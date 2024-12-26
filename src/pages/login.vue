@@ -52,14 +52,11 @@ const login = async () => {
     const promise = await authenticationStore.login(form);
 
     if (promise.code == 200) {
-      console.log("promise", promise);
 
       if (isEmpty(promise.user.company_id)) {
-        console.log("a");
         router.push({ name: "Company-List" })
         return
       }
-      console.log("b");
       router.push({ name: "Home" })
     };
 
