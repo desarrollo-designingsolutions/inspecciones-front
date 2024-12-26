@@ -7,12 +7,12 @@ import type { VForm } from 'vuetify/components/VForm';
 
 
 definePage({
-  path: "client-form/:action/:id?",
-  name: "Client-Form",
+  path: "Type-Vehicle-form/:action/:id?",
+  name: "Type-Vehicle-Form",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "client.list",
+    requiredPermission: "menu.type.vehicle",
   },
 });
 
@@ -63,7 +63,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/client/${form.value.id}/edit` : `/client/create`
+  const url = form.value.id ? `/type-vehicle/${form.value.id}/edit` : `/type-vehicle/create`
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -90,7 +90,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
 
     form.value.company_id = authenticationStore.company.id;
 
-    const url = form.value.id ? `/client/update/${form.value.id}` : `/client/store`
+    const url = form.value.id ? `/type-vehicle/update/${form.value.id}` : `/type-vehicle/store`
 
     loading.form = true;
     const { data, response } = await useApi(url).post(form.value);
@@ -110,7 +110,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
         if (isCreateAndNew) {
           clearForm(); // Limpiar el formulario si es "Crear y crear otro"
         } else {
-          router.push({ name: 'Client-List' }); // Redirigir si es "Crear"
+          router.push({ name: 'Type-Vehicle-List' }); // Redirigir si es "Crear"
         }
       }
     }
@@ -148,7 +148,7 @@ const handlerCancel = () => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información del cliente
+          Información del vehículo
         </span>
       </VCardTitle>
       <VCardText>

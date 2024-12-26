@@ -26,6 +26,8 @@ declare module 'vue-router/auto-routes' {
     'Company-List': RouteRecordInfo<'Company-List', '/Company/List', Record<never, never>, Record<never, never>>,
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'Type-Vehicle-List': RouteRecordInfo<'Type-Vehicle-List', '/TypeVehicle/List', Record<never, never>, Record<never, never>>,
+    'Type-Vehicle-Form': RouteRecordInfo<'Type-Vehicle-Form', 'Type-Vehicle-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'user-access-role-components-modal-form': RouteRecordInfo<'user-access-role-components-modal-form', '/UserAccess/Role/Components/ModalForm', Record<never, never>, Record<never, never>>,
     'Role-List': RouteRecordInfo<'Role-List', '/UserAccess/Role/List', Record<never, never>, Record<never, never>>,
     'user-access-users-components-modal-form': RouteRecordInfo<'user-access-users-components-modal-form', '/UserAccess/Users/Components/ModalForm', Record<never, never>, Record<never, never>>,
