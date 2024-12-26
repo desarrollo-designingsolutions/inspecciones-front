@@ -77,7 +77,7 @@ const downloadExcel = async () => {
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista marcas de vehículo")
+    downloadExcelBase64(data.value.excel, "Lista marcas de vehículos")
   }
 }
 
