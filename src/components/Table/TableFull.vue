@@ -270,166 +270,161 @@ defineExpose({
 
 <template>
   <div>
-    <VCard>
-      <VCardText v-if="isFilterDialog">
-        <FilterDialog :optionsFilter="optionsFilter" @sendFilter="changeFilter" />
-      </VCardText>
-      <VCardText>
-        <VDataTable :multi-sort="optionsTable.multiSort" :show-select="optionsTable.showSelect"
-          :expand-on-click="optionsTable.expandOnClick" v-model="optionsTable.selected" class="mt-5"
-          :headers="optionsTable.headers" :items-per-page="optionsTable.pagination.rowPerPage"
-          :page="optionsTable.pagination.currentPage" :items="optionsTable.tableData" :loading="loading"
-          @update:sortBy="updateSortBy">
-          <!-- Codigo que itera sobre las ranuras disponibles en el componente padre e individualmente rinde cada ranura con sus propias propiedades -->
-          <template v-for="(_, name) in $slots" #[name]="slotProps">
-            <slot :name="name" v-bind="slotProps || {}" />
-          </template>
-          <!-- Codigo que itera sobre las ranuras disponibles en el componente padre e individualmente rinde cada ranura con sus propias propiedades -->
 
-          <template v-slot:headers="{
-            columns,
-            isSorted,
-            getSortIcon,
-            toggleSort,
-            selectAll,
-            someSelected,
-            allSelected,
-          }">
-            <tr v-show="optionsTable.showHeader">
-              <template v-for="column in columns" :key="column.key">
-                <td v-if="column.key == 'data-table-select'">
-                  <div>
-                    <VCheckbox :indeterminate="someSelected && !allSelected" :model-value="allSelected" color="primary"
-                      @update:model-value="selectAll(!allSelected)"></VCheckbox>
-                  </div>
-                </td>
-                <td v-else>
-                  <div :class="`d-flex justify-${column.align}`">
-                    <span class="mr-2 cursor-pointer" @click="() => toggleSort(column)">{{ column.title }}</span>
-                    <template v-if="isSorted(column)">
-                      <v-icon :icon="getSortIcon(column)"></v-icon>
-                    </template>
-                  </div>
-                </td>
+    <template v-if="isFilterDialog">
+      <FilterDialog :optionsFilter="optionsFilter" @sendFilter="changeFilter" />
+    </template>
+    <VDataTable :multi-sort="optionsTable.multiSort" :show-select="optionsTable.showSelect"
+      :expand-on-click="optionsTable.expandOnClick" v-model="optionsTable.selected" class="mt-5"
+      :headers="optionsTable.headers" :items-per-page="optionsTable.pagination.rowPerPage"
+      :page="optionsTable.pagination.currentPage" :items="optionsTable.tableData" :loading="loading"
+      @update:sortBy="updateSortBy">
+      <!-- Codigo que itera sobre las ranuras disponibles en el componente padre e individualmente rinde cada ranura con sus propias propiedades -->
+      <template v-for="(_, name) in $slots" #[name]="slotProps">
+        <slot :name="name" v-bind="slotProps || {}" />
+      </template>
+      <!-- Codigo que itera sobre las ranuras disponibles en el componente padre e individualmente rinde cada ranura con sus propias propiedades -->
+
+      <template v-slot:headers="{
+        columns,
+        isSorted,
+        getSortIcon,
+        toggleSort,
+        selectAll,
+        someSelected,
+        allSelected,
+      }">
+        <tr v-show="optionsTable.showHeader">
+          <template v-for="column in columns" :key="column.key">
+            <td v-if="column.key == 'data-table-select'">
+              <div>
+                <VCheckbox :indeterminate="someSelected && !allSelected" :model-value="allSelected" color="primary"
+                  @update:model-value="selectAll(!allSelected)"></VCheckbox>
+              </div>
+            </td>
+            <td v-else>
+              <div :class="`d-flex justify-${column.align}`">
+                <span class="mr-2 cursor-pointer" @click="() => toggleSort(column)">{{ column.title }}</span>
+                <template v-if="isSorted(column)">
+                  <v-icon :icon="getSortIcon(column)"></v-icon>
+                </template>
+              </div>
+            </td>
+          </template>
+        </tr>
+      </template>
+
+      <template #item.is_active="{ item, index }">
+        <slot name="item.is_active" :item="item" :index="index">
+          <div class="d-flex align-center" v-if="optionsTable.actions.changeStatus.show">
+            <VChip color="success" v-if="
+              item.is_active ==
+              optionsTable.actions.changeStatus.btnActive.value
+            "
+              @click="callActionOrChangeStatus(optionsTable.actions.changeStatus.btnActive.newFunction, item, optionsTable.actions.changeStatus.dbField, optionsTable.actions.changeStatus.btnInactive.value)">
+              <VIcon start size="16" icon="tabler-bell" />
+              {{ optionsTable.actions.changeStatus.btnActive.text }}
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Estado">
+              </VTooltip>
+            </VChip>
+
+            <VChip color="error" v-else
+              @click="callActionOrChangeStatus(optionsTable.actions.changeStatus.btnInactive.newFunction, item, optionsTable.actions.changeStatus.dbField, optionsTable.actions.changeStatus.btnActive.value)">
+              <VIcon start size="16" icon="tabler-alert-circle" />
+              {{ optionsTable.actions.changeStatus.btnInactive.text }}
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Estado">
+              </VTooltip>
+            </VChip>
+          </div>
+        </slot>
+      </template>
+
+      <template #item.actions="{ item, index }">
+        <div>
+          <div v-if="optionsTable.actions.styleShow == 'dropdown'">
+            <VBtn color="primary">
+              <template #append>
+                <VIcon icon="tabler-square-rounded-chevron-down"></VIcon>
               </template>
-            </tr>
-          </template>
+              Acciones
+              <VMenu activator="parent">
+                <VList>
+                  <VListItem v-if="optionsTable.actions.view.show" @click="goView('view', item.id, item)">
+                    <template #prepend>
+                      <VIcon :icon="optionsTable.actions.view.icon" />
+                    </template>
+                    <span>Ver</span>
+                  </VListItem>
+                  <VListItem v-if="optionsTable.actions.edit.show" @click="goView('edit', item.id, item)">
+                    <template #prepend>
+                      <VIcon :icon="optionsTable.actions.edit.icon" />
+                    </template>
+                    <span>Editar</span>
+                  </VListItem>
+                  <VListItem v-if="optionsTable.actions.delete.show" @click="openModalQuestionDelete(item.id)">
+                    <template #prepend>
+                      <VIcon :icon="optionsTable.actions.delete.icon" />
+                    </template>
+                    <span>Eliminar</span>
+                  </VListItem>
 
-          <template #item.is_active="{ item, index }">
-            <slot name="item.is_active" :item="item" :index="index">
-              <div class="d-flex align-center" v-if="optionsTable.actions.changeStatus.show">
-                <VChip color="success" v-if="
-                  item.is_active ==
-                  optionsTable.actions.changeStatus.btnActive.value
-                "
-                  @click="callActionOrChangeStatus(optionsTable.actions.changeStatus.btnActive.newFunction, item, optionsTable.actions.changeStatus.dbField, optionsTable.actions.changeStatus.btnInactive.value)">
-                  <VIcon start size="16" icon="tabler-bell" />
-                  {{ optionsTable.actions.changeStatus.btnActive.text }}
-                  <VTooltip location="top" transition="scale-transition" activator="parent" text="Estado">
-                  </VTooltip>
-                </VChip>
+                  <slot name="item.actions2" :item="item" :index="index"></slot>
 
-                <VChip color="error" v-else
-                  @click="callActionOrChangeStatus(optionsTable.actions.changeStatus.btnInactive.newFunction, item, optionsTable.actions.changeStatus.dbField, optionsTable.actions.changeStatus.btnActive.value)">
-                  <VIcon start size="16" icon="tabler-alert-circle" />
-                  {{ optionsTable.actions.changeStatus.btnInactive.text }}
-                  <VTooltip location="top" transition="scale-transition" activator="parent" text="Estado">
-                  </VTooltip>
-                </VChip>
-              </div>
-            </slot>
-          </template>
+                </VList>
+              </VMenu>
+            </VBtn>
+          </div>
 
-          <template #item.actions="{ item, index }">
-            <div>
-              <div v-if="optionsTable.actions.styleShow == 'dropdown'">
-                <VBtn color="primary">
-                  <template #append>
-                    <VIcon icon="tabler-square-rounded-chevron-down"></VIcon>
-                  </template>
-                  Acciones
-                  <VMenu activator="parent">
-                    <VList>
-                      <VListItem v-if="optionsTable.actions.view.show" @click="goView('view', item.id, item)">
-                        <template #prepend>
-                          <VIcon :icon="optionsTable.actions.view.icon" />
-                        </template>
-                        <span>Ver</span>
-                      </VListItem>
-                      <VListItem v-if="optionsTable.actions.edit.show" @click="goView('edit', item.id, item)">
-                        <template #prepend>
-                          <VIcon :icon="optionsTable.actions.edit.icon" />
-                        </template>
-                        <span>Editar</span>
-                      </VListItem>
-                      <VListItem v-if="optionsTable.actions.delete.show" @click="openModalQuestionDelete(item.id)">
-                        <template #prepend>
-                          <VIcon :icon="optionsTable.actions.delete.icon" />
-                        </template>
-                        <span>Eliminar</span>
-                      </VListItem>
+          <div v-if="optionsTable.actions.styleShow == 'normal'">
+            <VBtn v-if="optionsTable.actions.view.show" color="warning" icon class="mr-2" @click="goView('view', item)">
+              <VIcon :icon="optionsTable.actions.view.icon" />
+              <VTooltip location="top" transition="scale-transition" activator="parent"
+                :text="optionsTable.actions.view.tooltipText">
+              </VTooltip>
+            </VBtn>
 
-                      <slot name="item.actions2" :item="item" :index="index"></slot>
+            <VBtn v-if="optionsTable.actions.edit.show" color="primary" icon class="mr-2" @click="goView('edit', item)">
+              <VIcon :icon="optionsTable.actions.edit.icon" />
+              <VTooltip location="top" transition="scale-transition" activator="parent"
+                :text="optionsTable.actions.edit.tooltipText">
+              </VTooltip>
+            </VBtn>
 
-                    </VList>
-                  </VMenu>
-                </VBtn>
-              </div>
+            <VBtn v-if="optionsTable.actions.delete.show" color="error" icon class="mr-2"
+              @click="openModalQuestionDelete(item.id)">
+              <VIcon :icon="optionsTable.actions.delete.icon" />
+              <VTooltip location="top" transition="scale-transition" activator="parent"
+                :text="optionsTable.actions.delete.tooltipText">
+              </VTooltip>
+            </VBtn>
+            <slot name="item.actions2" :item="item" :index="index"></slot>
+          </div>
+        </div>
+      </template>
 
-              <div v-if="optionsTable.actions.styleShow == 'normal'">
-                <VBtn v-if="optionsTable.actions.view.show" color="warning" icon class="mr-2"
-                  @click="goView('view', item)">
-                  <VIcon :icon="optionsTable.actions.view.icon" />
-                  <VTooltip location="top" transition="scale-transition" activator="parent"
-                    :text="optionsTable.actions.view.tooltipText">
-                  </VTooltip>
-                </VBtn>
+      <template #bottom>
+        <VCardText class="pt-2" v-if="optionsTable.pagination.show">
+          <VRow>
+            <VCol lg="2" cols="3">
+              <VTextField v-model="optionsTable.pagination.rowPerPage" @update:model-value="executeFetchTable(1)"
+                label="Filas Por Página" type="number" min="-1" hide-details variant="underlined" />
+            </VCol>
 
-                <VBtn v-if="optionsTable.actions.edit.show" color="primary" icon class="mr-2"
-                  @click="goView('edit', item)">
-                  <VIcon :icon="optionsTable.actions.edit.icon" />
-                  <VTooltip location="top" transition="scale-transition" activator="parent"
-                    :text="optionsTable.actions.edit.tooltipText">
-                  </VTooltip>
-                </VBtn>
+            <VContainer fluid class="d-flex align-center flex-wrap justify-space-between gap-4 py-3 px-5">
+              <span class="text-sm text-disabled">
+                {{ paginationData(optionsTable.tableData.length) }}
+              </span>
+              <VPagination v-model="optionsTable.pagination.currentPage" @click="executeFetchTable()" size="small"
+                :total-visible="5" :length="optionsTable.pagination.lastPage" />
+            </VContainer>
+          </VRow>
+        </VCardText>
+      </template>
 
-                <VBtn v-if="optionsTable.actions.delete.show" color="error" icon class="mr-2"
-                  @click="openModalQuestionDelete(item.id)">
-                  <VIcon :icon="optionsTable.actions.delete.icon" />
-                  <VTooltip location="top" transition="scale-transition" activator="parent"
-                    :text="optionsTable.actions.delete.tooltipText">
-                  </VTooltip>
-                </VBtn>
-                <slot name="item.actions2" :item="item" :index="index"></slot>
-              </div>
-            </div>
-          </template>
-
-          <template #bottom>
-            <VCardText class="pt-2" v-if="optionsTable.pagination.show">
-              <VRow>
-                <VCol lg="2" cols="3">
-                  <VTextField v-model="optionsTable.pagination.rowPerPage" @update:model-value="executeFetchTable(1)"
-                    label="Filas Por Página" type="number" min="-1" hide-details variant="underlined" />
-                </VCol>
-
-                <VContainer fluid class="d-flex align-center flex-wrap justify-space-between gap-4 py-3 px-5">
-                  <span class="text-sm text-disabled">
-                    {{ paginationData(optionsTable.tableData.length) }}
-                  </span>
-                  <VPagination v-model="optionsTable.pagination.currentPage" @click="executeFetchTable()" size="small"
-                    :total-visible="5" :length="optionsTable.pagination.lastPage" />
-                </VContainer>
-              </VRow>
-            </VCardText>
-          </template>
-
-          <template #loading>
-            <VSkeletonLoader type="table-row@10, divider" loading></VSkeletonLoader>
-          </template>
-        </VDataTable>
-      </VCardText>
-    </VCard>
+      <template #loading>
+        <VSkeletonLoader type="table-row@10, divider" loading></VSkeletonLoader>
+      </template>
+    </VDataTable>
 
     <ModalQuestion ref="refModalQuestion" @success="deleteData" />
 
