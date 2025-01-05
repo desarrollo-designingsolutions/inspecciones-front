@@ -69,9 +69,11 @@ const returnFilter = (filter: any) => {
 
 const downloadExcel = async () => {
   loading.excel = true;
+  filterTable.value = tableFull.value.optionsTable.searchQuery;
 
   const { data, response } = await useApi("/emergency-element/excelExport").post({
-    searchQuery: filterTable.value,
+    searchQueryArray: filterTable.value.arrayFilter,
+    searchQueryGeneral: filterTable.value.generalSearch,
     company_id: authenticationStore.company.id,
   })
   loading.excel = false;
