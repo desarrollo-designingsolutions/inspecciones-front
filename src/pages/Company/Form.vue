@@ -101,9 +101,9 @@ const changeCountry = async (event: any) => {
     `/selectStates/${event.value}`
   ).get();
   loading.states = false;
-
   if (response.value?.ok && data.value) {
     states.value = data.value.states;
+    cities.value = [];
   }
 }
 
@@ -211,6 +211,30 @@ watch(logo.value, (newVal, oldVal) => {
 const isLoading = computed(() => {
   return Object.values(loading).some(value => value);
 });
+
+const nameRules = [
+  value => (!value || value.length >= 2 && value.length <= 100) || "El nombre debe tener entre 2 y 100 caracteres",
+];
+
+const nitRules = [
+  value => (!value || /^[0-9]{9}-[0-9]{1}$/.test(value)) || 'El NIT debe tener el formato 000000000-0',
+];
+
+const phoneRules = [
+  value => (!value || value.length <= 10) || "El numero no debe tener mas de 10 caracteres",
+];
+
+const stateRules = computed(() => {
+  return states.value.length > 0 ? [value => !!value || "La región es obligatoria"] : [];
+});
+
+const cityRules = computed(() => {
+  return cities.value.length > 0 ? [value => !!value || "La ciudad es obligatoria"] : [];
+});
+
+const addressRules = [
+  value => (!value || value.length <= 150) || "La direccion no debe tener mas de 150 caracteres",
+];
 </script>
 
 
@@ -219,7 +243,7 @@ const isLoading = computed(() => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Fromulario Compañia
+          Formulario Compañia
         </span>
       </VCardTitle>
       <VCardText>
@@ -247,16 +271,16 @@ const isLoading = computed(() => {
               <VRow>
 
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[requiredValidator]" v-model="form.name" label="Nombre"
-                    :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
+                  <AppTextField :requiredField="true" :rules="[requiredValidator, ...nameRules]" v-model="form.name"
+                    label="Nombre" :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
                 </VCol>
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[requiredValidator, integerValidator]" v-model="form.nit"
+                  <AppTextField :requiredField="true" :rules="[requiredValidator, ...nitRules]" v-model="form.nit"
                     label="Nit" :error-messages="errorsBack.nit" @input="errorsBack.nit = ''" clearable />
                 </VCol>
                 <VCol sm="4">
-                  <AppTextField :rules="[integerValidator]" v-model="form.phone" label="Teléfono"
-                    :error-messages="errorsBack.phone" @input="errorsBack.phone = ''" />
+                  <AppTextField :requiredField="true" :rules="[integerValidator, ...phoneRules]" v-model="form.phone"
+                    label="Teléfono" :error-messages="errorsBack.phone" @input="errorsBack.phone = ''" />
                 </VCol>
 
                 <VCol cols="12" sm="4">
@@ -270,24 +294,24 @@ const isLoading = computed(() => {
                 <VCol cols="12" sm="4">
                   <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
                     v-model="form.state_id" label="Región" @update:model-value="changeState($event)"
-                    :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''"
-                    :rules="[requiredValidator]"></AppAutocomplete>
+                    :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[...stateRules]">
+                  </AppAutocomplete>
                 </VCol>
                 <VCol cols="12" sm="4">
                   <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
                     v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
-                    @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
+                    @input="errorsBack.city_id = ''" :rules="[...cityRules]">
                   </AppAutocomplete>
                 </VCol>
 
                 <VCol sm="4">
-                  <AppTextField clearable v-model="form.address" label="Dirección"
-                    :error-messages="errorsBack.address" />
+                  <AppTextField :requiredField="true" clearable v-model="form.address" :rules="[...addressRules]"
+                    label="Dirección" :error-messages="errorsBack.address" />
                 </VCol>
 
                 <VCol sm="4">
-                  <AppTextField clearable :rules="[emailValidator]" v-model="form.email" label="Email"
-                    :error-messages="errorsBack.email" @input="errorsBack.email = ''" />
+                  <AppTextField :requiredField="true" clearable :rules="[emailValidator]" v-model="form.email"
+                    label="Email" :error-messages="errorsBack.email" @input="errorsBack.email = ''" />
                 </VCol>
 
               </VRow>
