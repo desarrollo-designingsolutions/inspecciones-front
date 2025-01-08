@@ -156,8 +156,10 @@ const handlerCancel = () => {
         <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
             <VCol cols="12" md="6">
-              <AppTextField :requiredField="true" :rules="[requiredValidator]" v-model="form.name" label="Nombre"
-                :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
+              <AppTextField :requiredField="true"
+                :rules="[requiredValidator, maxCharacters(form.name, 100), minCharacters(form.name, 2)]"
+                v-model="form.name" label="Nombre" :error-messages="errorsBack.name" @input="errorsBack.name = ''"
+                clearable />
             </VCol>
           </VRow>
 

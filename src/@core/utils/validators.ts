@@ -103,3 +103,20 @@ export const alphaDashValidator = (value: unknown) => {
 
   return /^[\w-]*$/.test(valueAsString) || 'Todos los caracteres no son válidos'
 }
+
+export const maxCharacters = (value: string, max: number) => {
+  if (value) {
+    return value.length <= max || `Máximo ${max} caracteres`
+  } else {
+    return false
+  }
+}
+
+export const minCharacters = (value: string, min: number) => {
+  if (value) {
+
+    return value.length >= min || `Mínimo ${min} caracteres`
+  } else {
+    return false
+  }
+}

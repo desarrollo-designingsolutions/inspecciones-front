@@ -121,8 +121,8 @@ defineExpose({
             <VCol cols="12">
               <VSkeletonLoader type="text" :loading="componentData.isLoading">
                 <AppTextField :requiredField="true" label="Nombre de rol" v-model="formComponent.description"
-                  :rules="[requiredValidator]" clearable :error-messages="errorsBack.description"
-                  @input="errorsBack.description = ''" />
+                  :rules="[requiredValidator, maxCharacters(formComponent.description, 100)]" clearable
+                  :error-messages="errorsBack.description" @input="errorsBack.description = ''" />
               </VSkeletonLoader>
             </VCol>
           </VRow>
