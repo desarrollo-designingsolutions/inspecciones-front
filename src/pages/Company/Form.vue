@@ -279,8 +279,9 @@ const addressRules = [
                     label="Nit" :error-messages="errorsBack.nit" @input="errorsBack.nit = ''" clearable />
                 </VCol>
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[integerValidator, ...phoneRules]" v-model="form.phone"
-                    label="Teléfono" :error-messages="errorsBack.phone" @input="errorsBack.phone = ''" />
+                  <AppTextField :requiredField="true" :rules="[integerValidator, requiredValidator, ...phoneRules]"
+                    v-model="form.phone" label="Teléfono" :error-messages="errorsBack.phone"
+                    @input="errorsBack.phone = ''" />
                 </VCol>
 
                 <VCol cols="12" sm="4">
@@ -305,13 +306,15 @@ const addressRules = [
                 </VCol>
 
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" clearable v-model="form.address" :rules="[...addressRules]"
-                    label="Dirección" :error-messages="errorsBack.address" />
+                  <AppTextField :requiredField="true" clearable v-model="form.address"
+                    :rules="[requiredValidator, ...addressRules]" label="Dirección"
+                    :error-messages="errorsBack.address" />
                 </VCol>
 
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" clearable :rules="[emailValidator]" v-model="form.email"
-                    label="Email" :error-messages="errorsBack.email" @input="errorsBack.email = ''" />
+                  <AppTextField :requiredField="true" clearable :rules="[requiredValidator, emailValidator]"
+                    v-model="form.email" label="Email" :error-messages="errorsBack.email"
+                    @input="errorsBack.email = ''" />
                 </VCol>
 
               </VRow>
