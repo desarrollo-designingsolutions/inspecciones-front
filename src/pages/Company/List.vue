@@ -26,8 +26,10 @@ const optionsTable = {
     { key: 'logo', title: 'Logo' },
     { key: 'name', title: 'Nombre compañia' },
     { key: 'nit', title: 'Nit' },
-    { key: 'email', title: 'Correo' },
     { key: 'phone', title: 'Teléfono' },
+    { key: 'country', title: 'Pais' },
+    { key: 'state', title: 'Region' },
+    { key: 'city', title: 'Ciudad' },
     { key: "is_active", title: 'Estado', },
     { key: 'actions', title: 'Acciones' },
   ],
@@ -36,10 +38,11 @@ const optionsTable = {
       url: "/company/changeStatus"
     },
     view: {
-      show: false,
+      show: true,
     },
     delete: {
-      show: false,
+      url: "/company/delete",
+      show: true,
     },
   }
 }
@@ -49,7 +52,10 @@ const optionsTable = {
 const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
-      all: ["name", "nit", "email", "phone"],
+      all: ["name", "nit", "phone"],
+      country: ["name"],
+      state: ["name"],
+      city: ["name"],
     },
   },
   dialog: {
@@ -87,7 +93,7 @@ const selectCompany = (company: object) => {
         </div>
       </VCardTitle>
 
-      <VCardText class="px-0 mt-2">
+      <VCardText class="mt-2">
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
           <template #item.logo="{ item }">

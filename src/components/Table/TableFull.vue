@@ -194,7 +194,7 @@ const deleteData = async (id: number | string) => {
   loading.value = true;
   const { data, response } = await useApi(`${optionsTable.actions.delete.url}/${id}`).delete();
   loading.value = false;
-  if (data.value.code === 200) toast("Éxito", data.value.message, "success");
+  //if (data.value.code === 200) toast("Éxito", data.value.message, "success");
   if (response.value?.ok && data.value) await executeFetchTable();
 };
 
