@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useRoleStore } from "@/pages/UserAccess/Role/stores/useRoleStore";
-import type { VForm } from "vuetify/components";
+import { VCheckboxBtn, type VForm } from "vuetify/components";
 
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 const authenticationStore = useAuthenticationStore();
@@ -25,6 +25,7 @@ const formComponent = ref({
   description: null,
   company_id: null,
   permissions: [] as Array<Number>,
+  operator: null,
 });
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
@@ -73,6 +74,7 @@ const handleEdit = async ({ id }: any) => {
     formComponent.value.id = data.value.role.id;
     formComponent.value.description = data.value.role.description;
     formComponent.value.company_id = data.value.role.company_id;
+    formComponent.value.operator = data.value.role.operator;
 
     selectedElements.value = data.value.role.permissions;
     arrayFather.value = componentData.menus;
@@ -127,6 +129,14 @@ defineExpose({
             </VCol>
           </VRow>
         </VForm>
+        <h5 class="text-h5 my-6">Funciones del rol</h5>
+        <VRow :loading="componentData.isLoading">
+          <VCol>
+            <VCard border>
+              <VCheckboxBtn v-model="formComponent.operator" label="Operador"></VCheckboxBtn>
+            </VCard>
+          </VCol>
+        </VRow>
         <h5 class="text-h5 my-6">Permisos de rol</h5>
         <VSkeletonLoader type="list-item, list-item, list-item, list-item, list-item, list-item"
           :loading="componentData.isLoading">
