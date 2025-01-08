@@ -424,6 +424,9 @@ defineExpose({
       <template #loading>
         <VSkeletonLoader type="table-row@10, divider" loading></VSkeletonLoader>
       </template>
+      <template #no-data>
+        <span>No se encontraron resultados</span>
+      </template>
     </VDataTable>
 
     <ModalQuestion ref="refModalQuestion" @success="deleteData" />
