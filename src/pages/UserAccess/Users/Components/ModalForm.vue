@@ -45,6 +45,7 @@ const handleDialogVisible = () => {
 
 const openModal = async (id: string | null = null, disabled: boolean = false) => {
   disabledFiledsView.value = disabled
+  operator.value = false
 
   handleClearForm()
   handleDialogVisible();
@@ -105,7 +106,7 @@ const submitForm = async () => {
     }
 
     if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
-
+    console.log(errorsBack.value)
   }
 }
 
@@ -160,18 +161,17 @@ const nameRules = [
 ];
 
 const typeDocumentRules = [
-  value => maxCharacters(value, 20)
+  value => requiredValidator(value),
+  value => maxCharacters(value, 20),
+  value => integerValidator(value),
+  value => positiveNumberValidator(value),
 ]
 
 const typeLicenseRules = [
+  value => requiredValidator(value),
   value => integerValidator(value),
   value => positiveNumberValidator(value),
-  value => requiredValidator(value),
 ]
-
-onMounted(() => {
-  operator.value = false
-})
 
 defineExpose({
   openModal
@@ -232,8 +232,8 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :requiredField="true" label="Numero de documento"
-                  :rules="[...typeDocumentRules, ...typeLicenseRules]" v-model="form.type_document_name" />
+                <AppTextField :requiredField="true" label="Numero de documento" :rules="typeDocumentRules"
+                  v-model="form.type_document_name" :error-messages="errorsBack.type_document_name" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
@@ -243,13 +243,13 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :requiredField="true" label="Numero de licencia" :rules="[...typeLicenseRules]"
-                  v-model="form.type_license_name" />
+                <AppTextField :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules"
+                  v-model="form.type_license_name" :error-messages="errorsBack.type_license_name" />
               </VCol>
 
               <VCol cols="12" md="12" v-if="operator">
                 <AppDateTimePicker :requiredField="true" clearable :error-messages="errorsBack.expiration_date"
-                  @input="errorsBack.expiration_date = ''" v-model="form.expiration_date"
+                  @input="errorsBack.expiration_date = ''" v-model="form.expiration_date" :rules="[requiredValidator]"
                   label="Fecha de expiracion de licencia" @update:model-value="changeFinalDate($event)"
                   :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
               </VCol>
