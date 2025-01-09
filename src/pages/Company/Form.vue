@@ -212,15 +212,21 @@ const isLoading = computed(() => {
 });
 
 const nameRules = [
-  value => (!value || value.length >= 2 && value.length <= 100) || "El nombre debe tener entre 2 y 100 caracteres",
+  value => maxCharacters(value, 100),
+  value => minCharacters(value, 2),
+  value => requiredValidator(value),
 ];
 
 const nitRules = [
   value => (!value || /^[0-9]{9}-[0-9]{1}$/.test(value)) || 'El NIT debe tener el formato 000000000-0',
+  value => requiredValidator(value),
 ];
 
 const phoneRules = [
+  value => integerValidator(value),
   value => (!value || value.length <= 10) || "El numero no debe tener mas de 10 caracteres",
+  value => positiveNumberValidator(value),
+  value => requiredValidator(value),
 ];
 
 const stateRules = computed(() => {
@@ -233,6 +239,7 @@ const cityRules = computed(() => {
 
 const addressRules = [
   value => (!value || value.length <= 150) || "La direccion no debe tener mas de 150 caracteres",
+  value => requiredValidator(value),
 ];
 </script>
 
@@ -270,17 +277,16 @@ const addressRules = [
               <VRow>
 
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[requiredValidator, ...nameRules]" v-model="form.name"
-                    label="Nombre" :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
+                  <AppTextField :requiredField="true" :rules="nameRules" v-model="form.name" label="Nombre"
+                    :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
                 </VCol>
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[requiredValidator, ...nitRules]" v-model="form.nit"
-                    label="Nit" :error-messages="errorsBack.nit" @input="errorsBack.nit = ''" clearable />
+                  <AppTextField :requiredField="true" :rules="nitRules" v-model="form.nit" label="Nit"
+                    :error-messages="errorsBack.nit" @input="errorsBack.nit = ''" clearable />
                 </VCol>
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" :rules="[integerValidator, requiredValidator, ...phoneRules]"
-                    v-model="form.phone" label="Teléfono" :error-messages="errorsBack.phone"
-                    @input="errorsBack.phone = ''" />
+                  <AppTextField :requiredField="true" :rules="phoneRules" v-model="form.phone" label="Teléfono"
+                    :error-messages="errorsBack.phone" @input="errorsBack.phone = ''" />
                 </VCol>
 
                 <VCol cols="12" sm="4">
@@ -305,9 +311,8 @@ const addressRules = [
                 </VCol>
 
                 <VCol sm="4">
-                  <AppTextField :requiredField="true" clearable v-model="form.address"
-                    :rules="[requiredValidator, ...addressRules]" label="Dirección"
-                    :error-messages="errorsBack.address" />
+                  <AppTextField :requiredField="true" clearable v-model="form.address" :rules="addressRules"
+                    label="Dirección" :error-messages="errorsBack.address" />
                 </VCol>
 
                 <VCol sm="4">

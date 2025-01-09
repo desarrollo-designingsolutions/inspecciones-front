@@ -3,6 +3,7 @@ import { useToast } from '@/composables/useToast';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import moment from "moment";
 import type { VForm } from 'vuetify/components/VForm';
 
 definePage({
@@ -292,6 +293,31 @@ const ruleFieldLicensePlate = [
   (value: string) => maxCharacters(value, 6),
 ]
 
+const characterLimitRules = [
+  (value: string) => requiredValidator(value),
+  (value: string) => maxCharacters(value, 255),
+]
+
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
+const currentDay = now.getDate();
+
+const changeFinalDate = (event: any) => {
+  if (event) {
+    let d1 = moment(`${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDay.toString().padStart(2, '0')}`);
+    let d2 = moment(event);
+    errorsBack.value.final_date = "";
+    if (!d2.isSameOrBefore(d1)) {
+      errorsBack.value.final_date = `La fecha debe ser anterior o igual a ${d1.format('YYYY-MM-DD')}`;
+    }
+  }
+};
+
+const fileValidationRules = [
+  (value: string) => value || 'El archivo es obligatorio.',
+];
+
 // TAB 1
 // VEHICLES_STRUCTURE
 const vehicle_structures = ref<Array<{ value: string, title: string }>>([])
@@ -312,6 +338,8 @@ const changeState = async (event: Event) => {
   }
 }
 
+
+//FILES 3 TAB 
 // TAB 2
 const shouldShowDeleteButton = (typeArray: string) => {
   const visibleItems = form.value[typeArray].filter(item => !item.delete);
@@ -412,7 +440,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
             <VRow>
               <VCol cols="12" sm="6">
                 <AppTextField :requiredField="true" label="Número de placa" v-model="form.license_plate" clearable
-                  :errorMessages="errorsBack.license_plate" @input="errorsBack.license_plate = ''"
+                  :maxlength="6" :errorMessages="errorsBack.license_plate" @input="errorsBack.license_plate = ''"
                   :rules="ruleFieldLicensePlate">
                 </AppTextField>
               </VCol>
@@ -423,10 +451,15 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" md="6">
-                <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
-                  v-model="form.date_registration" :errorMessages="errorsBack.date_registration"
-                  @input="errorsBack.date_registration = ''" :config="{ dateFormat: 'Y-m-d' }"
-                  :rules="[requiredValidator]" />
+                <AppDateTimePicker :rules="[requiredValidator]" :requiredField="true" clearable
+                  :error-messages="errorsBack.date_registration" @input="errorsBack.date_registration = ''"
+                  v-model="form.date_registration" label="Fecha de matrícula"
+                  @update:model-value="changeFinalDate($event)" :config="{
+                    dateFormat: 'Y-m-d',
+                    disable: [
+                      { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
+                    ]
+                  }" />
               </VCol>
 
               <VCol cols="12" md="6">
@@ -438,7 +471,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               <VCol cols="12" sm="6">
                 <AppTextField :requiredField="true" label="Número de motor" v-model="form.engine_number" clearable
                   :errorMessages="errorsBack.engine_number" @input="errorsBack.engine_number = ''"
-                  :rules="[requiredValidator]">
+                  :rules="characterLimitRules">
                 </AppTextField>
               </VCol>
 
@@ -457,21 +490,22 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Modelo" v-model="form.model" clearable
-                  :errorMessages="errorsBack.model" @input="errorsBack.model = ''" :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Modelo" v-model="form.model"
+                  clearable :errorMessages="errorsBack.model" @input="errorsBack.model = ''"
+                  :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
               <VCol cols="12" sm="6">
                 <AppTextField :requiredField="true" label="Número de VIN" v-model="form.vin_number" clearable
                   :errorMessages="errorsBack.vin_number" @input="errorsBack.vin_number = ''"
-                  :rules="[requiredValidator]">
+                  :rules="characterLimitRules">
                 </AppTextField>
               </VCol>
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Capacidad de carga (kg)" v-model="form.load_capacity"
-                  clearable :errorMessages="errorsBack.load_capacity" @input="errorsBack.load_capacity = ''"
-                  :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Capacidad de carga (kg)"
+                  v-model="form.load_capacity" clearable :errorMessages="errorsBack.load_capacity"
+                  @input="errorsBack.load_capacity = ''" :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
@@ -481,16 +515,16 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Peso bruto vehicular (kg)"
+                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Peso bruto vehicular (kg)"
                   v-model="form.gross_vehicle_weight" clearable :errorMessages="errorsBack.gross_vehicle_weight"
                   @input="errorsBack.gross_vehicle_weight = ''" :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Capacidad de pasajeros" v-model="form.passenger_capacity"
-                  clearable :errorMessages="errorsBack.passenger_capacity" @input="errorsBack.passenger_capacity = ''"
-                  :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Capacidad de pasajeros"
+                  v-model="form.passenger_capacity" clearable :errorMessages="errorsBack.passenger_capacity"
+                  @input="errorsBack.passenger_capacity = ''" :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
@@ -502,9 +536,10 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Kilometraje actual del vehiculo"
-                  v-model="form.current_mileage" clearable :errorMessages="errorsBack.current_mileage"
-                  @input="errorsBack.current_mileage = ''" :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true"
+                  label="Kilometraje actual del vehiculo" v-model="form.current_mileage" clearable
+                  :errorMessages="errorsBack.current_mileage" @input="errorsBack.current_mileage = ''"
+                  :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
@@ -514,7 +549,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   <div class="ml-2 w-100">
                     <AppTextField v-if="form.have_trailer" :requiredField="true" label="Trailer" v-model="form.trailer"
                       clearable :errorMessages="errorsBack.trailer" @input="errorsBack.trailer = ''"
-                      :rules="[requiredValidator]">
+                      :rules="characterLimitRules">
                     </AppTextField>
                   </div>
                 </div>
@@ -545,7 +580,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <SelectTypeDocumentForm :key="'select_' + index" :rules="[requiredValidator]" :requiredField="true"
-                    label="Tipo de documento" v-model="item.type_document_id" />
+                    label="Tipo de documento" v-model="item.type_document_id"
+                    @input="errorsBack.type_document_id = ''" />
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
@@ -585,14 +621,14 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   label="Foto frontal" :label2="form.photo_front ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
                   :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
                   label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
                   :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
@@ -600,7 +636,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   :label2="form.photo_right_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
                   :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
@@ -608,7 +644,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   :label2="form.photo_left_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
                   :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
             </VRow>
           </VForm>
