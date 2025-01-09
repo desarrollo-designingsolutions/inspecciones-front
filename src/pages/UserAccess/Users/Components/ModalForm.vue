@@ -247,7 +247,7 @@ defineExpose({
                   v-model="form.type_license_name" :error-messages="errorsBack.type_license_name" />
               </VCol>
 
-              <VCol cols="12" md="12" v-if="operator">
+              <VCol cols="12" md="6" v-if="operator">
                 <AppDateTimePicker :requiredField="true" clearable :error-messages="errorsBack.expiration_date"
                   @input="errorsBack.expiration_date = ''" v-model="form.expiration_date" :rules="[requiredValidator]"
                   label="Fecha de expiracion de licencia" @update:model-value="changeFinalDate($event)"
