@@ -18,7 +18,7 @@ definePage({
 
 const emit = defineEmits(["closeModal"]);
 
-const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
+const { btnCancel, btnBack, saveAndCloseModal, styleModal } = defineProps({
   btnCancel: {
     type: Boolean,
     default: false,
@@ -28,6 +28,10 @@ const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
     default: true,
   },
   saveAndCloseModal: {
+    type: Boolean,
+    default: false,
+  },
+  styleModal: {
     type: Boolean,
     default: false,
   },
@@ -155,7 +159,7 @@ const handlerCancel = () => {
 
         <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol cols="12" :md="styleModal ? 12 : 6">
               <AppTextField :requiredField="true"
                 :rules="[requiredValidator, maxCharacters(form.name, 100), minCharacters(form.name, 2)]"
                 v-model="form.name" label="Nombre" :error-messages="errorsBack.name" @input="errorsBack.name = ''"
