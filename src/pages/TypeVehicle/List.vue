@@ -7,7 +7,7 @@ definePage({
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "menu.type.vehicle",
+    requiredPermission: "type.vehicle.list",
   },
 });
 

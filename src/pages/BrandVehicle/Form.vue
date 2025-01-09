@@ -12,7 +12,7 @@ definePage({
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "menu.brand.vehicle",
+    requiredPermission: "brand.vehicle.list",
   },
 });
 

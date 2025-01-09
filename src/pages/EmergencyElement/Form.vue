@@ -12,7 +12,7 @@ definePage({
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "menu.emergency.element",
+    requiredPermission: "emergency.element.list",
   },
 });
 

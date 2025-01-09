@@ -4,7 +4,7 @@ definePage({
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "menu.role",
+    requiredPermission: "role.list",
   },
 });
 
