@@ -202,7 +202,6 @@ const changeFinalDate = (event: any) => {
 const logo = ref(useFileUpload())
 logo.value.allowedExtensions = ["jpg", "jpeg", "png"];
 watch(logo.value, (newVal, oldVal) => {
-  console.log("newVal", newVal.imageFile);
 
   if (newVal.imageFile) form.value.logo = newVal.imageFile
 })
