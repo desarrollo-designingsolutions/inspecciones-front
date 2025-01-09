@@ -18,7 +18,7 @@ definePage({
 
 const emit = defineEmits(["closeModal"]);
 
-const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
+const { btnCancel, btnBack, saveAndCloseModal ,styleModal} = defineProps({
   btnCancel: {
     type: Boolean,
     default: false,
@@ -28,6 +28,10 @@ const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
     default: true,
   },
   saveAndCloseModal: {
+    type: Boolean,
+    default: false,
+  },
+  styleModal: {
     type: Boolean,
     default: false,
   },
@@ -63,7 +67,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/type-document/${form.value.id}/edit` : `/type-document/create`
+  const url = styleModal ? '/type-document/create' : (form.value.id ? `/type-document/${form.value.id}/edit` : '/type-document/create');
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -126,7 +130,7 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  if (route.params.id) {
+  if (!styleModal && route.params.id) {
     await fetchDataForm()
   }
 })
@@ -155,7 +159,7 @@ const handlerCancel = () => {
 
         <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
-            <VCol cols="12" md="6">
+            <VCol cols="12" :md="styleModal ? 12 : 6">
               <AppTextField :requiredField="true" :rules="[requiredValidator]" v-model="form.name" label="Nombre"
                 :error-messages="errorsBack.name" @input="errorsBack.name = ''" clearable />
             </VCol>

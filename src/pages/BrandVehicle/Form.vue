@@ -67,7 +67,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/brand-vehicle/${form.value.id}/edit` : `/brand-vehicle/create`
+  const url = styleModal ? '/brand-vehicle/create' : (form.value.id ? `/brand-vehicle/${form.value.id}/edit` : '/brand-vehicle/create');
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -94,7 +94,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
 
     form.value.company_id = authenticationStore.company.id;
 
-    const url = form.value.id ? `/brand-vehicle/update/${form.value.id}` : `/brand-vehicle/store`
+    const url = styleModal ? '/brand-vehicle/store' : (form.value.id ? `/brand-vehicle/update/${form.value.id}` : '/brand-vehicle/store');
 
     loading.form = true;
     const { data, response } = await useApi(url).post(form.value);
@@ -130,9 +130,9 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  if (route.params.id) {
+  if (!styleModal && route.params.id) {
     await fetchDataForm()
-  }
+  } 
 })
 
 // Computed que verifica si al menos uno de los valores es true

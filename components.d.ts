@@ -69,6 +69,7 @@ declare module 'vue' {
     SelectForm: typeof import('./src/components/SelectForm.vue')['default']
     SelectInfinite: typeof import('./src/components/SelectInfinite.vue')['default']
     SelectStackForm: typeof import('./src/components/SelectStackForm.vue')['default']
+    SelectTypeDocumentForm: typeof import('./src/components/SelectTypeDocumentForm.vue')['default']
     SelectTypeVehicleForm: typeof import('./src/components/SelectTypeVehicleForm.vue')['default']
     ShareProjectDialog: typeof import('./src/components/dialogs/ShareProjectDialog.vue')['default']
     Shortcuts: typeof import('./src/@core/components/Shortcuts.vue')['default']
