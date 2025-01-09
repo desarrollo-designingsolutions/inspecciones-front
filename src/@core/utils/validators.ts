@@ -120,3 +120,11 @@ export const minCharacters = (value: string, min: number) => {
     return false
   }
 }
+
+export const positiveNumberValidator = (value: string) => {
+  if (value) {
+    return /^[0-9]*$/i.test(value) || "El numero no debe ser negativo"
+  } else {
+    return false
+  }
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import moment from "moment";
 import type { VForm } from "vuetify/components/VForm";
 
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
@@ -25,6 +26,11 @@ const form = ref({
   confirmedPassword: null as null | string,
   role_id: null as null | string,
   company_id: null as null | string,
+  type_document_id: null as null | string,
+  type_document_name: null as null | string,
+  type_license_id: null as null | string,
+  type_license_name: null as null | string,
+  expiration_date: null as null | string,
 })
 
 const handleClearForm = () => {
@@ -39,6 +45,7 @@ const handleDialogVisible = () => {
 
 const openModal = async (id: string | null = null, disabled: boolean = false) => {
   disabledFiledsView.value = disabled
+  operator.value = false
 
   handleClearForm()
   handleDialogVisible();
@@ -51,7 +58,10 @@ const openModal = async (id: string | null = null, disabled: boolean = false) =>
 };
 
 const roles = ref([])
+const typeDocuments = ref([])
+const typeLicenses = ref([])
 const companies = ref([])
+const operator = ref(false)
 const fetchDataForm = async () => {
 
   const url = form.value.id ? `/user/${form.value.id}/edit` : `/user/create`
@@ -68,6 +78,8 @@ const fetchDataForm = async () => {
 
   if (response.value?.ok && data.value) {
     roles.value = data.value.roles
+    typeDocuments.value = data.value.typeDocuments
+    typeLicenses.value = data.value.typeLicenses
     companies.value = data.value.companies
 
     if (data.value.form) {
@@ -93,6 +105,8 @@ const submitForm = async () => {
       handleDialogVisible()
     }
 
+    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+    console.log(errorsBack.value)
   }
 }
 
@@ -117,7 +131,47 @@ const rulesFieldConfirmedPassword = computed(() => {
 })
 
 
+watch(() => form.value.role_id, () => {
+  roles.value.forEach(element => {
+    if (element.value == form.value.role_id) {
+      operator.value = element.operator
+    }
+  });
+})
 
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
+const currentDay = now.getDate();
+
+const changeFinalDate = (event: any) => {
+  if (event) {
+    let d1 = moment(`${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDay.toString().padStart(2, '0')}`);
+    let d2 = moment(event);
+    errorsBack.value.expiration_date = "";
+    if (!d2.isAfter(d1))
+      errorsBack.value.expiration_date = `La fecha debe ser posterior a ${d1.format('YYYY-MM-DD')}`;
+  }
+}
+
+const nameRules = [
+  value => requiredValidator(value),
+  value => maxCharacters(value, 100),
+  value => minCharacters(value, 2),
+];
+
+const typeDocumentRules = [
+  value => requiredValidator(value),
+  value => maxCharacters(value, 20),
+  value => integerValidator(value),
+  value => positiveNumberValidator(value),
+]
+
+const typeLicenseRules = [
+  value => requiredValidator(value),
+  value => integerValidator(value),
+  value => positiveNumberValidator(value),
+]
 
 defineExpose({
   openModal
@@ -127,7 +181,7 @@ defineExpose({
 
 <template>
   <div>
-    <VDialog v-model="isDialogVisible" :overlay="false" max-width="40rem" transition="dialog-transition" persistent>
+    <VDialog v-model="isDialogVisible" :overlay="false" max-width="50rem" transition="dialog-transition" persistent>
       <DialogCloseBtn @click="handleDialogVisible" />
       <VCard :loading="isLoading" :disabled="isLoading" class="w-100">
         <!-- Toolbar -->
@@ -141,41 +195,65 @@ defineExpose({
           <VForm ref="refForm" @submit.prevent="() => { }">
 
             <VRow>
-              <VCol cols="12">
+              <VCol cols="12" md="6">
                 <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Nombres"
-                  :rules="[requiredValidator]" v-model="form.name" :error-messages="errorsBack.name" />
+                  :rules="nameRules" v-model="form.name" :error-messages="errorsBack.name" />
               </VCol>
-              <VCol cols="12">
+              <VCol cols="12" md="6">
                 <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Apellidos"
-                  :rules="[requiredValidator]" v-model="form.surname" :error-messages="errorsBack.surname" />
+                  :rules="nameRules" v-model="form.surname" :error-messages="errorsBack.surname" />
               </VCol>
 
-              <VCol cols="12">
-                <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Correo" type="email"
-                  :rules="[requiredValidator, emailValidator]" v-model="form.email"
-                  :error-messages="errorsBack.email" />
+              <VCol cols="12" md="4">
+                <AppTextField :requiredField="true" clearable :rules="[requiredValidator]" v-model="form.email"
+                  label="Email" :error-messages="errorsBack.email" @input="errorsBack.email = ''" />
               </VCol>
 
-              <VCol cols="12">
+              <VCol cols="12" md="4">
                 <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Contraseña"
                   type="password" :rules="rulesFieldPassword" v-model="form.password"
                   :error-messages="errorsBack.password" />
               </VCol>
 
-              <VCol cols="12">
+              <VCol cols="12" md="4">
                 <AppTextField :requiredField="true" label="Confirmar Contraseña" type="password"
                   :rules="rulesFieldConfirmedPassword" v-model="form.confirmedPassword" />
               </VCol>
-              <VCol cols="12">
+
+              <VCol cols="12" md="6">
                 <AppSelect :requiredField="true" :items="roles" label="Rol" :rules="[requiredValidator]"
                   v-model="form.role_id" :error-messages="errorsBack.role_id" clearable
                   :disabled="disabledFiledsView" />
               </VCol>
-              <!-- <VCol cols="12" v-if="user.role_id == ROLE_SUPERADMIN_UUID">
-                <AppSelect :requiredField="true" :items="companies" label="Compañia" :rules="[requiredValidator]"
-                  v-model="form.company_id" :error-messages="errorsBack.company_id" clearable
-                  :disabled="disabledFiledsView" />
-              </VCol> -->
+              <VCol cols="12" md="6" v-if="operator">
+                <AppSelect :requiredField="true" :items="typeDocuments" label="Tipo de documentos"
+                  :rules="[requiredValidator]" v-model="form.type_document_id"
+                  :error-messages="errorsBack.type_document_id" clearable :disabled="disabledFiledsView" />
+              </VCol>
+
+              <VCol cols="12" md="6" v-if="operator">
+                <AppTextField :requiredField="true" label="Numero de documento" :rules="typeDocumentRules"
+                  v-model="form.type_document_name" :error-messages="errorsBack.type_document_name" />
+              </VCol>
+
+              <VCol cols="12" md="6" v-if="operator">
+                <AppSelect :requiredField="true" :items="typeLicenses" label="Tipo de licencias"
+                  :rules="[requiredValidator]" v-model="form.type_license_id"
+                  :error-messages="errorsBack.type_license_id" clearable :disabled="disabledFiledsView" />
+              </VCol>
+
+              <VCol cols="12" md="6" v-if="operator">
+                <AppTextField :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules"
+                  v-model="form.type_license_name" :error-messages="errorsBack.type_license_name" />
+              </VCol>
+
+              <VCol cols="12" md="12" v-if="operator">
+                <AppDateTimePicker :requiredField="true" clearable :error-messages="errorsBack.expiration_date"
+                  @input="errorsBack.expiration_date = ''" v-model="form.expiration_date" :rules="[requiredValidator]"
+                  label="Fecha de expiracion de licencia" @update:model-value="changeFinalDate($event)"
+                  :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
+              </VCol>
+
             </VRow>
 
           </VForm>
