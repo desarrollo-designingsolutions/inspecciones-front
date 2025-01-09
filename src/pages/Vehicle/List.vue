@@ -3,7 +3,7 @@ import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
-  name: "Brand-Vehicle-List",
+  name: "Vehicle-List",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
@@ -16,28 +16,32 @@ const loading = reactive({ excel: false })
 const authenticationStore = useAuthenticationStore();
 
 const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Brand-Vehicle-Form", params: { action: data.action, id: data.id } })
+  router.push({ name: "Vehicle-Form", params: { action: data.action, id: data.id } })
 }
 
 //TABLE
 const tableFull = ref()
 
 const optionsTable = {
-  url: "/brand-vehicle/list",
+  url: "/vehicle/list",
   params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'name', title: 'Nombre' },
-    { key: "is_active", title: 'Estado' },
+    { key: 'license_plate', title: 'Placa' },
+    { key: "type_vehicle_name", title: 'Clase de vehículo' },
+    { key: "date_registration", title: 'Fecha de matrícula' },
+    { key: "operator", title: 'Operador ??????' },
+    { key: "model", title: 'Modelo' },
+    { key: "city_name", title: 'Ciudad de operación' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {
     changeStatus: {
-      url: "/brand-vehicle/changeStatus"
+      url: "/vehicle/changeStatus"
     },
     delete: {
-      url: "/brand-vehicle/delete"
+      url: "/vehicle/delete"
     },
   }
 }
@@ -48,7 +52,9 @@ const filterTable = ref()
 const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
-      all: ["name"],
+      all: ["license_plate", "model"],
+      type_vehicle: ["name"],
+      city: ["name"],
     },
   },
   dialog: {
@@ -67,7 +73,7 @@ const downloadExcel = async () => {
   loading.excel = true;
   filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/brand-vehicle/excelExport").post({
+  const { data, response } = await useApi("/vehicle/excelExport").post({
     searchQueryArray: filterTable.value.arrayFilter,
     searchQueryGeneral: filterTable.value.generalSearch,
     company_id: authenticationStore.company.id,
@@ -75,7 +81,7 @@ const downloadExcel = async () => {
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista marcas de vehículos")
+    downloadExcelBase64(data.value.excel, "Lista vehículos")
   }
 }
 
@@ -87,7 +93,7 @@ const downloadExcel = async () => {
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Marcas de vehículos
+          Vehículos
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
@@ -99,7 +105,7 @@ const downloadExcel = async () => {
           </VBtn>
 
           <VBtn @click="goView()">
-            Agregar marca de vehículo
+            Agregar vehículo
           </VBtn>
         </div>
       </VCardTitle>
@@ -107,16 +113,6 @@ const downloadExcel = async () => {
       <VCardText class=" mt-2">
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
-          <template #item.logo="{ item }">
-            <div class="my-2">
-              <VAvatar v-if="item.logo" :size="38" class="me-3">
-                <VImg :src="storageBack(item.logo)"></VImg>
-              </VAvatar>
-              <VAvatar v-else :size="38" class="me-3" color="primary" variant="tonal">
-                {{ avatarText(item.name) }}
-              </VAvatar>
-            </div>
-          </template>
 
         </TableFull>
       </VCardText>
