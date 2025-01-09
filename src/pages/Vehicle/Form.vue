@@ -254,6 +254,12 @@ const changeFinalDate = (event: any) => {
   }
 };
 
+const fileValidationRules = [
+  (value: string) => value || 'El archivo es obligatorio.',
+  (value: string) => ['image/jpeg', 'image/png'].includes(value?.type) || 'El archivo debe ser una imagen en formato JPG o PNG.',
+  (value: string) => (value?.size <= 2 * 1024 * 1024) || 'El archivo no debe exceder 2MB.',
+];
+
 // VEHICLES_STRUCTURE
 const vehicle_structures = ref<Array<{ value: string, title: string }>>([])
 
@@ -461,14 +467,14 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
                   label="Foto frontal" :label2="form.photo_front ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
                   :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
                   label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
                   :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
@@ -476,7 +482,7 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
                   :label2="form.photo_right_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
                   :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
@@ -484,7 +490,7 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
                   :label2="form.photo_left_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
                   :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
-                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
               </VCol>
             </VRow>
           </VForm>
