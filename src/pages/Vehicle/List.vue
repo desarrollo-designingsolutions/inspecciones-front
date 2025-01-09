@@ -31,7 +31,6 @@ const optionsTable = {
     { key: 'license_plate', title: 'Placa' },
     { key: "type_vehicle_name", title: 'Clase de vehículo' },
     { key: "date_registration", title: 'Fecha de matrícula' },
-    { key: "operator", title: 'Operador ??????' },
     { key: "model", title: 'Modelo' },
     { key: "city_name", title: 'Ciudad de operación' },
     { key: 'actions', title: 'Acciones' },

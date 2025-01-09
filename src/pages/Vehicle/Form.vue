@@ -22,6 +22,7 @@ const errorsBack = ref<IErrorsBack>({});
 const disabledFiledsView = ref<boolean>(false);
 const route = useRoute()
 const refFormGeneralInformation = ref<VForm>()
+const refFormPhoto = ref<VForm>()
 const loading = reactive({
   form: false,
   cities: false,
@@ -47,6 +48,12 @@ const form = ref({
   have_trailer: false as boolean,
   trailer: null as string | null,
   vehicle_structure_id: null as string | null,
+
+  photo_front: null as null | File,
+  photo_rear: null as null | File,
+  photo_right_side: null as null | File,
+  photo_left_side: null as null | File,
+
 })
 
 const clearForm = () => {
@@ -84,16 +91,77 @@ const fetchDataForm = async () => {
   }
 }
 
+const updateValidationToFalse = () => {
+  tabs.value.forEach(tab => {
+    tab.errorsValidations = false;
+  });
+}
+
+const allValidations = async () => {
+  updateValidationToFalse()
+  let exito = []
+  const validation = await refFormPhoto.value?.validate()
+
+  console.log("validation", validation);
+
+  if (validation) {
+    exito.push(validation?.valid)
+    tabs.value[0].errorsValidations = !validation?.valid
+  }
+
+  const validation2 = await refFormGeneralInformation.value?.validate()
+  console.log("validation2", validation2);
+
+  if (validation2) {
+    exito.push(validation2?.valid)
+    tabs.value[2].errorsValidations = !validation2?.valid
+  }
+
+  // Verificar si hay algún false en el array exito
+  const exitoFinal = exito.every(item => item === true);
+
+  return exitoFinal;
+}
+
 const submitForm = async (isCreateAndNew: boolean = false) => {
-  const validation = await refFormGeneralInformation.value?.validate()
-  if (validation?.valid) {
+  const validation = await allValidations()
+  if (validation) {
 
     form.value.company_id = authenticationStore.company.id;
 
     const url = form.value.id ? `/vehicle/update/${form.value.id}` : `/vehicle/store`
 
+    const formData = new FormData();
+    for (const key in form.value) {
+    }
+
+    formData.append("id", String(form.value.id))
+    formData.append("company_id", String(form.value.company_id))
+    formData.append("license_plate", String(form.value.license_plate))
+    formData.append("type_vehicle_id", String(form.value.type_vehicle_id.value))
+    formData.append("date_registration", String(form.value.date_registration))
+    formData.append("brand_vehicle_id", String(form.value.brand_vehicle_id.value))
+    formData.append("engine_number", String(form.value.engine_number))
+    formData.append("state_id", String(form.value.state_id))
+    formData.append("city_id", String(form.value.city_id))
+    formData.append("model", String(form.value.model))
+    formData.append("vin_number", String(form.value.vin_number))
+    formData.append("load_capacity", String(form.value.load_capacity))
+    formData.append("client_id", String(form.value.client_id.value))
+    formData.append("gross_vehicle_weight", String(form.value.gross_vehicle_weight))
+    formData.append("passenger_capacity", String(form.value.passenger_capacity))
+    formData.append("number_axles", String(form.value.number_axles))
+    formData.append("current_mileage", String(form.value.current_mileage))
+    formData.append("have_trailer", String(form.value.have_trailer))
+    formData.append("trailer", String(form.value.trailer))
+    formData.append("vehicle_structure_id", String(form.value.vehicle_structure_id))
+    formData.append("photo_front", form.value.photo_front)
+    formData.append("photo_rear", form.value.photo_rear)
+    formData.append("photo_right_side", form.value.photo_right_side)
+    formData.append("photo_left_side", form.value.photo_left_side)
+
     loading.form = true;
-    const { data, response } = await useApi(url).post(form.value);
+    const { data, response } = await useApi(url).post(formData);
     loading.form = false;
 
 
@@ -183,6 +251,31 @@ const changeState = async (event: Event) => {
     cities.value = data.value.cities;
   }
 }
+
+//FILES 3 TAB 
+const inputFilePhotoFront = ref(useFileUpload())
+inputFilePhotoFront.value.allowedExtensions = ["jpg", "png"];
+watch(inputFilePhotoFront.value, (newVal, oldVal) => {
+  if (newVal.imageFile) form.value.photo_front = newVal.imageFile
+})
+
+const inputFilePhotoRear = ref(useFileUpload())
+inputFilePhotoRear.value.allowedExtensions = ["jpg", "png"];
+watch(inputFilePhotoRear.value, (newVal, oldVal) => {
+  if (newVal.imageFile) form.value.photo_rear = newVal.imageFile
+})
+
+const inputFilePhotoRightSide = ref(useFileUpload())
+inputFilePhotoRightSide.value.allowedExtensions = ["jpg", "png"];
+watch(inputFilePhotoRightSide.value, (newVal, oldVal) => {
+  if (newVal.imageFile) form.value.photo_right_side = newVal.imageFile
+})
+
+const inputFilePhotoLeftSide = ref(useFileUpload())
+inputFilePhotoLeftSide.value.allowedExtensions = ["jpg", "png"];
+watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
+  if (newVal.imageFile) form.value.photo_left_side = newVal.imageFile
+})
 </script>
 
 <template>
@@ -327,6 +420,43 @@ const changeState = async (event: Event) => {
 
             </VRow>
 
+          </VForm>
+        </div>
+
+        <div v-show="currentTab == 2">
+          <VForm ref="refFormPhoto" @submit.prevent="() => { }" :disabled="disabledFiledsView">
+            <VRow>
+              <VCol cols="12" sm="6">
+                <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoFront.loading"
+                  label="Foto frontal" :label2="form.photo_front ? '1 archivo agregado' : ''"
+                  @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
+                  :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
+                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
+                  label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
+                  @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
+                  :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
+                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppFileInput :requiredField="form.id ? false : true" clearable
+                  :loading="inputFilePhotoRightSide.loading" label="Foto  lado derecho"
+                  :label2="form.photo_right_side ? '1 archivo agregado' : ''"
+                  @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
+                  :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
+                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppFileInput :requiredField="form.id ? false : true" clearable
+                  :loading="inputFilePhotoLeftSide.loading" label="Foto  lado izquierdo"
+                  :label2="form.photo_left_side ? '1 archivo agregado' : ''"
+                  @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
+                  :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
+                  :rules="[form.id ? true : requiredValidator]"></AppFileInput>
+              </VCol>
+            </VRow>
           </VForm>
         </div>
       </VCardText>
