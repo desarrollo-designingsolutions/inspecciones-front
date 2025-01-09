@@ -18,7 +18,7 @@ definePage({
 
 const emit = defineEmits(["closeModal"]);
 
-const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
+const { btnCancel, btnBack, saveAndCloseModal,styleModal } = defineProps({
   btnCancel: {
     type: Boolean,
     default: false,
@@ -28,6 +28,10 @@ const { btnCancel, btnBack, saveAndCloseModal } = defineProps({
     default: true,
   },
   saveAndCloseModal: {
+    type: Boolean,
+    default: false,
+  },
+  styleModal: {
     type: Boolean,
     default: false,
   },
@@ -63,7 +67,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/emergency-element/${form.value.id}/edit` : `/emergency-element/create`
+  const url = styleModal ? '/emergency-element/create' : (form.value.id ? `/emergency-element/${form.value.id}/edit` : '/emergency-element/create');
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -126,7 +130,7 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  if (route.params.id) {
+  if (!styleModal && route.params.id) {
     await fetchDataForm()
   }
 })

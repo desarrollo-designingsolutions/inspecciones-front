@@ -67,7 +67,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/type-vehicle/${form.value.id}/edit` : `/type-vehicle/create`
+  const url = styleModal ? '/type-vehicle/create' : (form.value.id ? `/type-vehicle/${form.value.id}/edit` : '/type-vehicle/create');
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -130,7 +130,7 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  if (route.params.id) {
+  if (!styleModal && route.params.id) {
     await fetchDataForm()
   }
 })

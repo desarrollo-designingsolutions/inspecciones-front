@@ -24,10 +24,20 @@ const disabledFiledsView = ref<boolean>(false);
 const route = useRoute()
 const refFormGeneralInformation = ref<VForm>()
 const refFormPhoto = ref<VForm>()
+const refFormTypeDocument = ref<VForm>()
 const loading = reactive({
   form: false,
   cities: false,
 })
+
+interface ITypeDocument {
+  id: null | string,
+  type_document_id: null | string,
+  document_number: null | string,
+  date_issue: null | string,
+  expiration_date: null | string,
+}
+
 const form = ref({
   id: null as string | null,
   company_id: null as string | null,
@@ -50,6 +60,8 @@ const form = ref({
   trailer: null as string | null,
   vehicle_structure_id: null as string | null,
 
+  type_documents: [] as Array<ITypeDocument>,
+
   photo_front: null as null | File,
   photo_rear: null as null | File,
   photo_right_side: null as null | File,
@@ -62,6 +74,7 @@ const clearForm = () => {
     form.value[key] = null
   }
   form.value.have_trailer = false
+  form.value.type_documents = []
 }
 
 const fetchDataForm = async () => {
@@ -89,6 +102,17 @@ const fetchDataForm = async () => {
     if (data.value.form) {
       form.value = data.value.form
     }
+
+    if (form.value.type_documents.length == 0) {
+      form.value.type_documents.push({
+        id: null,
+        type_document_id: null,
+        document_number: null,
+        date_issue: null,
+        expiration_date: null,
+      } as ITypeDocument)
+    }
+
   }
 }
 
@@ -160,6 +184,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("photo_rear", form.value.photo_rear)
     formData.append("photo_right_side", form.value.photo_right_side)
     formData.append("photo_left_side", form.value.photo_left_side)
+    formData.append("type_documents", JSON.stringify(form.value.type_documents))
 
     loading.form = true;
     const { data, response } = await useApi(url).post(formData);
@@ -260,6 +285,7 @@ const fileValidationRules = [
   (value: string) => (value?.size <= 2 * 1024 * 1024) || 'El archivo no debe exceder 2MB.',
 ];
 
+// TAB 1
 // VEHICLES_STRUCTURE
 const vehicle_structures = ref<Array<{ value: string, title: string }>>([])
 
@@ -281,6 +307,33 @@ const changeState = async (event: Event) => {
 
 
 //FILES 3 TAB 
+// TAB 2
+const shouldShowDeleteButton = (typeArray: string) => {
+  const visibleItems = form.value[typeArray].filter(item => !item.delete);
+  return visibleItems.length > 1; // Mostrar el botón si hay más de un elemento visible
+}
+
+//DATA_ARRAY
+const addDataArrayTypeDocument = async () => {
+  const validation = await refFormTypeDocument.value?.validate()
+  console.log("validation", validation);
+
+  if (validation?.valid) {
+    form.value.type_documents.push({
+      id: null,
+      type_document_id: null,
+      document_number: null,
+      date_issue: null,
+      expiration_date: null,
+    } as ITypeDocument)
+  }
+}
+
+const deleteDataArrayMatrizRisks = (index: number) => {
+  form.value.type_documents.splice(index, 1);
+}
+
+//TAB 3 
 const inputFilePhotoFront = ref(useFileUpload())
 inputFilePhotoFront.value.allowedExtensions = ["jpg", "png"];
 watch(inputFilePhotoFront.value, (newVal, oldVal) => {
@@ -456,6 +509,50 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
 
             </VRow>
 
+          </VForm>
+        </div>
+
+        <div v-show="currentTab == 1">
+          <VForm ref="refFormTypeDocument" @submit.prevent="() => { }" :disabled="disabledFiledsView">
+            <VRow>
+              <template v-for="(item, index) in form.type_documents" :key="index">
+                <VCol cols="12" class="w-100 d-flex justify-end">
+                  <VBtn icon v-if="shouldShowDeleteButton('type_documents')" size="30" class="mt-7" color="error"
+                    @click="deleteDataArrayMatrizRisks(index)">
+                    <VIcon icon="tabler-trash"></VIcon>
+                  </VBtn>
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <SelectTypeDocumentForm :key="'select_' + index" :rules="[requiredValidator]" :requiredField="true"
+                    label="Tipo de documento" v-model="item.type_document_id" />
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
+                    :rules="[requiredValidator]">
+                  </AppTextField>
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
+                    v-model="item.date_issue" :errorMessages="errorsBack.date_issue" @input="errorsBack.date_issue = ''"
+                    :config="{ dateFormat: 'Y-m-d' }" />
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
+                    v-model="item.expiration_date" :errorMessages="errorsBack.expiration_date"
+                    @input="errorsBack.expiration_date = ''" :config="{ dateFormat: 'Y-m-d' }" />
+                </VCol>
+
+
+                <VDivider />
+              </template>
+
+              <VCol cols="12" class="w-100 d-flex justify-center">
+                <VBtn class="ml-3" @click="addDataArrayTypeDocument()">
+                  <VIcon icon="tabler-plus"></VIcon>
+                  Agregar Documento
+                </VBtn>
+              </VCol>
+            </VRow>
           </VForm>
         </div>
 

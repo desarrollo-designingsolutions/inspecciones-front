@@ -67,7 +67,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/client/${form.value.id}/edit` : `/client/create`
+  const url = styleModal ? '/client/create' : (form.value.id ? `/client/${form.value.id}/edit` : '/client/create');
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -130,9 +130,11 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  if (route.params.id) {
+  if (!styleModal && route.params.id) {
+
     await fetchDataForm()
   }
+
 })
 
 // Computed que verifica si al menos uno de los valores es true
