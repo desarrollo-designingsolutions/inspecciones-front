@@ -24,6 +24,7 @@ const route = useRoute()
 const refFormGeneralInformation = ref<VForm>()
 const refFormPhoto = ref<VForm>()
 const refFormTypeDocument = ref<VForm>()
+const refFormEmergencyElement = ref<VForm>()
 const loading = reactive({
   form: false,
   cities: false,
@@ -31,10 +32,17 @@ const loading = reactive({
 
 interface ITypeDocument {
   id: null | string,
+  vehicle_id: null | string,
   type_document_id: null | string,
   document_number: null | string,
   date_issue: null | string,
   expiration_date: null | string,
+}
+interface IEmergencyElement {
+  id: null | string,
+  vehicle_id: null | string,
+  emergency_element_id: null | string,
+  quantity: null | string,
 }
 
 const form = ref({
@@ -60,6 +68,7 @@ const form = ref({
   vehicle_structure_id: null as string | null,
 
   type_documents: [] as Array<ITypeDocument>,
+  emergency_elements: [] as Array<IEmergencyElement>,
 
   photo_front: null as null | File,
   photo_rear: null as null | File,
@@ -74,6 +83,7 @@ const clearForm = () => {
   }
   form.value.have_trailer = false
   form.value.type_documents = []
+  form.value.emergency_elements = []
 }
 
 const fetchDataForm = async () => {
@@ -105,11 +115,19 @@ const fetchDataForm = async () => {
     if (form.value.type_documents.length == 0) {
       form.value.type_documents.push({
         id: null,
+        vehicle_id: null,
         type_document_id: null,
         document_number: null,
         date_issue: null,
         expiration_date: null,
       } as ITypeDocument)
+
+      form.value.emergency_elements.push({
+        id: null,
+        vehicle_id: null,
+        emergency_element_id: null,
+        quantity: null,
+      } as IEmergencyElement)
     }
 
   }
@@ -124,21 +142,37 @@ const updateValidationToFalse = () => {
 const allValidations = async () => {
   updateValidationToFalse()
   let exito = []
-  const validation = await refFormPhoto.value?.validate()
+  const validation1 = await refFormGeneralInformation.value?.validate()
 
-  console.log("validation", validation);
+  console.log("validation1", validation1);
 
-  if (validation) {
-    exito.push(validation?.valid)
-    tabs.value[0].errorsValidations = !validation?.valid
+  if (validation1) {
+    exito.push(validation1?.valid)
+    tabs.value[0].errorsValidations = !validation1?.valid
   }
 
-  const validation2 = await refFormGeneralInformation.value?.validate()
+  const validation2 = await refFormTypeDocument.value?.validate()
   console.log("validation2", validation2);
 
   if (validation2) {
     exito.push(validation2?.valid)
-    tabs.value[2].errorsValidations = !validation2?.valid
+    tabs.value[1].errorsValidations = !validation2?.valid
+  }
+
+  const validation3 = await refFormPhoto.value?.validate()
+  console.log("validation3", validation3);
+
+  if (validation3) {
+    exito.push(validation3?.valid)
+    tabs.value[2].errorsValidations = !validation3?.valid
+  }
+
+  const validation4 = await refFormEmergencyElement.value?.validate()
+  console.log("validation4", validation4);
+
+  if (validation4) {
+    exito.push(validation4?.valid)
+    tabs.value[3].errorsValidations = !validation4?.valid
   }
 
   // Verificar si hay algún false en el array exito
@@ -184,6 +218,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("photo_right_side", form.value.photo_right_side)
     formData.append("photo_left_side", form.value.photo_left_side)
     formData.append("type_documents", JSON.stringify(form.value.type_documents))
+    formData.append("emergency_elements", JSON.stringify(form.value.emergency_elements))
 
     loading.form = true;
     const { data, response } = await useApi(url).post(formData);
@@ -291,6 +326,7 @@ const addDataArrayTypeDocument = async () => {
   if (validation?.valid) {
     form.value.type_documents.push({
       id: null,
+      vehicle_id: null,
       type_document_id: null,
       document_number: null,
       date_issue: null,
@@ -299,7 +335,7 @@ const addDataArrayTypeDocument = async () => {
   }
 }
 
-const deleteDataArrayMatrizRisks = (index: number) => {
+const deleteDataArrayTypeDocument = (index: number) => {
   form.value.type_documents.splice(index, 1);
 }
 
@@ -327,6 +363,28 @@ inputFilePhotoLeftSide.value.allowedExtensions = ["jpg", "png"];
 watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
   if (newVal.imageFile) form.value.photo_left_side = newVal.imageFile
 })
+
+
+//tab 4
+
+//DATA_ARRAY
+const addDataArrayEmergencyElement = async () => {
+  const validation = await refFormEmergencyElement.value?.validate()
+  console.log("validation", validation);
+
+  if (validation?.valid) {
+    form.value.emergency_elements.push({
+      id: null,
+      vehicle_id: null,
+      emergency_element_id: null,
+      quantity: null,
+    } as IEmergencyElement)
+  }
+}
+
+const deleteDataArrayEmergencyElement = (index: number) => {
+  form.value.emergency_elements.splice(index, 1);
+}
 </script>
 
 <template>
@@ -367,7 +425,8 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
               <VCol cols="12" md="6">
                 <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
                   v-model="form.date_registration" :errorMessages="errorsBack.date_registration"
-                  @input="errorsBack.date_registration = ''" :config="{ dateFormat: 'Y-m-d' }" />
+                  @input="errorsBack.date_registration = ''" :config="{ dateFormat: 'Y-m-d' }"
+                  :rules="[requiredValidator]" />
               </VCol>
 
               <VCol cols="12" md="6">
@@ -480,7 +539,7 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
               <template v-for="(item, index) in form.type_documents" :key="index">
                 <VCol cols="12" class="w-100 d-flex justify-end">
                   <VBtn icon v-if="shouldShowDeleteButton('type_documents')" size="30" class="mt-7" color="error"
-                    @click="deleteDataArrayMatrizRisks(index)">
+                    @click="deleteDataArrayTypeDocument(index)">
                     <VIcon icon="tabler-trash"></VIcon>
                   </VBtn>
                 </VCol>
@@ -511,7 +570,7 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
               <VCol cols="12" class="w-100 d-flex justify-center">
                 <VBtn class="ml-3" @click="addDataArrayTypeDocument()">
                   <VIcon icon="tabler-plus"></VIcon>
-                  Agregar Documento
+                  Agregar documento
                 </VBtn>
               </VCol>
             </VRow>
@@ -554,6 +613,40 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
             </VRow>
           </VForm>
         </div>
+
+        <div v-show="currentTab == 3">
+          <VForm ref="refFormEmergencyElement" @submit.prevent="() => { }" :disabled="disabledFiledsView">
+            <VRow>
+              <template v-for="(item, index) in form.emergency_elements" :key="index">
+                <VCol cols="12" class="w-100 d-flex justify-end">
+                  <VBtn icon v-if="shouldShowDeleteButton('type_documents')" size="30" class="mt-7" color="error"
+                    @click="deleteDataArrayEmergencyElement(index)">
+                    <VIcon icon="tabler-trash"></VIcon>
+                  </VBtn>
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <SelectEmergencyElementForm :key="'select2_' + index" :rules="[requiredValidator]"
+                    :requiredField="true" label="Elemento de emergencia" v-model="item.emergency_element_id" />
+                </VCol>
+                <VCol cols="12" sm="6">
+                  <AppTextField :requiredField="true" label="Cantidad" v-model="item.quantity"
+                    :rules="[requiredValidator]">
+                  </AppTextField>
+                </VCol>
+
+                <VDivider />
+              </template>
+
+              <VCol cols="12" class="w-100 d-flex justify-center">
+                <VBtn class="ml-3" @click="addDataArrayEmergencyElement()">
+                  <VIcon icon="tabler-plus"></VIcon>
+                  Agregar elemento de emergencia
+                </VBtn>
+              </VCol>
+            </VRow>
+          </VForm>
+        </div>
+
       </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
