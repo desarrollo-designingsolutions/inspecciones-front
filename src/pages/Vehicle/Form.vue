@@ -281,8 +281,6 @@ const changeFinalDate = (event: any) => {
 
 const fileValidationRules = [
   (value: string) => value || 'El archivo es obligatorio.',
-  (value: string) => ['image/jpeg', 'image/png'].includes(value?.type) || 'El archivo debe ser una imagen en formato JPG o PNG.',
-  (value: string) => (value?.size <= 2 * 1024 * 1024) || 'El archivo no debe exceder 2MB.',
 ];
 
 // TAB 1
@@ -524,7 +522,8 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <SelectTypeDocumentForm :key="'select_' + index" :rules="[requiredValidator]" :requiredField="true"
-                    label="Tipo de documento" v-model="item.type_document_id" />
+                    label="Tipo de documento" v-model="item.type_document_id"
+                    @input="errorsBack.type_document_id = ''" />
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
