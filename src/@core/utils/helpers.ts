@@ -107,6 +107,12 @@ export function onlyNumbersKeyPress(event: any) {
     event.preventDefault();
   }
 }
+export function onlyNumbersPositivesKeyPress(event: any) {
+  if ((!/[0-9,]/.test(event.key))) {
+    event.preventDefault();
+  }
+}
+
 export function storageBack(path: string) {
   return BASE_BACK_STORAGE + path
 } 

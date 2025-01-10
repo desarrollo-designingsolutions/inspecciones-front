@@ -113,6 +113,7 @@ declare global {
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
   const onlyNumbersKeyPress: typeof import('./src/@core/utils/helpers')['onlyNumbersKeyPress']
+  const onlyNumbersPositivesKeyPress: typeof import('./src/@core/utils/helpers')['onlyNumbersPositivesKeyPress']
   const openPdfBase64: typeof import('./src/@core/utils/helpers')['openPdfBase64']
   const paginationMeta: typeof import('./src/utils/paginationMeta')['paginationMeta']
   const passwordValidator: typeof import('./src/@core/utils/validators')['passwordValidator']
@@ -493,6 +494,7 @@ declare module 'vue' {
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly onlyNumbersKeyPress: UnwrapRef<typeof import('./src/@core/utils/helpers')['onlyNumbersKeyPress']>
+    readonly onlyNumbersPositivesKeyPress: UnwrapRef<typeof import('./src/@core/utils/helpers')['onlyNumbersPositivesKeyPress']>
     readonly openPdfBase64: UnwrapRef<typeof import('./src/@core/utils/helpers')['openPdfBase64']>
     readonly paginationMeta: UnwrapRef<typeof import('./src/utils/paginationMeta')['paginationMeta']>
     readonly passwordValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['passwordValidator']>

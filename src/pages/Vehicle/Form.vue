@@ -319,17 +319,19 @@ const fileValidationRules = [
 ];
 
 const checkLicensePlate = async () => {
-  const url = '/vehicle/validate-license-plate'
+  if (form.value.license_plate) {
+    const url = '/vehicle/validateLicensePlate'
 
-  const { response, data } = await useApi(url).post({
-    license_plate: form.value.license_plate,
-    company_id: company.value.id,
-  });
+    const { response, data } = await useApi(url).post({
+      license_plate: form.value.license_plate,
+      company_id: company.value.id,
+    });
 
-  if (response.value?.ok && data.value.exists) {
-    errorsBack.value.license_plate = data.value.message_licences;
-  } else {
-    errorsBack.value.license_plate = "";
+    if (response.value?.ok && data.value.exists) {
+      errorsBack.value.license_plate = data.value.message_licences;
+    } else {
+      errorsBack.value.license_plate = "";
+    }
   }
 };
 
@@ -414,7 +416,6 @@ watch(inputFilePhotoLeftSide.value, (newVal, oldVal) => {
 //DATA_ARRAY
 const addDataArrayEmergencyElement = async () => {
   const validation = await refFormEmergencyElement.value?.validate()
-  console.log("validation", validation);
 
   if (validation?.valid) {
     form.value.emergency_elements.push({
@@ -506,8 +507,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Modelo" v-model="form.model"
-                  clearable :errorMessages="errorsBack.model" @input="errorsBack.model = ''"
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true" label="Modelo"
+                  v-model="form.model" clearable :errorMessages="errorsBack.model" @input="errorsBack.model = ''"
                   :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
@@ -519,9 +520,10 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 </AppTextField>
               </VCol>
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Capacidad de carga (kg)"
-                  v-model="form.load_capacity" clearable :errorMessages="errorsBack.load_capacity"
-                  @input="errorsBack.load_capacity = ''" :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true"
+                  label="Capacidad de carga (kg)" v-model="form.load_capacity" clearable
+                  :errorMessages="errorsBack.load_capacity" @input="errorsBack.load_capacity = ''"
+                  :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
@@ -531,28 +533,30 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Peso bruto vehicular (kg)"
-                  v-model="form.gross_vehicle_weight" clearable :errorMessages="errorsBack.gross_vehicle_weight"
-                  @input="errorsBack.gross_vehicle_weight = ''" :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true"
+                  label="Peso bruto vehicular (kg)" v-model="form.gross_vehicle_weight" clearable
+                  :errorMessages="errorsBack.gross_vehicle_weight" @input="errorsBack.gross_vehicle_weight = ''"
+                  :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Capacidad de pasajeros"
-                  v-model="form.passenger_capacity" clearable :errorMessages="errorsBack.passenger_capacity"
-                  @input="errorsBack.passenger_capacity = ''" :rules="[requiredValidator]">
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true"
+                  label="Capacidad de pasajeros" v-model="form.passenger_capacity" clearable
+                  :errorMessages="errorsBack.passenger_capacity" @input="errorsBack.passenger_capacity = ''"
+                  :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true" label="Número de ejes"
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true" label="Número de ejes"
                   v-model="form.number_axles" clearable :errorMessages="errorsBack.number_axles"
                   @input="errorsBack.number_axles = ''" :rules="[requiredValidator]">
                 </AppTextField>
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersKeyPress" :requiredField="true"
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true"
                   label="Kilometraje actual del vehiculo" v-model="form.current_mileage" clearable
                   :errorMessages="errorsBack.current_mileage" @input="errorsBack.current_mileage = ''"
                   :rules="[requiredValidator]">
@@ -572,11 +576,11 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppAutocomplete :requiredField="true" clearable :items="vehicle_structures"
+                <AppSelect :requiredField="true" clearable :items="vehicle_structures"
                   v-model="form.vehicle_structure_id" label="Estructura del vehículo"
                   :error-messages="errorsBack.vehicle_structure_id" @input="errorsBack.vehicle_structure_id = ''"
                   :rules="[requiredValidator]">
-                </AppAutocomplete>
+                </AppSelect>
               </VCol>
 
             </VRow>
@@ -605,9 +609,9 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   </AppTextField>
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
-                    v-model="item.date_issue" :errorMessages="errorsBack.date_issue" @input="errorsBack.date_issue = ''"
-                    @update:model-value="changeFinalDate($event)" :config="{
+                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de expedición"
+                    :rules="[requiredValidator]" v-model="item.date_issue" :errorMessages="errorsBack.date_issue"
+                    @input="errorsBack.date_issue = ''" @update:model-value="changeFinalDate($event)" :config="{
                       dateFormat: 'Y-m-d',
                       disable: [
                         { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
@@ -615,9 +619,10 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                     }" />
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
-                    v-model="item.expiration_date" :errorMessages="errorsBack.expiration_date"
-                    @input="errorsBack.expiration_date = ''" @update:model-value="changeFinalDate($event)" :config="{
+                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
+                    :rules="[requiredValidator]" v-model="item.expiration_date"
+                    :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
+                    @update:model-value="changeFinalDate($event)" :config="{
                       dateFormat: 'Y-m-d',
                       disable: [
                         { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
@@ -692,7 +697,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppTextField :requiredField="true" label="Cantidad" v-model="item.quantity"
-                    :rules="[requiredValidator]">
+                    @keypress="onlyNumbersPositivesKeyPress" :rules="[requiredValidator]"
+                    :error-messages="errorsBack.quantity" @input="errorsBack.quantity = ''">
                   </AppTextField>
                 </VCol>
 
