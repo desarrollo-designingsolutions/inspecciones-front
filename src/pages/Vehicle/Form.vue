@@ -318,6 +318,21 @@ const fileValidationRules = [
   (value: string) => value || 'El archivo es obligatorio.',
 ];
 
+const checkLicensePlate = async () => {
+  const url = '/vehicle/validate-license-plate'
+
+  const { response, data } = await useApi(url).post({
+    license_plate: form.value.license_plate,
+    company_id: company.value.id,
+  });
+
+  if (response.value?.ok && data.value.exists) {
+    errorsBack.value.license_plate = data.value.message_licences;
+  } else {
+    errorsBack.value.license_plate = "";
+  }
+};
+
 // TAB 1
 // VEHICLES_STRUCTURE
 const vehicle_structures = ref<Array<{ value: string, title: string }>>([])
@@ -439,9 +454,9 @@ const deleteDataArrayEmergencyElement = (index: number) => {
           <VForm ref="refFormGeneralInformation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
             <VRow>
               <VCol cols="12" sm="6">
-                <AppTextField :requiredField="true" label="Número de placa" v-model="form.license_plate" clearable
-                  :maxlength="6" :errorMessages="errorsBack.license_plate" @input="errorsBack.license_plate = ''"
-                  :rules="ruleFieldLicensePlate">
+                <AppTextField @blur="checkLicensePlate" :requiredField="true" label="Número de placa"
+                  v-model="form.license_plate" clearable :maxlength="6" :errorMessages="errorsBack.license_plate"
+                  @input="errorsBack.license_plate = ''" :rules="ruleFieldLicensePlate">
                 </AppTextField>
               </VCol>
               <VCol cols="12" md="6">
@@ -591,12 +606,22 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
                     v-model="item.date_issue" :errorMessages="errorsBack.date_issue" @input="errorsBack.date_issue = ''"
-                    :config="{ dateFormat: 'Y-m-d' }" />
+                    @update:model-value="changeFinalDate($event)" :config="{
+                      dateFormat: 'Y-m-d',
+                      disable: [
+                        { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
+                      ]
+                    }" />
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de matrícula"
                     v-model="item.expiration_date" :errorMessages="errorsBack.expiration_date"
-                    @input="errorsBack.expiration_date = ''" :config="{ dateFormat: 'Y-m-d' }" />
+                    @input="errorsBack.expiration_date = ''" @update:model-value="changeFinalDate($event)" :config="{
+                      dateFormat: 'Y-m-d',
+                      disable: [
+                        { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
+                      ]
+                    }" />
                 </VCol>
 
 

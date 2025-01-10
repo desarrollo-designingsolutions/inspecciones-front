@@ -36,10 +36,6 @@ declare module 'vue' {
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsVerticalSimple: typeof import('./src/@core/components/CardStatisticsVerticalSimple.vue')['default']
     ConfirmDialog: typeof import('./src/components/dialogs/ConfirmDialog.vue')['default']
-<<<<<<< HEAD
-    copy: typeof import('./src/components/SelectClientForm copy.vue')['default']
-=======
->>>>>>> origin/feature/validate-vehicle-module
     CreateAppDialog: typeof import('./src/components/dialogs/CreateAppDialog.vue')['default']
     CustomCheckboxes: typeof import('./src/@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./src/@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']
@@ -69,11 +65,7 @@ declare module 'vue' {
     ScrollToTop: typeof import('./src/@core/components/ScrollToTop.vue')['default']
     SelectBrandVehicleForm: typeof import('./src/components/SelectBrandVehicleForm.vue')['default']
     SelectClientForm: typeof import('./src/components/SelectClientForm.vue')['default']
-<<<<<<< HEAD
     SelectEmergencyElementForm: typeof import('./src/components/SelectEmergencyElementForm.vue')['default']
-    SelectForm: typeof import('./src/components/SelectForm.vue')['default']
-=======
->>>>>>> origin/feature/validate-vehicle-module
     SelectInfinite: typeof import('./src/components/SelectInfinite.vue')['default']
     SelectTypeDocumentForm: typeof import('./src/components/SelectTypeDocumentForm.vue')['default']
     SelectTypeVehicleForm: typeof import('./src/components/SelectTypeVehicleForm.vue')['default']
