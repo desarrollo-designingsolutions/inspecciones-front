@@ -25,7 +25,7 @@ const formComponent = ref({
   description: null,
   company_id: null,
   permissions: [] as Array<Number>,
-  operator: null,
+  operator: false,
 });
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
@@ -36,6 +36,7 @@ const handleClearFormComponent = (): void => {
   formComponent.value.id = null;
   formComponent.value.description = null;
   formComponent.value.permissions = [];
+  formComponent.value.operator = false,
 };
 
 const handleCreate = async () => {
