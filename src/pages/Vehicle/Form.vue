@@ -298,8 +298,9 @@ const currentYear = now.getFullYear();
 const currentMonth = now.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
 const currentDay = now.getDate();
 
-const changeFinalDate = (event: any) => {
+const changeFinalDate = (event: any, item: any) => {
   if (event) {
+    item.expiration_date = null;
     let d1 = moment(`${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDay.toString().padStart(2, '0')}`);
     let d2 = moment(event);
     errorsBack.value.final_date = "";
@@ -330,6 +331,15 @@ const checkLicensePlate = async () => {
   }
 };
 
+const validationExpirationDate = (event: any, date: any) => {
+  if (event) {
+    let d1 = moment(date);
+    let d2 = moment(event);
+    errorsBack.value.expiration_date = "";
+    if (!d2.isAfter(d1))
+      errorsBack.value.expiration_date = `La fecha debe ser posterior a ${d1.format('YYYY-MM-DD')}`;
+  }
+}
 
 // TAB 1
 // VEHICLES_STRUCTURE
@@ -605,7 +615,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de expedición"
                     :rules="[requiredValidator]" v-model="item.date_issue" :errorMessages="errorsBack.date_issue"
-                    @input="errorsBack.date_issue = ''" @update:model-value="changeFinalDate($event)" :config="{
+                    @input="errorsBack.date_issue = ''" @update:model-value="changeFinalDate($event, item)" :config="{
                       dateFormat: 'Y-m-d',
                       disable: [
                         { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
@@ -616,12 +626,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
                     :rules="[requiredValidator]" v-model="item.expiration_date"
                     :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
-                    @update:model-value="changeFinalDate($event)" :config="{
-                      dateFormat: 'Y-m-d',
-                      disable: [
-                        { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
-                      ]
-                    }" />
+                    @update:model-value="validationExpirationDate($event, item.date_issue)"
+                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" />
                 </VCol>
 
 
