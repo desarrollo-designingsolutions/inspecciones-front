@@ -106,7 +106,6 @@ const submitForm = async () => {
     }
 
     if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
-    console.log(errorsBack.value)
   }
 }
 

@@ -145,15 +145,12 @@ const allValidations = async () => {
   let exito = []
   const validation1 = await refFormGeneralInformation.value?.validate()
 
-  console.log("validation1", validation1);
-
   if (validation1) {
     exito.push(validation1?.valid)
     tabs.value[0].errorsValidations = !validation1?.valid
   }
 
   const validation2 = await refFormTypeDocument.value?.validate()
-  console.log("validation2", validation2);
 
   if (validation2) {
     exito.push(validation2?.valid)
@@ -161,7 +158,6 @@ const allValidations = async () => {
   }
 
   const validation3 = await refFormPhoto.value?.validate()
-  console.log("validation3", validation3);
 
   if (validation3) {
     exito.push(validation3?.valid)
@@ -169,7 +165,6 @@ const allValidations = async () => {
   }
 
   const validation4 = await refFormEmergencyElement.value?.validate()
-  console.log("validation4", validation4);
 
   if (validation4) {
     exito.push(validation4?.valid)
@@ -367,7 +362,6 @@ const shouldShowDeleteButton = (typeArray: string) => {
 //DATA_ARRAY
 const addDataArrayTypeDocument = async () => {
   const validation = await refFormTypeDocument.value?.validate()
-  console.log("validation", validation);
 
   if (validation?.valid) {
     form.value.type_documents.push({
