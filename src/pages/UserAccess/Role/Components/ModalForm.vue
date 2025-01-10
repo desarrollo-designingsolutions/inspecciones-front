@@ -36,7 +36,7 @@ const handleClearFormComponent = (): void => {
   formComponent.value.id = null;
   formComponent.value.description = null;
   formComponent.value.permissions = [];
-  formComponent.value.operator = false,
+  formComponent.value.operator = false
 };
 
 const handleCreate = async () => {
