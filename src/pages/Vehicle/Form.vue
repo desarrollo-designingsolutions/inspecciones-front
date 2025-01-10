@@ -333,6 +333,7 @@ const checkLicensePlate = async () => {
   }
 };
 
+
 // TAB 1
 // VEHICLES_STRUCTURE
 const vehicle_structures = ref<Array<{ value: string, title: string }>>([])
