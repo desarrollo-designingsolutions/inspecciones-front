@@ -111,7 +111,7 @@ if (isAuthenticated) {
                 <!-- email -->
                 <VCol cols="12">
                   <AppTextField v-model="form.email" autofocus label="Correo electrónico" type="email"
-                    placeholder="johndoe@email.com" clearable :rules="[requiredValidator, emailValidator]" />
+                    placeholder="johndoe@email.com" autocomplete="username" clearable :rules="[requiredValidator, emailValidator]" />
                 </VCol>
 
                 <!-- password -->
@@ -120,7 +120,7 @@ if (isAuthenticated) {
                     :type="isPasswordVisible ? 'text' : 'password'"
                     :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                     @click:append-inner="isPasswordVisible = !isPasswordVisible" clearable
-                    :rules="[requiredValidator]" />
+                    :rules="[requiredValidator]" autocomplete="current-password" />
 
                   <div class="d-flex align-center flex-wrap justify-space-between mt-1 mb-4">
                     <VCheckbox v-model="rememberMe" label="Recuérdame" />
