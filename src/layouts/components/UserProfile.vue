@@ -7,8 +7,12 @@ const authenticationStore = useAuthenticationStore();
 const { company, user } = storeToRefs(authenticationStore);
 
 const logout = () => {
-  router.push({ name: "Login" });
   authenticationStore.logout()
+  // router.push({ name: "Login" });
+
+  const route = { name: "Login" };
+  const url = router.resolve(route).href;
+  window.location.href = url;
 };
 
 
