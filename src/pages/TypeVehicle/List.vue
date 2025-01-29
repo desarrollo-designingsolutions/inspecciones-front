@@ -72,8 +72,7 @@ const downloadExcel = async () => {
   filterTable.value = tableFull.value.optionsTable.searchQuery;
 
   const { data, response } = await useApi("/type-vehicle/excelExport").post({
-    searchQueryArray: filterTable.value.arrayFilter,
-    searchQueryGeneral: filterTable.value.generalSearch,
+    searchQuery: filterTable.value,
     company_id: authenticationStore.company.id,
   })
   loading.excel = false;

@@ -7,6 +7,7 @@ interface Props {
   actionRemove?: boolean
   loading?: boolean | undefined
   title?: string
+  subtitle?: string
 }
 
 interface Emit {
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
   actionRemove: false,
   loading: undefined,
   title: undefined,
+  subtitle: undefined,
 })
 
 const emit = defineEmits<Emit>()
@@ -84,6 +86,12 @@ const triggeredRemove = () => {
               {{ props.title }}
             </slot>
           </VCardTitle>
+          <VCardSubtitle v-if="props.subtitle || $slots.subtitle">
+            <!-- 👉 Title slot and prop -->
+            <slot name="subtitle">
+              {{ props.subtitle }}
+            </slot>
+          </VCardSubtitle>
 
           <template #append>
             <!-- 👉 Before actions slot -->
@@ -93,62 +101,38 @@ const triggeredRemove = () => {
               <!-- SECTION Actions buttons -->
 
               <!-- 👉 Collapse button -->
-              <IconBtn
-                v-if="(!(actionRemove || actionRefresh) || actionCollapsed) && !noActions"
-                @click="triggerCollapse"
-              >
-                <VIcon
-                  size="20"
-                  icon="tabler-chevron-up"
+              <IconBtn v-if="(!(actionRemove || actionRefresh) || actionCollapsed) && !noActions"
+                @click="triggerCollapse">
+                <VIcon size="20" icon="tabler-chevron-up"
                   :style="{ transform: isContentCollapsed ? 'rotate(-180deg)' : undefined }"
-                  style="transition-duration: 0.28s;"
-                />
+                  style="transition-duration: 0.28s;" />
               </IconBtn>
 
               <!-- 👉 Overlay button -->
-              <IconBtn
-                v-if="(!(actionRemove || actionCollapsed) || actionRefresh) && !noActions"
-                @click="triggerRefresh"
-              >
-                <VIcon
-                  size="20"
-                  icon="tabler-refresh"
-                />
+              <IconBtn v-if="(!(actionRemove || actionCollapsed) || actionRefresh) && !noActions"
+                @click="triggerRefresh">
+                <VIcon size="20" icon="tabler-refresh" />
               </IconBtn>
 
               <!-- 👉 Close button -->
-              <IconBtn
-                v-if="(!(actionRefresh || actionCollapsed) || actionRemove) && !noActions"
-                @click="triggeredRemove"
-              >
-                <VIcon
-                  size="20"
-                  icon="tabler-x"
-                />
+              <IconBtn v-if="(!(actionRefresh || actionCollapsed) || actionRemove) && !noActions"
+                @click="triggeredRemove">
+                <VIcon size="20" icon="tabler-x" />
               </IconBtn>
             </div>
-          <!-- !SECTION -->
+            <!-- !SECTION -->
           </template>
         </VCardItem>
 
         <!-- 👉 card content -->
         <VExpandTransition>
-          <div
-            v-show="!isContentCollapsed"
-            class="v-card-content"
-          >
+          <div v-show="!isContentCollapsed" class="v-card-content">
             <slot />
           </div>
         </VExpandTransition>
 
         <!-- 👉 Overlay -->
-        <VOverlay
-          v-model="$loading"
-          contained
-          persistent
-          scroll-strategy="none"
-          class="align-center justify-center"
-        >
+        <VOverlay v-model="$loading" contained persistent scroll-strategy="none" class="align-center justify-center">
           <VProgressCircular indeterminate />
         </VOverlay>
       </VCard>

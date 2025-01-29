@@ -27,9 +27,9 @@ const form = ref({
   role_id: null as null | string,
   company_id: null as null | string,
   type_document_id: null as null | string,
-  type_document_name: null as null | string,
+  document: null as null | string,
   type_license_id: null as null | string,
-  type_license_name: null as null | string,
+  license: null as null | string,
   expiration_date: null as null | string,
 })
 
@@ -232,7 +232,7 @@ defineExpose({
 
               <VCol cols="12" md="6" v-if="operator">
                 <AppTextField :requiredField="true" label="Numero de documento" :rules="typeDocumentRules"
-                  v-model="form.type_document_name" :error-messages="errorsBack.type_document_name" />
+                  v-model="form.document" :error-messages="errorsBack.document" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
@@ -243,7 +243,7 @@ defineExpose({
 
               <VCol cols="12" md="6" v-if="operator">
                 <AppTextField :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules"
-                  v-model="form.type_license_name" :error-messages="errorsBack.type_license_name" />
+                  v-model="form.license" :error-messages="errorsBack.license" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">

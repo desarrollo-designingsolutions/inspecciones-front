@@ -29,6 +29,8 @@ declare module 'vue-router/auto-routes' {
     'Emergency-Element-Form': RouteRecordInfo<'Emergency-Element-Form', 'Emergency-Element-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Emergency-Element-List': RouteRecordInfo<'Emergency-Element-List', '/EmergencyElement/List', Record<never, never>, Record<never, never>>,
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
+    'Inspection-Form': RouteRecordInfo<'Inspection-Form', 'Inspection-form/:inspection_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Inspection-List': RouteRecordInfo<'Inspection-List', '/Inspection/List', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'Type-Document-List': RouteRecordInfo<'Type-Document-List', '/TypeDocument/List', Record<never, never>, Record<never, never>>,
     'Type-Document-Form': RouteRecordInfo<'Type-Document-Form', 'Type-Document-form/:action/:id?', Record<never, never>, Record<never, never>>,
