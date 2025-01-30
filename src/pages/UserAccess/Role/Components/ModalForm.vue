@@ -26,6 +26,7 @@ const formComponent = ref({
   company_id: null,
   permissions: [] as Array<Number>,
   operator: false,
+  mechanic: false,
 });
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
@@ -37,6 +38,7 @@ const handleClearFormComponent = (): void => {
   formComponent.value.description = null;
   formComponent.value.permissions = [];
   formComponent.value.operator = false
+  formComponent.value.mechanic = false
 };
 
 const handleCreate = async () => {
@@ -76,6 +78,7 @@ const handleEdit = async ({ id }: any) => {
     formComponent.value.description = data.value.role.description;
     formComponent.value.company_id = data.value.role.company_id;
     formComponent.value.operator = data.value.role.operator;
+    formComponent.value.mechanic = data.value.role.mechanic;
 
     selectedElements.value = data.value.role.permissions;
     arrayFather.value = componentData.menus;
@@ -135,6 +138,11 @@ defineExpose({
           <VCol>
             <VCard border>
               <VCheckboxBtn v-model="formComponent.operator" label="Operador"></VCheckboxBtn>
+            </VCard>
+          </VCol>
+          <VCol>
+            <VCard border>
+              <VCheckboxBtn v-model="formComponent.mechanic" label="Mecanico"></VCheckboxBtn>
             </VCard>
           </VCol>
         </VRow>
