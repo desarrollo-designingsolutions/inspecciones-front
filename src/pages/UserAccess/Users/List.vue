@@ -40,6 +40,7 @@ const optionsTable = {
     },
     delete: {
       show: true,
+      url: "/user/delete"
     },
   }
 }
