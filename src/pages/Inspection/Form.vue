@@ -2,6 +2,7 @@
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue';
 import { useToast } from '@/composables/useToast';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { VForm } from 'vuetify/components/VForm';
 
@@ -15,6 +16,34 @@ definePage({
   },
 });
 
+interface IOperatorData {
+  document: string | null,
+  license: string | null,
+}
+interface IForm {
+  id: string | null,
+  company_id: string | null,
+  inspection_type_id: string | null,
+  vehicle_id: string | null,
+  inspection_date: string | null,
+  state_id: string | null,
+  city_id: string | null,
+  user_id: string | null,
+  general_comment: string | null,
+  type_documents: Array<object>,
+}
+interface IVehicleData {
+  license_plate: string | null,
+  brand_vehicle_name: string | null,
+  model: string | null,
+  vehicle_structure_name: string | null,
+  type_documents: Array<{
+    type_document_name: string,
+    document_number: string,
+    expiration_date: string,
+  }>,
+}
+
 const authenticationStore = useAuthenticationStore();
 const { company } = storeToRefs(authenticationStore)
 const { toast } = useToast()
@@ -27,11 +56,36 @@ const loading = reactive({
   cities: false,
 })
 
-const form = ref({})
+const form = ref<IForm>({
+  id: null,
+  company_id: null,
+  inspection_type_id: null,
+  vehicle_id: null,
+  inspection_date: null,
+  state_id: null,
+  city_id: null,
+  user_id: null,
+  general_comment: null,
+  type_documents: []
+})
 
 const clearForm = () => {
+  isCreateAndNew.value = false
   for (const key in form.value) {
     form.value[key] = null
+  }
+  form.value.type_documents = []
+
+  operatorData.value = {
+    document: null,
+    license: null,
+  }
+  vehicleData.value = {
+    license_plate: null,
+    brand_vehicle_name: null,
+    model: null,
+    vehicle_structure_name: null,
+    type_documents: [],
   }
 }
 const cloneForm = ref();
@@ -52,7 +106,6 @@ const fetchDataForm = async () => {
   );
 
   if (response.value?.ok && data.value) {
-    //formulario 
 
     tabs.value = data.value.tabs;
     states.value = data.value.states
@@ -69,6 +122,8 @@ const fetchDataForm = async () => {
         });
       }
     });
+
+    //formulario 
     if (data.value.form) {
       cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
       form.value = data.value.form
@@ -77,6 +132,8 @@ const fetchDataForm = async () => {
       form.value.city_id = cloneForm.value.city_id
     }
   }
+  loading.form = false
+
 }
 
 const updateValidationToFalse = () => {
@@ -85,27 +142,28 @@ const updateValidationToFalse = () => {
   });
 }
 
-const exito = ref<Array<boolean>>([])
-
 const allValidations = async () => {
-  updateValidationToFalse()
-  exito.value = []
+  updateValidationToFalse();
+  let exito: any[] = [];
 
-  tabs.value.forEach(async (element, key) => {
-    const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate()
+  const validationPromises = tabs.value.map(async (element, key) => {
+    const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
     if (validation) {
-      exito.value.push(validation?.valid)
-      tabs.value[key].errorsValidations = !validation?.valid
+      exito.push(validation.valid);
+      tabs.value[key].errorsValidations = !validation.valid;
     }
   });
 
-  const exitoFinal = exito.value.every(item => item === true);
+  await Promise.all(validationPromises);
+
+  const exitoFinal = exito.every(item => item === true);
 
   return exitoFinal;
-}
+};
 
-const submitForm = async (isCreateAndNew: boolean = false) => {
+const isCreateAndNew = ref<boolean>(false)
+const submitForm = async () => {
 
   const validation = await allValidations()
 
@@ -115,11 +173,20 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
 
     form.value.company_id = company.value.id
     form.value.inspection_type_id = route.params.inspection_type_id
-    form.value.type_documents = vehicleData.type_documents
+    form.value.type_documents = vehicleData.value.type_documents
 
 
     const { data, response } = await useApi(url).post(form.value);
 
+    if (response.value?.ok && data.value) {
+      if (data.value.code == 200) {
+        if (isCreateAndNew.value) {
+          clearForm(); // Limpiar el formulario si es "Crear y crear otro"
+        } else {
+          router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
+        }
+      }
+    }
     if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
 
     loading.form = false;
@@ -139,8 +206,7 @@ const isLoading = computed(() => {
 });
 
 onMounted(async () => {
-  // clearForm()
-  // await fetchDataTabs()
+  clearForm()
   await fetchDataForm()
 })
 
@@ -168,28 +234,25 @@ const changeState = async (event: Event) => {
   }
 }
 
-const operatorData = reactive({
-  document: null as null | string,
-  license: null as null | string,
+
+const operatorData = ref<IOperatorData>({
+  document: null,
+  license: null,
 });
 
 const changeOperator = (event: Event) => {
   if (event) {
-    operatorData.document = event.document
-    operatorData.license = event.license
+    operatorData.value.document = event.document
+    operatorData.value.license = event.license
   }
 }
 
-const vehicleData = reactive({
-  license_plate: null as null | string,
-  brand_vehicle_name: null as null | string,
-  model: null as null | string,
-  vehicle_structure_name: null as null | string,
-  type_documents: [] as Array<{
-    type_document_name: string,
-    document_number: string,
-    expiration_date: string,
-  }>,
+const vehicleData = ref<IVehicleData>({
+  license_plate: null,
+  brand_vehicle_name: null,
+  model: null,
+  vehicle_structure_name: null,
+  type_documents: [],
 });
 
 const changeVehicle = async (event: Event) => {
@@ -200,20 +263,37 @@ const changeVehicle = async (event: Event) => {
     const { response, data } = await useApi(url).get();
 
     if (response.value?.ok && data.value) {
-      vehicleData.license_plate = data.value.vehicle.license_plate
-      vehicleData.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
-      vehicleData.model = data.value.vehicle.model
-      vehicleData.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
-      vehicleData.type_documents = data.value.vehicle.type_documents
+      vehicleData.value.license_plate = data.value.vehicle.license_plate
+      vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
+      vehicleData.value.model = data.value.vehicle.model
+      vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
+      vehicleData.value.type_documents = data.value.vehicle.type_documents
 
       cloneForm.value.type_documents.forEach(element => {
-        const search = vehicleData.type_documents.find(ele => ele.id === element.vehicle_document_id);
+        const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
         search.response = element.original
         loading.form = false
       });
     }
   }
 }
+
+
+//ModalQuestion
+const refModalQuestion = ref()
+
+const openModalQuestionSave = async (typeCreate: boolean) => {
+  const validation = await allValidations()
+  if (validation) {
+    isCreateAndNew.value = typeCreate
+    refModalQuestion.value.openModal()
+    refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+  }
+}
+
 </script>
 
 <template>
@@ -332,7 +412,7 @@ const changeVehicle = async (event: Event) => {
                       </VCol>
                       <VCol cols="12" sm="4">
                         <AppSelect label="¿Es original?" :requiredField="true" :items="responseDocument"
-                          v-model="item.response">
+                          v-model="item.response" :rules="[requiredValidator]">
                         </AppSelect>
                       </VCol>
                     </VRow>
@@ -346,7 +426,7 @@ const changeVehicle = async (event: Event) => {
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
                 <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id]"
                   :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''">
+                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
                 </AppSelect>
               </VCol>
 
@@ -365,8 +445,12 @@ const changeVehicle = async (event: Event) => {
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
         <BtnBack :disabled="isLoading" :loading="isLoading" />
-        <BtnSave v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading" @execute="submitForm" />
+        <BtnSave v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading"
+          @execute="openModalQuestionSave" />
       </VCardText>
     </VCard>
+
+    <ModalQuestion ref="refModalQuestion" @success="submitForm" />
+
   </div>
 </template>

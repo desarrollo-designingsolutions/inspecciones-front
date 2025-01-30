@@ -35,10 +35,10 @@ const optionsTable = {
       url: "/user/changeStatus"
     },
     view: {
-      show: false,
+      show: true,
     },
     delete: {
-      show: false,
+      show: true,
     },
   }
 }
