@@ -2,6 +2,7 @@
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue';
 import { useToast } from '@/composables/useToast';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { VForm } from 'vuetify/components/VForm';
 
@@ -15,8 +16,35 @@ definePage({
   },
 });
 
+interface IForm {
+  id: null | string,
+  company_id: null | string,
+  maintenance_type_id: null | string,
+  vehicle_id: null | string,
+  maintenance_date: null | string,
+  state_id: null | string,
+  city_id: null | string,
+  mileage: null | string,
+  user_mechanic_id: null | string,
+  user_operator_id: null | string,
+  status: null | string,
+  general_comment: null | string,
+}
+
+interface IOperatorData {
+  document: string | null,
+  license: string | null,
+}
+
+interface IVehicleData {
+  license_plate: string | null,
+  brand_vehicle_name: string | null,
+  model: string | null,
+  vehicle_structure_name: string | null,
+}
+
 const authenticationStore = useAuthenticationStore();
-const { company } = storeToRefs(authenticationStore)
+const { company, user } = storeToRefs(authenticationStore);
 const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
 const disabledFiledsView = ref<boolean>(false);
@@ -27,12 +55,57 @@ const loading = reactive({
   cities: false,
 })
 
-const form = ref({})
+const form = ref<IForm>({
+  id: null,
+  company_id: null,
+  maintenance_type_id: null,
+  vehicle_id: null,
+  maintenance_date: null,
+  state_id: null,
+  city_id: null,
+  mileage: null,
+  user_mechanic_id: null,
+  user_operator_id: null,
+  status: null,
+  general_comment: null,
+})
 
 const clearForm = () => {
-  for (const key in form.value) {
-    form.value[key] = null
+
+  form.value.id = null,
+    form.value.company_id = null,
+    form.value.maintenance_type_id = null,
+    form.value.vehicle_id = null,
+    form.value.maintenance_date = null,
+    form.value.state_id = null,
+    form.value.city_id = null,
+    form.value.mileage = null,
+    form.value.user_mechanic_id = null,
+    form.value.user_operator_id = null,
+    form.value.status = null,
+    form.value.general_comment = null,
+
+
+    operatorData.value = {
+      document: null,
+      license: null,
+    }
+  vehicleData.value = {
+    license_plate: null,
+    brand_vehicle_name: null,
+    model: null,
+    vehicle_structure_name: null,
   }
+
+  tabs.value.forEach(element => {
+    if (!isNullOrUndefined(element.maintenance_type_inputs)) {
+      element.maintenance_type_inputs.forEach(ele => {
+        form.value[ele.id].type = null
+        form.value[ele.id].type_maintenance = null
+        form.value[ele.id].comment = null
+      });
+    }
+  });
 }
 const cloneForm = ref();
 
@@ -52,13 +125,13 @@ const fetchDataForm = async () => {
   );
 
   if (response.value?.ok && data.value) {
-    //formulario 
 
     tabs.value = data.value.tabs;
     states.value = data.value.states
     responseDocument.value = data.value.responseDocument
-    responseVehicle.value = data.value.responseVehicle
     responseStatus.value = data.value.responseStatus
+    responseMaintenanceInput.value = data.value.responseMaintenanceInput
+    responseTypeMaintenance.value = data.value.responseTypeMaintenance
 
     tabs.value.forEach(element => {
 
@@ -66,10 +139,17 @@ const fetchDataForm = async () => {
 
       if (element.maintenance_type_inputs) {
         element.maintenance_type_inputs.forEach(elementSelect => {
-          form.value[`${elementSelect.id}`] = '';
+          form.value[`${elementSelect.id}`] = {
+            type: '',
+            type_maintenance: '',
+            comment: '',
+          };
         });
       }
     });
+
+    //formulario 
+
     if (data.value.form) {
       cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
       form.value = data.value.form
@@ -87,27 +167,29 @@ const updateValidationToFalse = () => {
   });
 }
 
-const exito = ref<Array<boolean>>([])
-
 const allValidations = async () => {
-  updateValidationToFalse()
-  exito.value = []
+  updateValidationToFalse();
+  let exito: any[] = [];
 
-  tabs.value.forEach(async (element, key) => {
-    const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate()
+  const validationPromises = tabs.value.map(async (element, key) => {
+    const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
     if (validation) {
-      exito.value.push(validation?.valid)
-      tabs.value[key].errorsValidations = !validation?.valid
+      exito.push(validation.valid);
+      tabs.value[key].errorsValidations = !validation.valid;
     }
   });
 
-  const exitoFinal = exito.value.every(item => item === true);
+  await Promise.all(validationPromises);
+
+  const exitoFinal = exito.every(item => item === true);
 
   return exitoFinal;
-}
+};
 
-const submitForm = async (isCreateAndNew: boolean = false) => {
+const isCreateAndNew = ref<boolean>(false)
+
+const submitForm = async () => {
 
   const validation = await allValidations()
 
@@ -117,11 +199,20 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
 
     form.value.company_id = company.value.id
     form.value.maintenance_type_id = route.params.maintenance_type_id
+    form.value.user_inspector_id = user.value.id
 
 
     const { data, response } = await useApi(url).post(form.value);
 
-    console.log(data.value);
+    if (response.value?.ok && data.value) {
+      if (data.value.code == 200) {
+        if (isCreateAndNew.value) {
+          clearForm(); // Limpiar el formulario si es "Crear y crear otro"
+        } else {
+          router.push({ name: 'Maintenance-List' }); // Redirigir si es "Crear"
+        }
+      }
+    }
 
     if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
 
@@ -142,8 +233,7 @@ const isLoading = computed(() => {
 });
 
 onMounted(async () => {
-  // clearForm()
-  // await fetchDataTabs()
+  clearForm()
   await fetchDataForm()
 })
 
@@ -153,8 +243,9 @@ const currentTab = ref(0)
 const tabs = ref([])
 
 const responseDocument = ref<Array<{ value: string, title: string }>>([])
-const responseVehicle = ref<Array<{ value: string, title: string }>>([])
 const responseStatus = ref<Array<{ value: string, title: string }>>([])
+const responseMaintenanceInput = ref<Array<{ value: string, title: string }>>([])
+const responseTypeMaintenance = ref<Array<{ value: string, title: string }>>([])
 
 // STATES AND CITIES
 const states = ref<Array<{ value: string, title: string }>>([])
@@ -172,23 +263,23 @@ const changeState = async (event: Event) => {
   }
 }
 
-const operatorData = reactive({
-  document: null as null | string,
-  license: null as null | string,
+const operatorData = ref<IOperatorData>({
+  document: null,
+  license: null,
 });
 
 const changeOperator = (event: Event) => {
   if (event) {
-    operatorData.document = event.document
-    operatorData.license = event.license
+    operatorData.value.document = event.document
+    operatorData.value.license = event.license
   }
 }
 
-const vehicleData = reactive({
-  license_plate: null as null | string,
-  brand_vehicle_name: null as null | string,
-  model: null as null | string,
-  vehicle_structure_name: null as null | string,
+const vehicleData = ref<IVehicleData>({
+  license_plate: null,
+  brand_vehicle_name: null,
+  model: null,
+  vehicle_structure_name: null,
 });
 
 const changeVehicle = async (event: Event) => {
@@ -199,12 +290,27 @@ const changeVehicle = async (event: Event) => {
     const { response, data } = await useApi(url).get();
 
     if (response.value?.ok && data.value) {
-      vehicleData.license_plate = data.value.vehicle.license_plate
-      vehicleData.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
-      vehicleData.model = data.value.vehicle.model
-      vehicleData.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
+      vehicleData.value.license_plate = data.value.vehicle.license_plate
+      vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
+      vehicleData.value.model = data.value.vehicle.model
+      vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
       loading.form = false
     }
+  }
+}
+
+//ModalQuestion
+const refModalQuestion = ref()
+
+const openModalQuestionSave = async (typeCreate: boolean) => {
+  const validation = await allValidations()
+  if (validation) {
+    isCreateAndNew.value = typeCreate
+    refModalQuestion.value.openModal()
+    refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
   }
 }
 </script>
@@ -244,7 +350,7 @@ const changeVehicle = async (event: Event) => {
               <VCol cols="12" md="6">
                 <AppDateTimePicker :rules="[requiredValidator]" :requiredField="true" clearable
                   :error-messages="errorsBack.maintenance_date" @input="errorsBack.maintenance_date = ''"
-                  label="Fecha de inspección" :config="{ dateFormat: 'Y-m-d' }" v-model="form.maintenance_date" />
+                  label="Fecha de mantenimiento" :config="{ dateFormat: 'Y-m-d' }" v-model="form.maintenance_date" />
               </VCol>
 
               <VCol cols="12" sm="6">
@@ -333,12 +439,32 @@ const changeVehicle = async (event: Event) => {
             </VRow>
 
             <VRow v-else>
-              <VCol cols="12" sm="6" v-for="(itemSelect) in item.maintenance_type_inputs" :key="itemSelect.order">
-                <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id]"
-                  :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''">
-                </AppSelect>
-              </VCol>
+              <template v-if="item.maintenance_type_inputs">
+                <VCol cols="12" v-for="(itemSelect) in item.maintenance_type_inputs" :key="itemSelect.order">
+                  <VCard>
+                    <VCardTitle>{{ itemSelect.name }}</VCardTitle>
+                    <VCardText>
+                      <VRow>
+                        <VCol cols="12" md="6">
+                          <AppSelect clearable :items="responseMaintenanceInput" v-model="form[itemSelect.id].type"
+                            label="Seleccionar" :error-messages="errorsBack[itemSelect.id]"
+                            @input="errorsBack[itemSelect.id] = ''">
+                          </AppSelect>
+                        </VCol>
+                        <VCol cols="12" md="6">
+                          <AppSelect clearable :items="responseTypeMaintenance"
+                            v-model="form[itemSelect.id].type_maintenance" label="Tipo de mantenimiento"
+                            :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
+                          </AppSelect>
+                        </VCol>
+                        <VCol cols="12">
+                          <AppTextarea label="Observaciones" v-model="form[itemSelect.id].comment"></AppTextarea>
+                        </VCol>
+                      </VRow>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </template>
 
               <VCol v-if="index === tabs.length - 1" cols="12">
                 <AppCardActions noActions
@@ -356,8 +482,11 @@ const changeVehicle = async (event: Event) => {
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
         <BtnBack :disabled="isLoading" :loading="isLoading" />
-        <BtnSave v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading" @execute="submitForm" />
+        <BtnSave v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading"
+          @execute="openModalQuestionSave" />
       </VCardText>
     </VCard>
+
+    <ModalQuestion ref="refModalQuestion" @success="submitForm" />
   </div>
 </template>

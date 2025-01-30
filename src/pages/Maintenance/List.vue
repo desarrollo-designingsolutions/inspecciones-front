@@ -35,17 +35,18 @@ const goView = (data: { action: string, id: string | null, maintenance_type_id: 
 const tableFull = ref()
 
 const optionsTable = {
-  url: "/inspection/list",
+  url: "/maintenance/list",
   params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'maintenance_date', title: 'Fecha de inspección' },
+    { key: 'maintenance_date', title: 'Fecha de Mantenimiento' },
     { key: 'vehicle_license_plate', title: 'Placa' },
     { key: 'vehicle_brand_name', title: 'Marca' },
     { key: "vehicle_model", title: 'Modelo' },
-    { key: "maintenance_type_name", title: 'Tipo de inspección' },
-    { key: "user_full_name", title: 'Inspector' },
+    { key: "user_inspector_full_name", title: 'Inspector' },
+    { key: "user_mechanic_full_name", title: 'Asignado a' },
+    { key: "status", title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {
@@ -79,20 +80,20 @@ const filterTable = ref()
 const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
-      all: [],
+      all: ['status|custom'],
       vehicle: ["license_plate", "model"],
       'vehicle.brand_vehicle': ["name"],
-      inspectionType: ["name"],
-      user: ["name", "surname"],
+      user_inspector: ["name", "surname"],
+      user_mechanic: ["name", "surname"],
     },
   },
   dialog: {
     width: 500,
     inputs: [
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        input_type: "dateRange",
+        title: "Fecha de inspección",
+        key: "maintenance_date",
       },
     ],
   }
@@ -102,14 +103,14 @@ const downloadExcel = async () => {
   loading.excel = true;
   filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/vehicle/excelExport").post({
+  const { data, response } = await useApi("/maintenance/excelExport").post({
     searchQuery: filterTable.value,
     company_id: authenticationStore.company.id,
   })
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista vehículos")
+    downloadExcelBase64(data.value.excel, "Listado de mantenimientos")
   }
 }
 
@@ -129,12 +130,12 @@ onMounted(() => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <!-- <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
+          <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
             @click="downloadExcel()">
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
-          </VBtn> -->
+          </VBtn>
 
           <VMenu location="bottom">
             <template #activator="{ props }">

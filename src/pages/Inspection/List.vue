@@ -21,16 +21,12 @@ const loading = reactive({
 const authenticationStore = useAuthenticationStore();
 
 const goView = (data: { action: string, id: string | null, inspection_type_id: string | null } = { action: "create", id: null, inspection_type_id: null }) => {
-  console.log(tableFull.value.optionsTable.tableData);
 
   if (isNullOrUndefined(data.inspection_type_id)) {
     const tableData = tableFull.value.optionsTable.tableData;
     const search = tableData.find((item: any) => item.id == data.id)
-    console.log(search);
     data.inspection_type_id = search.inspection_type_id;
   }
-  console.log(data);
-
 
   router.push({ name: "Inspection-Form", params: { action: data.action, id: data.id, inspection_type_id: data.inspection_type_id } })
 }

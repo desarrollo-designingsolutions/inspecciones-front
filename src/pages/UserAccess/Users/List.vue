@@ -13,6 +13,7 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
 const { company, user } = storeToRefs(authenticationStore);
+const disabledFiledsView = ref<boolean>(false)
 
 
 //TABLE
@@ -72,7 +73,11 @@ const openModalForm = () => {
 }
 
 const goView = async (data: any = { action: 'created', id: null }) => {
-  refModalForm.value.openModal(data.id)
+  disabledFiledsView.value = false
+  if (data.action == 'view') {
+    disabledFiledsView.value = true
+  }
+  refModalForm.value.openModal(data.id, disabledFiledsView.value)
 }
 
 const reloadTable = () => {
