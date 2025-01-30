@@ -94,9 +94,9 @@ const optionsFilter = ref({
     width: 500,
     inputs: [
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        input_type: "dateRange",
+        title: "Fecha de inspección",
+        key: "inspection_date",
       },
     ],
   }
@@ -106,14 +106,14 @@ const downloadExcel = async () => {
   loading.excel = true;
   filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/vehicle/excelExport").post({
+  const { data, response } = await useApi("/inspection/excelExport").post({
     searchQuery: filterTable.value,
     company_id: authenticationStore.company.id,
   })
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista vehículos")
+    downloadExcelBase64(data.value.excel, "Lista inspecciones")
   }
 }
 
@@ -129,16 +129,16 @@ onMounted(() => {
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Vehículos
+          Inspecciones
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <!-- <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
+          <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
             @click="downloadExcel()">
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
-          </VBtn> -->
+          </VBtn>
 
           <VMenu location="bottom">
             <template #activator="{ props }">
