@@ -132,7 +132,7 @@ onMounted(async () => {
   clearForm()
   if (!styleModal && route.params.id) {
     await fetchDataForm()
-  } 
+  }
 })
 
 // Computed que verifica si al menos uno de los valores es true
@@ -152,7 +152,7 @@ const handlerCancel = () => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información de la marca
+          Información de la marca de vehículo
         </span>
       </VCardTitle>
       <VCardText>

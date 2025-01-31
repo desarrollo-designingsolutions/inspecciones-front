@@ -330,6 +330,7 @@ const checkLicensePlate = async () => {
     const url = '/vehicle/validateLicensePlate'
 
     const { response, data } = await useApi(url).post({
+      id: form.value.id,
       license_plate: form.value.license_plate,
       company_id: company.value.id,
     });

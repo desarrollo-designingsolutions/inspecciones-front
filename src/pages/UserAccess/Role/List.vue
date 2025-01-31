@@ -110,7 +110,7 @@ const openModalQuestionDelete = (id: string) => {
           <VRow>
             <VCol cols="12" sm="6" lg="4" v-for="(role, key) in roles" :key="key">
               <VCard variant="elevated" density="default">
-                <VCardText style="width: 100%;height: 40px;" class="d-flex align-center pb-4">
+                <VCardText style="block-size: 40px;inline-size: 100%;" class="d-flex align-center pb-4">
                   <div class="text-body-1">
                     <b>Total usuarios</b>: {{ role.count_users || 0 }}
                   </div>

@@ -205,7 +205,7 @@ defineExpose({
                   :rules="nameRules" v-model="form.surname" :error-messages="errorsBack.surname" />
               </VCol>
 
-              <VCol cols="12" md="4">
+              <VCol cols="12" :md="disabledFiledsView ? 6 : 4">
                 <AppTextField :disabled="disabledFiledsView" :requiredField="true" clearable
                   :rules="[requiredValidator]" v-model="form.email" label="Email" :error-messages="errorsBack.email"
                   @input="errorsBack.email = ''" />

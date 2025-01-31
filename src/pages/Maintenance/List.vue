@@ -137,7 +137,7 @@ onMounted(() => {
             </VTooltip>
           </VBtn>
 
-          <VMenu location="bottom">
+          <!-- <VMenu location="bottom">
             <template #activator="{ props }">
               <VBtn v-bind="props" :loading="loading.btnCreate" :disabled="loading.btnCreate">
                 Agregar Mantenimiento
@@ -145,13 +145,18 @@ onMounted(() => {
               </VBtn>
             </template>
 
-            <VList>
-              <VListItem v-for="(item, index) in maintenanceTypeBtn" :key="index"
-                @click="goView({ action: 'create', id: null, maintenance_type_id: item.id })">
-                {{ item.name }}
-              </VListItem>
-            </VList>
-          </VMenu>
+<VList>
+  <VListItem>
+    {{ item.name }}
+  </VListItem>
+</VList>
+</VMenu> -->
+
+          <VBtn :loading="loading.btnCreate" :disabled="loading.btnCreate" v-for="(item, index) in maintenanceTypeBtn"
+            :key="index" @click="goView({ action: 'create', id: null, maintenance_type_id: item.id })">
+            Agregar Mantenimiento
+            <VIcon icon="tabler-plus"></VIcon>
+          </VBtn>
 
 
 

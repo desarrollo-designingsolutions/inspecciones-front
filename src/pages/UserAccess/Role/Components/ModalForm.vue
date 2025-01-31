@@ -55,7 +55,6 @@ const handleCreate = async () => {
   componentData.isLoading = isFetching.value;
 
   formComponent.value.company_id = company.value.id
-  console.log(data.value)
   componentData.menus = data.value.menus;
   arrayFather.value = componentData.menus;
 };
