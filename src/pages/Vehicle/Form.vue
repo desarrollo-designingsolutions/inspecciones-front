@@ -101,16 +101,27 @@ const fetchDataForm = async () => {
       },
     })
   );
-  loading.form = false
+
+  console.log(data.value)
 
   if (response.value?.ok && data.value) {
 
     states.value = data.value.states
     vehicle_structures.value = data.value.vehicle_structures
 
+
     //formulario 
     if (data.value.form) {
       form.value = data.value.form
+
+      const formClone = JSON.parse(JSON.stringify(data.value.form))
+
+      if (data.value.form.id) {
+        await changeState(formClone.state_id?.value)
+
+        form.value.state_id = formClone.state_id
+        form.value.city_id = formClone.city_id
+      }
     }
 
     if (form.value.type_documents.length == 0) {
@@ -131,6 +142,7 @@ const fetchDataForm = async () => {
       } as IEmergencyElement)
     }
 
+    loading.form = false
   }
 }
 
@@ -188,7 +200,6 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     const formData = new FormData();
     for (const key in form.value) {
     }
-
     formData.append("id", String(form.value.id))
     formData.append("company_id", String(form.value.company_id))
     formData.append("license_plate", String(form.value.license_plate))
@@ -196,8 +207,8 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("date_registration", String(form.value.date_registration))
     formData.append("brand_vehicle_id", String(form.value.brand_vehicle_id.value))
     formData.append("engine_number", String(form.value.engine_number))
-    formData.append("state_id", String(form.value.state_id))
-    formData.append("city_id", String(form.value.city_id))
+    formData.append("state_id", String(form.value.state_id?.value))
+    formData.append("city_id", String(form.value.city_id?.value))
     formData.append("model", String(form.value.model))
     formData.append("vin_number", String(form.value.vin_number))
     formData.append("load_capacity", String(form.value.load_capacity))
@@ -504,9 +515,9 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
-                  v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
-                  @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
+                <AppAutocomplete :disabled="cities.length <= 0 || disabledFiledsView" :requiredField="cities.length > 0"
+                  :loading="loading.cities" clearable :items="cities" v-model="form.city_id" label="Ciudad"
+                  :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
                 </AppAutocomplete>
               </VCol>
 
@@ -571,14 +582,13 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <div class="d-flex">
                   <VSwitch v-model="form.have_trailer" label="¿Tiene un trailer?" />
                   <div class="ml-2 w-100">
-                    <AppTextField v-if="form.have_trailer" :requiredField="true" label="Trailer" v-model="form.trailer"
-                      clearable :errorMessages="errorsBack.trailer" @input="errorsBack.trailer = ''"
-                      :rules="characterLimitRules">
+                    <AppTextField v-if="form.have_trailer" :requiredField="true" label="Número de placa trailer"
+                      v-model="form.trailer" clearable :errorMessages="errorsBack.trailer"
+                      @input="errorsBack.trailer = ''" :rules="characterLimitRules">
                     </AppTextField>
                   </div>
                 </div>
               </VCol>
-
               <VCol cols="12" sm="6">
                 <AppSelect :requiredField="true" clearable :items="vehicle_structures"
                   v-model="form.vehicle_structure_id" label="Estructura del vehículo"
@@ -597,8 +607,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
             <VRow>
               <template v-for="(item, index) in form.type_documents" :key="index">
                 <VCol cols="12" class="w-100 d-flex justify-end">
-                  <VBtn icon v-if="shouldShowDeleteButton('type_documents')" size="30" class="mt-7" color="error"
-                    @click="deleteDataArrayTypeDocument(index)">
+                  <VBtn icon v-if="shouldShowDeleteButton('type_documents') && !disabledFiledsView" size="30"
+                    class="mt-7" color="error" @click="deleteDataArrayTypeDocument(index)">
                     <VIcon icon="tabler-trash"></VIcon>
                   </VBtn>
                 </VCol>
@@ -609,6 +619,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
+                    :errorMessages="errorsBack.document_number" @input="errorsBack.document_number = ''"
                     :rules="[requiredValidator]">
                   </AppTextField>
                 </VCol>
@@ -634,7 +645,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <VDivider />
               </template>
 
-              <VCol cols="12" class="w-100 d-flex justify-center">
+              <VCol v-if="!disabledFiledsView" cols="12" class="w-100 d-flex justify-center">
                 <VBtn class="ml-3" @click="addDataArrayTypeDocument()">
                   <VIcon icon="tabler-plus"></VIcon>
                   Agregar documento
@@ -686,8 +697,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
             <VRow>
               <template v-for="(item, index) in form.emergency_elements" :key="index">
                 <VCol cols="12" class="w-100 d-flex justify-end">
-                  <VBtn icon v-if="shouldShowDeleteButton('type_documents')" size="30" class="mt-7" color="error"
-                    @click="deleteDataArrayEmergencyElement(index)">
+                  <VBtn icon v-if="shouldShowDeleteButton('emergency_elements') && !disabledFiledsView" size="30"
+                    class="mt-7" color="error" @click="deleteDataArrayEmergencyElement(index)">
                     <VIcon icon="tabler-trash"></VIcon>
                   </VBtn>
                 </VCol>
@@ -705,7 +716,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <VDivider />
               </template>
 
-              <VCol cols="12" class="w-100 d-flex justify-center">
+              <VCol v-if="!disabledFiledsView" cols="12" class="w-100 d-flex justify-center">
                 <VBtn class="ml-3" @click="addDataArrayEmergencyElement()">
                   <VIcon icon="tabler-plus"></VIcon>
                   Agregar elemento de emergencia

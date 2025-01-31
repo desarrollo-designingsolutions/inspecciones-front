@@ -51,6 +51,12 @@ const tooltip = computed(
       <template v-for="(_, name) in $slots" #[name]="slotProps">
         <slot :name="name" v-bind="slotProps || {}" />
       </template>
+
+      <template #no-data>
+        <div class="text-body-2 text-center">
+          <span style="font-size: 14px;">Aún no hay opciones disponibles</span>
+        </div>
+      </template>
     </VAutocomplete>
   </div>
 </template>

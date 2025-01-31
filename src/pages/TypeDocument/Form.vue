@@ -18,7 +18,7 @@ definePage({
 
 const emit = defineEmits(["closeModal"]);
 
-const { btnCancel, btnBack, saveAndCloseModal ,styleModal} = defineProps({
+const { btnCancel, btnBack, saveAndCloseModal, styleModal } = defineProps({
   btnCancel: {
     type: Boolean,
     default: false,
@@ -152,7 +152,7 @@ const handlerCancel = () => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información de la marca
+          Información del documento
         </span>
       </VCardTitle>
       <VCardText>

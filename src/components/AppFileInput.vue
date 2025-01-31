@@ -23,8 +23,8 @@ const tooltip = computed(
 
 </script>
 <template>
-  <div> 
-    <VLabel v-if="label" :for="elementId" class="mb-1 text-body-2 text-high-emphasis">
+  <div>
+    <VLabel v-if="label" :for="elementId" class="mb-1 text-body-2">
       {{ label }}
       <span v-if="requiredField">&nbsp; <b class="text-warning">*</b></span>
       <VTooltip v-if="tooltip" :location="tooltip.location ?? 'top'">

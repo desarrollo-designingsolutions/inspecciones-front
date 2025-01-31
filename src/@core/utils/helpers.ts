@@ -108,8 +108,25 @@ export function onlyNumbersKeyPress(event: any) {
   }
 }
 export function onlyNumbersPositivesKeyPress(event: any) {
-  if ((!/[0-9,]/.test(event.key))) {
+  const input = event.target as HTMLInputElement;
+  const value = input.value;
+
+  // Permitir solo números y la coma
+  if (!/[0-9,]/.test(event.key)) {
     event.preventDefault();
+    return;
+  }
+
+  // Evitar que el primer carácter sea '0' (a menos que el usuario escriba solo '0')
+  if (value.length === 0 && event.key === "0") {
+    event.preventDefault();
+    return;
+  }
+
+  // Evitar que solo se escriba '0' sin otros números
+  if (value === "0" && event.key !== ",") {
+    event.preventDefault();
+    return;
   }
 }
 
