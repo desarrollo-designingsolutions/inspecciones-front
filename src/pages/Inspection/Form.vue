@@ -343,8 +343,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :disabled="cities.length == 0 || disabledFiledsView" :loading="loading.cities"
-                  :requiredField="true" clearable :items="cities" label="Ciudad" :error-messages="errorsBack.city_id"
-                  @input="errorsBack.city_id = ''" :rules="[requiredValidator]" v-model="form.city_id">
+                  :requiredField="cities.length > 0" clearable :items="cities" label="Ciudad"
+                  :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''"
+                  :rules="[cities.length > 0 ? requiredValidator : null]" v-model="form.city_id">
                 </AppAutocomplete>
               </VCol>
               <VCol cols="12">
@@ -426,7 +427,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
                 <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id]"
                   :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
+                  @input="errorsBack[itemSelect.id] = ''">
                 </AppSelect>
               </VCol>
 

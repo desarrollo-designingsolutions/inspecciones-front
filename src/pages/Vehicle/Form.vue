@@ -117,7 +117,7 @@ const fetchDataForm = async () => {
       const formClone = JSON.parse(JSON.stringify(data.value.form))
 
       if (data.value.form.id) {
-        await changeState(formClone.state_id?.value)
+        await changeState(formClone.state_id)
 
         form.value.state_id = formClone.state_id
         form.value.city_id = formClone.city_id
@@ -207,8 +207,8 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("date_registration", String(form.value.date_registration))
     formData.append("brand_vehicle_id", String(form.value.brand_vehicle_id.value))
     formData.append("engine_number", String(form.value.engine_number))
-    formData.append("state_id", String(form.value.state_id?.value))
-    formData.append("city_id", String(form.value.city_id?.value))
+    formData.append("state_id", String(form.value.state_id))
+    formData.append("city_id", String(form.value.city_id))
     formData.append("model", String(form.value.model))
     formData.append("vin_number", String(form.value.vin_number))
     formData.append("load_capacity", String(form.value.load_capacity))
@@ -589,6 +589,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   </div>
                 </div>
               </VCol>
+
               <VCol cols="12" sm="6">
                 <AppSelect :requiredField="true" clearable :items="vehicle_structures"
                   v-model="form.vehicle_structure_id" label="Estructura del vehículo"
@@ -619,7 +620,6 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
-                    :errorMessages="errorsBack.document_number" @input="errorsBack.document_number = ''"
                     :rules="[requiredValidator]">
                   </AppTextField>
                 </VCol>
