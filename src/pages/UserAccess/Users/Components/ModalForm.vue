@@ -172,6 +172,9 @@ const typeLicenseRules = [
   value => requiredValidator(value),
   value => integerValidator(value),
   value => positiveNumberValidator(value),
+  value => maxCharacters(value, 10),
+  value => minCharacters(value, 4),
+  value => value != form.value.document ? 'El documento y la licencia deben ser iguales' : true,
 ]
 
 defineExpose({
@@ -245,8 +248,9 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Número de licencia"
-                  :rules="typeLicenseRules" v-model="form.license" :error-messages="errorsBack.license" />
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :disabled="disabledFiledsView"
+                  :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules" v-model="form.license"
+                  :error-messages="errorsBack.license" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">

@@ -79,12 +79,40 @@ const form = ref({
 })
 
 const clearForm = () => {
+
+  currentTab.value = 0;
+
+  //Tab 1
   for (const key in form.value) {
     form.value[key] = null
   }
   form.value.have_trailer = false
+
+  //Tab 2
   form.value.type_documents = []
+  form.value.type_documents.push({
+    id: null,
+    vehicle_id: null,
+    type_document_id: null,
+    document_number: null,
+    date_issue: null,
+    expiration_date: null,
+  } as ITypeDocument)
+
+  //Tab 4
   form.value.emergency_elements = []
+  form.value.emergency_elements.push({
+    id: null,
+    vehicle_id: null,
+    emergency_element_id: null,
+    quantity: null,
+  } as IEmergencyElement)
+
+
+  inputFilePhotoFront.value.clearData();
+  inputFilePhotoRear.value.clearData();
+  inputFilePhotoRightSide.value.clearData();
+  inputFilePhotoLeftSide.value.clearData();
 }
 
 const fetchDataForm = async () => {
@@ -238,7 +266,9 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
       if (data.value.code == 200) {
 
         if (isCreateAndNew) {
-          clearForm(); // Limpiar el formulario si es "Crear y crear otro"
+          clearForm();
+          route.params.id = null;
+          router.push({ name: "Vehicle-Form", params: { action: 'create', id: null } })
         } else {
           router.push({ name: 'Vehicle-List' }); // Redirigir si es "Crear"
         }
@@ -293,6 +323,20 @@ const tabs = ref([
   },
 ])
 
+const models = computed(() => {
+  const startYear = 1950;
+  const endYear = new Date().getFullYear() + 1; // Año actual + 1
+  const years = [];
+
+  for (let year = endYear; year >= startYear; year--) {
+    years.push(year);
+  }
+
+  return years;
+});
+
+
+
 //VALIDATIOS FIELDS
 const ruleFieldLicensePlate = [
   (value: string) => requiredValidator(value),
@@ -309,17 +353,7 @@ const currentYear = now.getFullYear();
 const currentMonth = now.getMonth() + 1; // Los meses van de 0 a 11, por lo que sumamos 1
 const currentDay = now.getDate();
 
-const changeFinalDate = (event: any, item: any) => {
-  if (event) {
-    item.expiration_date = null;
-    let d1 = moment(`${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDay.toString().padStart(2, '0')}`);
-    let d2 = moment(event);
-    errorsBack.value.final_date = "";
-    if (!d2.isSameOrBefore(d1)) {
-      errorsBack.value.final_date = `La fecha debe ser anterior o igual a ${d1.format('YYYY-MM-DD')}`;
-    }
-  }
-};
+
 
 const fileValidationRules = [
   (value: string) => value || 'El archivo es obligatorio.',
@@ -341,6 +375,12 @@ const checkLicensePlate = async () => {
       errorsBack.value.license_plate = "";
     }
   }
+};
+
+const updateEndDate = async (event: any, item: any) => {
+  return item.expiration_date = moment(event, "YYYY-MM-DD")
+    .add(1, "year")
+    .format("YYYY-MM-DD");
 };
 
 const validationExpirationDate = (event: any, date: any) => {
@@ -486,8 +526,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               <VCol cols="12" md="6">
                 <AppDateTimePicker :rules="[requiredValidator]" :requiredField="true" clearable
                   :error-messages="errorsBack.date_registration" @input="errorsBack.date_registration = ''"
-                  v-model="form.date_registration" label="Fecha de matrícula"
-                  @update:model-value="changeFinalDate($event)" :config="{
+                  v-model="form.date_registration" label="Fecha de matrícula" :config="{
                     dateFormat: 'Y-m-d',
                     disable: [
                       { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
@@ -523,10 +562,13 @@ const deleteDataArrayEmergencyElement = (index: number) => {
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true" label="Modelo"
+                <!-- <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true" label="Modelo"
                   v-model="form.model" clearable :errorMessages="errorsBack.model" @input="errorsBack.model = ''"
                   :rules="[requiredValidator]">
-                </AppTextField>
+                </AppTextField> -->
+                <AppSelect :items="models" :requiredField="true" label="Modelo" v-model="form.model" clearable
+                  :errorMessages="errorsBack.model" @input="errorsBack.model = ''" :rules="[requiredValidator]">
+                </AppSelect>
               </VCol>
 
               <VCol cols="12" sm="6">
@@ -627,7 +669,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de expedición"
                     :rules="[requiredValidator]" v-model="item.date_issue" :errorMessages="errorsBack.date_issue"
-                    @input="errorsBack.date_issue = ''" @update:model-value="changeFinalDate($event, item)" :config="{
+                    @input="errorsBack.date_issue = ''" @update:model-value="updateEndDate($event, item)" :config="{
                       dateFormat: 'Y-m-d',
                       disable: [
                         { from: `${currentYear}-${(currentMonth).toString().padStart(2, '0')}-${(currentDay + 1).toString().padStart(2, '0')}`, to: '9999-12-31' }
@@ -665,21 +707,38 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
                   :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+
+                <template v-if="inputFilePhotoFront.imageUrl || form.photo_front">
+                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
+                    :src="inputFilePhotoFront.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                </template>
               </VCol>
               <VCol cols="12" sm="6">
+
                 <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
                   label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
                   :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+
+                <template v-if="inputFilePhotoRear.imageUrl || form.photo_rear">
+                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
+                    :src="inputFilePhotoRear.imageUrl ?? storageBack(form.photo_rear)" alt="alt"></VImg>
+                </template>
               </VCol>
               <VCol cols="12" sm="6">
+
                 <AppFileInput :requiredField="form.id ? false : true" clearable
                   :loading="inputFilePhotoRightSide.loading" label="Foto  lado derecho"
                   :label2="form.photo_right_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
                   :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+
+                <template v-if="inputFilePhotoRightSide.imageUrl || form.photo_right_side">
+                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
+                    :src="inputFilePhotoRightSide.imageUrl ?? storageBack(form.photo_right_side)" alt="alt"></VImg>
+                </template>
               </VCol>
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
@@ -688,6 +747,11 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
                   :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+
+                <template v-if="inputFilePhotoLeftSide.imageUrl || form.photo_left_side">
+                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
+                    :src="inputFilePhotoLeftSide.imageUrl ?? storageBack(form.photo_left_side)" alt="alt"></VImg>
+                </template>
               </VCol>
             </VRow>
           </VForm>
