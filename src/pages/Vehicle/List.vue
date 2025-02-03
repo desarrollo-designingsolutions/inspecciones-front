@@ -61,9 +61,9 @@ const optionsFilter = ref({
     width: 500,
     inputs: [
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        input_type: "dateRange",
+        title: "Fecha de matricula",
+        key: "date_registration",
       },
     ],
   }

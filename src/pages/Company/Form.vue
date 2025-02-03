@@ -298,14 +298,14 @@ const addressRules = [
                 </VCol>
 
                 <VCol cols="12" sm="4">
-                  <AppAutocomplete :disabled="states.length <= 0" :loading="loading.states"
+                  <AppAutocomplete :disabled="states.length <= 0 || disabledFiledsView" :loading="loading.states"
                     :requiredField="states.length > 0" clearable :items="states" v-model="form.state_id" label="Región"
                     @update:model-value="changeState($event)" :error-messages="errorsBack.state_id"
                     @input="errorsBack.state_id = ''" :rules="[...stateRules]">
                   </AppAutocomplete>
                 </VCol>
                 <VCol cols="12" sm="4">
-                  <AppAutocomplete :disabled="cities.length <= 0" :loading="loading.cities"
+                  <AppAutocomplete :disabled="cities.length <= 0 || disabledFiledsView" :loading="loading.cities"
                     :requiredField="cities.length > 0" clearable :items="cities" v-model="form.city_id" label="Ciudad"
                     :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''" :rules="[...cityRules]">
                   </AppAutocomplete>

@@ -15,67 +15,62 @@ export const useRoleStore = defineStore("useRoleStore", {
     },
 
     handleCardCheckboxChange(cardId: number | string) {
+      console.log('cardId: ', cardId)
+      console.log('this.selectedFather: ', this.selectedFather)
       if (this.selectedFather.includes(cardId)) {
+        console.log('1: ', cardId)
+
         this.selectAllPermissions(cardId);
       } else {
+
         this.deselectAllPermissions(cardId)
       }
     },
 
-    selectAllPermissions(cardId: number | string) {
-
-      const dataIndex = this.arrayFather.findIndex((ele) => ele[this.keyIdComparation] == cardId);
-      if (dataIndex !== -1) {
-        const data = this.arrayFather[dataIndex];
-        data[this.keyArray].forEach((element: { id: number | string }) => {
-          if (!this.selectedElements.includes(element[this.keyIdComparation])) {
-            this.selectedElements.push(element.id);
-          }
-        });
-      } else {
-        // Si no se encuentra en arrayFather, buscar recursivamente en los children
-        this.arrayFather.forEach(parent => {
-          this.searchInChildrenToAdd(parent, cardId);
-        });
-      }
-    },
 
     // Función recursiva para buscar en los children de un elemento y agregarlo
     searchInChildrenToAdd(parent: any, cardId: number | string) {
       parent["children"].forEach(child => {
         if (child[this.keyIdComparation] === cardId && !this.selectedElements.includes(child.id)) {
+          console.log('bbbbbb')
           this.selectedElements.push(child.id);
         }
         // Llamar recursivamente para buscar en los hijos de este child si existen
         if (child["children"] && child["children"].length > 0) {
+          console.log('aaaaa')
           this.searchInChildrenToAdd(child, cardId);
         }
       });
     },
+    selectAllPermissions(cardId: number | string) {
+      const group = this.findGroupRecursive(this.arrayFather, cardId); // Busca el grupo en toda la estructura
+      if (group && group.permissions) {
+        group.permissions.forEach(permission => {
+          if (!this.selectedElements.includes(permission.id) && permission.id !== 1) {
+            this.selectedElements.push(permission.id);
+          }
+        });
+      }
+    },
 
     deselectAllPermissions(cardId: number | string) {
-      const findAndDeselect = (data: any): boolean => {
-        // Buscar en el array actual
-        const dataIndex = data.findIndex(ele => ele[this.keyIdComparation] == cardId);
-        if (dataIndex !== -1) {
-          const elementsToRemove = data[dataIndex][this.keyArray].map(ele => ele.id);
-          this.selectedElements = this.selectedElements.filter(element => !elementsToRemove.includes(element));
-          return true; // Elemento encontrado y eliminado
-        }
+      const group = this.findGroupRecursive(this.arrayFather, cardId); // Busca el grupo en toda la estructura
+      if (group && group.permissions) {
+        const permissionIds = group.permissions.map(perm => perm.id);
+        this.selectedElements = this.selectedElements.filter(el => !permissionIds.includes(el));
+      }
+    },
 
-        // Buscar en los children de cada elemento
-        for (const item of data) {
-          if (item.children && item.children.length > 0) {
-            if (findAndDeselect(item.children)) {
-              return true; // Elemento encontrado y eliminado
-            }
-          }
+    // Función auxiliar para buscar un grupo por ID en toda la estructura anidada
+    findGroupRecursive(groups: any[], targetId: number | string): any {
+      for (const group of groups) {
+        if (group.id === targetId) return group;
+        if (group.children) {
+          const found = this.findGroupRecursive(group.children, targetId);
+          if (found) return found;
         }
-        return false; // Elemento no encontrado
-      };
-
-      // Iniciar la búsqueda recursiva en this.arrayFather
-      const found = findAndDeselect(this.arrayFather);
+      }
+      return null;
     },
   },
 });
