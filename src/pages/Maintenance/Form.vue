@@ -412,7 +412,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
               </VCol>
 
               <VCol cols="12">
-                <AppCardActions title="Información del Vehiculo" action-collapsed>
+                <AppCardActions title="Información del Vehículo" action-collapsed>
                   <VCardText>
                     <VRow>
                       <VCol cols="12" sm="6">

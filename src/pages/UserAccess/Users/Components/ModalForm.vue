@@ -234,7 +234,7 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Numero de documento"
+                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Número de documento"
                   :rules="typeDocumentRules" v-model="form.document" :error-messages="errorsBack.document" />
               </VCol>
 
@@ -245,14 +245,14 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Numero de licencia"
+                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Número de licencia"
                   :rules="typeLicenseRules" v-model="form.license" :error-messages="errorsBack.license" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
                 <AppDateTimePicker :disabled="disabledFiledsView" :requiredField="true" clearable
                   :error-messages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
-                  v-model="form.expiration_date" :rules="[requiredValidator]" label="Fecha de expiracion de licencia"
+                  v-model="form.expiration_date" :rules="[requiredValidator]" label="Fecha de expiración de licencia"
                   @update:model-value="changeFinalDate($event)"
                   :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
               </VCol>

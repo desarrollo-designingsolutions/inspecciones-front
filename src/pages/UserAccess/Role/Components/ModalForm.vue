@@ -144,7 +144,7 @@ defineExpose({
           </VCol>
           <VCol>
             <VCard border>
-              <VCheckboxBtn v-model="formComponent.mechanic" label="Mecanico"></VCheckboxBtn>
+              <VCheckboxBtn v-model="formComponent.mechanic" label="Mecánico"></VCheckboxBtn>
             </VCard>
           </VCol>
           <VCol>

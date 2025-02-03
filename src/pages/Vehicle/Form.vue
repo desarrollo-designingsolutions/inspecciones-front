@@ -453,7 +453,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información del vehiculo
+          Información del vehículo
         </span>
       </VCardTitle>
 
@@ -573,7 +573,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
 
               <VCol cols="12" sm="6">
                 <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true"
-                  label="Kilometraje actual del vehiculo" v-model="form.current_mileage" clearable
+                  label="Kilometraje actual del vehículo" v-model="form.current_mileage" clearable
                   :errorMessages="errorsBack.current_mileage" @input="errorsBack.current_mileage = ''"
                   :rules="[requiredValidator]">
                 </AppTextField>

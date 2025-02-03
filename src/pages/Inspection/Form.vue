@@ -301,7 +301,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información del vehiculo
+          Información del vehículo
         </span>
       </VCardTitle>
       <VCardText>
@@ -373,7 +373,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
               </VCol>
 
               <VCol cols="12">
-                <AppCardActions title="Información del Vehiculo" action-collapsed>
+                <AppCardActions title="Información del Vehículo" action-collapsed>
                   <VCardText>
                     <VRow>
                       <VCol cols="12" sm="6">

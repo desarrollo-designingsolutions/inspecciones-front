@@ -224,7 +224,7 @@ const nitRules = [
 
 const phoneRules = [
   value => integerValidator(value),
-  value => (!value || value.length <= 10) || "El numero no debe tener mas de 10 caracteres",
+  value => (!value || value.length <= 10) || "El número no debe tener mas de 10 caracteres",
   value => positiveNumberValidator(value),
   value => requiredValidator(value),
 ];
