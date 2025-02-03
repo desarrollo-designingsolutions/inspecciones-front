@@ -660,34 +660,77 @@ const deleteDataArrayEmergencyElement = (index: number) => {
           <VForm ref="refFormPhoto" @submit.prevent="() => { }" :disabled="disabledFiledsView">
             <VRow>
               <VCol cols="12" sm="6">
-                <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoFront.loading"
-                  label="Foto frontal" :label2="form.photo_front ? '1 archivo agregado' : ''"
-                  @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
-                  :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
-                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                <VRow>
+                  <VCol>
+                    <AppFileInput :requiredField="form.id ? false : true" clearable
+                      :loading="inputFilePhotoFront.loading" label="Foto frontal"
+                      :label2="form.photo_front ? '1 archivo agregado' : ''"
+                      @change="inputFilePhotoFront.handleImageSelected" :key="inputFilePhotoFront.key"
+                      :error-messages="errorsBack.photo_front" @input="errorsBack.photo_front = ''"
+                      :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <VCol class="d-flex justify-center ">
+                    <VImg style=" max-block-size: 300px;max-inline-size: 500px;"
+                      :src="inputFilePhotoFront.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                  </VCol>
+                </VRow>
               </VCol>
               <VCol cols="12" sm="6">
-                <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
-                  label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
-                  @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
-                  :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
-                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                <VRow>
+                  <VCol>
+                    <AppFileInput :requiredField="form.id ? false : true" clearable
+                      :loading="inputFilePhotoRear.loading" label="Foto reverso"
+                      :label2="form.photo_rear ? '1 archivo agregado' : ''"
+                      @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
+                      :error-messages="errorsBack.photo_rear" @input="errorsBack.photo_rear = ''"
+                      :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <VCol>
+                    <VImg style=" max-block-size: 300px;max-inline-size: 500px;"
+                      :src="inputFilePhotoRear.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                  </VCol>
+                </VRow>
+
               </VCol>
               <VCol cols="12" sm="6">
-                <AppFileInput :requiredField="form.id ? false : true" clearable
-                  :loading="inputFilePhotoRightSide.loading" label="Foto  lado derecho"
-                  :label2="form.photo_right_side ? '1 archivo agregado' : ''"
-                  @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
-                  :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
-                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                <VRow>
+                  <VCol>
+                    <AppFileInput :requiredField="form.id ? false : true" clearable
+                      :loading="inputFilePhotoRightSide.loading" label="Foto  lado derecho"
+                      :label2="form.photo_right_side ? '1 archivo agregado' : ''"
+                      @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
+                      :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
+                      :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <VCol>
+                    <VImg style=" max-block-size: 300px;max-inline-size: 500px;"
+                      :src="inputFilePhotoRightSide.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                  </VCol>
+                </VRow>
               </VCol>
               <VCol cols="12" sm="6">
-                <AppFileInput :requiredField="form.id ? false : true" clearable
-                  :loading="inputFilePhotoLeftSide.loading" label="Foto  lado izquierdo"
-                  :label2="form.photo_left_side ? '1 archivo agregado' : ''"
-                  @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
-                  :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
-                  :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                <VRow>
+                  <VCol>
+                    <AppFileInput :requiredField="form.id ? false : true" clearable
+                      :loading="inputFilePhotoLeftSide.loading" label="Foto  lado izquierdo"
+                      :label2="form.photo_left_side ? '1 archivo agregado' : ''"
+                      @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
+                      :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
+                      :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <VCol>
+                    <VImg style=" max-block-size: 300px;max-inline-size: 500px;"
+                      :src="inputFilePhotoLeftSide.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                  </VCol>
+                </VRow>
               </VCol>
             </VRow>
           </VForm>

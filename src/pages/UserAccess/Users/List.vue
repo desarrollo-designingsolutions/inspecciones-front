@@ -50,7 +50,7 @@ const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
       all: ["name", "surname", "email", "phone"],
-      rol: ["name"],
+      role: ["description"],
     },
   },
   dialog: {
