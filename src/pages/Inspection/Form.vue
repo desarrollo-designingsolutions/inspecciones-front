@@ -28,7 +28,8 @@ interface IForm {
   inspection_date: string | null,
   state_id: string | null,
   city_id: string | null,
-  user_id: string | null,
+  user_inspector_id: number | string | null,
+  user_operator_id: string | null,
   general_comment: string | null,
   type_documents: Array<object>,
 }
@@ -64,7 +65,8 @@ const form = ref<IForm>({
   inspection_date: null,
   state_id: null,
   city_id: null,
-  user_id: null,
+  user_inspector_id: null,
+  user_operator_id: null,
   general_comment: null,
   type_documents: []
 })
@@ -172,6 +174,7 @@ const submitForm = async () => {
     const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
 
     form.value.company_id = company.value.id
+    form.value.user_inspector_id = authenticationStore.user.id
     form.value.inspection_type_id = route.params.inspection_type_id
     form.value.type_documents = vehicleData.value.type_documents
 
@@ -354,9 +357,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                     <VRow>
                       <VCol cols="12" sm="6">
                         <SelectUserOperatorForm :requiredField="true" clearable label="Operador"
-                          :error-messages="errorsBack.user_id" @input="errorsBack.user_id = ''"
+                          :error-messages="errorsBack.user_operator_id" @input="errorsBack.user_operator_id = ''"
                           :rules="[requiredValidator]" @update:model-value="changeOperator($event)"
-                          v-model="form.user_id">
+                          v-model="form.user_operator_id">
                         </SelectUserOperatorForm>
                       </VCol>
                       <VCol cols="12" sm="6">
