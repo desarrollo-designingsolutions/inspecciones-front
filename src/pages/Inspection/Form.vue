@@ -120,7 +120,10 @@ const fetchDataForm = async () => {
 
       if (element.inspection_type_inputs) {
         element.inspection_type_inputs.forEach(elementSelect => {
-          form.value[`${elementSelect.id}`] = '';
+          form.value[`${elementSelect.id}`] = {
+            value: '',         // Aquí se guardará el valor del AppSelect
+            observation: ''    // Aquí se guardará la observación del AppTextarea
+          };
         });
       }
     });
@@ -428,10 +431,13 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
             <VRow v-else>
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
-                <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id]"
+                <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id].value"
                   :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
+                  @input="errorsBack[itemSelect.id] = ''">
                 </AppSelect>
+                <AppTextarea v-if="route.params.inspection_type_id != 1" label="Observacion"
+                  v-model="form[itemSelect.id].observation">
+                </AppTextarea>
               </VCol>
 
               <VCol v-if="index === tabs.length - 1" cols="12">
