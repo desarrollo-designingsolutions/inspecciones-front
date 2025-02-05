@@ -55,7 +55,7 @@ const optionsTable = {
     delete: {
       url: "/inspection/delete"
     },
-  }
+  },
 }
 
 const inspectionTypeBtn = ref([]);
@@ -117,6 +117,19 @@ onMounted(() => {
   fetchDataBtn();
 })
 
+const pdfExport = async (item: any) => {
+
+  const { data, response } = await useApi("/inspection/pdfExport").post({
+    id: item.id,
+    company_id: authenticationStore.company.id,
+    pdf_name: "Lista inspecciones",
+  })
+
+  if (response.value?.ok && data.value) {
+    openPdfBase64(data.value.pdf)
+  }
+}
+
 </script>
 
 <template>
@@ -162,6 +175,17 @@ onMounted(() => {
       <VCardText class=" mt-2">
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
+          <template #item.actions2="{ item }">
+
+            <VListItem @click="pdfExport(item)">
+              <template #prepend>
+                <VIcon size="22" icon="tabler-file-type-pdf" />
+              </template>
+              <span>Reporte</span>
+            </VListItem>
+
+
+          </template>
 
         </TableFull>
       </VCardText>
