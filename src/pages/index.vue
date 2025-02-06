@@ -17,8 +17,6 @@ const { company, user } = storeToRefs(useAuthenticationStore())
 
 <template>
   <div>
-    <VCard class="mb-6">
-      <VCardTitle>Bienvenido a: {{ company.name }}</VCardTitle>
-    </VCard>
+    <CountAllData v-if="hasPermission('dashboard.countAllData')" />
   </div>
 </template>

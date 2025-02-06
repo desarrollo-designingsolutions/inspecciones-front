@@ -505,7 +505,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
-                  v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
+                  v-model="form.city_id" label="Ciudad de operación" :error-messages="errorsBack.city_id"
                   @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
                 </AppAutocomplete>
               </VCol>
