@@ -3,11 +3,11 @@ import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
-  name: "Inspection-List",
+  name: "Maintenance-List",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "inspection.list",
+    requiredPermission: "maintenance.list",
   },
 });
 
@@ -20,55 +20,56 @@ const loading = reactive({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: string | null, inspection_type_id: string | null } = { action: "create", id: null, inspection_type_id: null }) => {
+const goView = (data: { action: string, id: string | null, maintenance_type_id: string | null } = { action: "create", id: null, maintenance_type_id: null }) => {
 
-  if (isNullOrUndefined(data.inspection_type_id)) {
+  if (isNullOrUndefined(data.maintenance_type_id)) {
     const tableData = tableFull.value.optionsTable.tableData;
     const search = tableData.find((item: any) => item.id == data.id)
-    data.inspection_type_id = search.inspection_type_id;
+    data.maintenance_type_id = search.maintenance_type_id;
   }
 
-  router.push({ name: "Inspection-Form", params: { action: data.action, id: data.id, inspection_type_id: data.inspection_type_id } })
+  router.push({ name: "Maintenance-Form", params: { action: data.action, id: data.id, maintenance_type_id: data.maintenance_type_id } })
 }
 
 //TABLE
 const tableFull = ref()
 
 const optionsTable = {
-  url: "/inspection/list",
+  url: "/maintenance/list",
   params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'inspection_date', title: 'Fecha de inspección' },
+    { key: 'maintenance_date', title: 'Fecha de Mantenimiento' },
     { key: 'vehicle_license_plate', title: 'Placa' },
     { key: 'vehicle_brand_name', title: 'Marca' },
     { key: "vehicle_model", title: 'Modelo' },
-    { key: "inspection_type_name", title: 'Tipo de inspección' },
     { key: "user_inspector_full_name", title: 'Inspector' },
+    { key: "user_mechanic_full_name", title: 'Asignado a' },
+    { key: "status", title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {
     changeStatus: {
-      url: "/inspection/changeStatus"
+      url: "/maintenance/changeStatus"
     },
     delete: {
-      url: "/inspection/delete"
+      url: "/maintenance/delete"
     },
-  },
+  }
 }
 
-const inspectionTypeBtn = ref([]);
+const maintenanceTypeBtn = ref([]);
 
 const fetchDataBtn = async () => {
   loading.btnCreate = true
-  const url = "/inspection/loadBtnCreate";
+  const url = "/maintenance/loadBtnCreate";
 
   const { data, response } = await useApi<any>(
     createUrl(url)
   );
   if (response.value?.ok && data.value) {
-    inspectionTypeBtn.value = data.value.inspection_type;
+    maintenanceTypeBtn.value = data.value.maintenance_type;
   }
   loading.btnCreate = false
 }
@@ -79,11 +80,11 @@ const filterTable = ref()
 const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
-      all: [],
+      all: ['status|custom'],
       vehicle: ["license_plate", "model"],
       'vehicle.brand_vehicle': ["name"],
-      inspectionType: ["name"],
-      user: ["name", "surname"],
+      user_inspector: ["name", "surname"],
+      user_mechanic: ["name", "surname"],
     },
   },
   dialog: {
@@ -92,7 +93,7 @@ const optionsFilter = ref({
       {
         input_type: "dateRange",
         title: "Fecha de inspección",
-        key: "inspection_date",
+        key: "maintenance_date",
       },
     ],
   }
@@ -102,33 +103,20 @@ const downloadExcel = async () => {
   loading.excel = true;
   filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/inspection/excelExport").post({
+  const { data, response } = await useApi("/maintenance/excelExport").post({
     searchQuery: filterTable.value,
     company_id: authenticationStore.company.id,
   })
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista inspecciones")
+    downloadExcelBase64(data.value.excel, "Listado de mantenimientos")
   }
 }
 
 onMounted(() => {
   fetchDataBtn();
 })
-
-const pdfExport = async (item: any) => {
-
-  const { data, response } = await useApi("/inspection/pdfExport").post({
-    id: item.id,
-    company_id: authenticationStore.company.id,
-    pdf_name: "Lista inspecciones",
-  })
-
-  if (response.value?.ok && data.value) {
-    openPdfBase64(data.value.pdf)
-  }
-}
 
 </script>
 
@@ -138,7 +126,7 @@ const pdfExport = async (item: any) => {
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Inspecciones
+          Mantenimiento
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
@@ -149,22 +137,26 @@ const pdfExport = async (item: any) => {
             </VTooltip>
           </VBtn>
 
-          <VMenu location="bottom">
+          <!-- <VMenu location="bottom">
             <template #activator="{ props }">
               <VBtn v-bind="props" :loading="loading.btnCreate" :disabled="loading.btnCreate">
-                Agregar Inspeccion
+                Agregar Mantenimiento
                 <VIcon icon="tabler-circle-chevrons-down"></VIcon>
               </VBtn>
             </template>
 
-            <VList>
-              <VListItem v-for="(item, index) in inspectionTypeBtn" :key="index"
-                @click="goView({ action: 'create', id: null, inspection_type_id: item.id })">
+<VList>
+  <VListItem>
+    {{ item.name }}
+  </VListItem>
+</VList>
+</VMenu> -->
 
-                {{ item.name }}
-              </VListItem>
-            </VList>
-          </VMenu>
+          <VBtn :loading="loading.btnCreate" :disabled="loading.btnCreate" v-for="(item, index) in maintenanceTypeBtn"
+            :key="index" @click="goView({ action: 'create', id: null, maintenance_type_id: item.id })">
+            Agregar Mantenimiento
+            <VIcon icon="tabler-plus"></VIcon>
+          </VBtn>
 
 
 
@@ -175,17 +167,6 @@ const pdfExport = async (item: any) => {
       <VCardText class=" mt-2">
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
-          <template #item.actions2="{ item }">
-
-            <VListItem @click="pdfExport(item)">
-              <template #prepend>
-                <VIcon size="22" icon="tabler-file-type-pdf" />
-              </template>
-              <span>Reporte</span>
-            </VListItem>
-
-
-          </template>
 
         </TableFull>
       </VCardText>

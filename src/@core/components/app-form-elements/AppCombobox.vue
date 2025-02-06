@@ -15,42 +15,30 @@ const label = computed(() => useAttrs().label as string | undefined)
 </script>
 
 <template>
-  <div
-    class="app-combobox flex-grow-1"
-    :class="$attrs.class"
-  >
-    <VLabel
-      v-if="label"
-      :for="elementId"
-      class="mb-1 text-body-2"
-      :text="label"
-    />
+  <div class="app-combobox flex-grow-1" :class="$attrs.class">
+    <VLabel v-if="label" :for="elementId" class="mb-1 text-body-2" :text="label" />
 
-    <VCombobox
-      v-bind="{
-        ...$attrs,
-        class: null,
-        label: undefined,
-        variant: 'outlined',
-        id: elementId,
-        menuProps: {
-          contentClass: [
-            'app-inner-list',
-            'app-combobox__content',
-            'v-combobox__content',
-            $attrs.multiple !== undefined ? 'v-list-select-multiple' : '',
-          ],
-        },
-      }"
-    >
-      <template
-        v-for="(_, name) in $slots"
-        #[name]="slotProps"
-      >
-        <slot
-          :name="name"
-          v-bind="slotProps || {}"
-        />
+    <VCombobox v-bind="{
+      ...$attrs,
+      class: null,
+      label: undefined,
+      variant: 'outlined',
+      id: elementId,
+      menuProps: {
+        contentClass: [
+          'app-inner-list',
+          'app-combobox__content',
+          'v-combobox__content',
+          $attrs.multiple !== undefined ? 'v-list-select-multiple' : '',
+        ],
+      },
+    }">
+      <template v-for="(_, name) in $slots" #[name]="slotProps">
+        <slot :name="name" v-bind="slotProps || {}" />
+      </template>
+
+      <template #no-data>
+        <span style="font-size: 14px;">Aún no hay opciones disponibles</span>
       </template>
     </VCombobox>
   </div>

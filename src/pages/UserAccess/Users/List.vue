@@ -13,6 +13,7 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
 const { company, user } = storeToRefs(authenticationStore);
+const disabledFiledsView = ref<boolean>(false)
 
 
 //TABLE
@@ -35,10 +36,11 @@ const optionsTable = {
       url: "/user/changeStatus"
     },
     view: {
-      show: false,
+      show: true,
     },
     delete: {
-      show: false,
+      show: true,
+      url: "/user/delete"
     },
   }
 }
@@ -48,7 +50,7 @@ const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
       all: ["name", "surname", "email", "phone"],
-      rol: ["name"],
+      role: ["description"],
     },
   },
   dialog: {
@@ -72,7 +74,11 @@ const openModalForm = () => {
 }
 
 const goView = async (data: any = { action: 'created', id: null }) => {
-  refModalForm.value.openModal(data.id)
+  disabledFiledsView.value = false
+  if (data.action == 'view') {
+    disabledFiledsView.value = true
+  }
+  refModalForm.value.openModal(data.id, disabledFiledsView.value)
 }
 
 const reloadTable = () => {

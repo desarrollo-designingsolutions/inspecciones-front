@@ -7,46 +7,44 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { VForm } from 'vuetify/components/VForm';
 
 definePage({
-  path: "Inspection-form/:inspection_type_id/:action/:id?",
-  name: "Inspection-Form",
+  path: "Maintenance-form/:maintenance_type_id/:action/:id?",
+  name: "Maintenance-Form",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "inspection.list",
+    requiredPermission: "maintenance.list",
   },
 });
+
+interface IForm {
+  id: null | string,
+  company_id: null | string,
+  maintenance_type_id: null | string,
+  vehicle_id: null | string,
+  maintenance_date: null | string,
+  state_id: null | string,
+  city_id: null | string,
+  mileage: null | string,
+  user_mechanic_id: null | string,
+  user_operator_id: null | string,
+  status: null | string,
+  general_comment: null | string,
+}
 
 interface IOperatorData {
   document: string | null,
   license: string | null,
 }
-interface IForm {
-  id: string | null,
-  company_id: string | null,
-  inspection_type_id: string | null,
-  vehicle_id: string | null,
-  inspection_date: string | null,
-  state_id: string | null,
-  city_id: string | null,
-  user_inspector_id: number | string | null,
-  user_operator_id: string | null,
-  general_comment: string | null,
-  type_documents: Array<object>,
-}
+
 interface IVehicleData {
   license_plate: string | null,
   brand_vehicle_name: string | null,
   model: string | null,
   vehicle_structure_name: string | null,
-  type_documents: Array<{
-    type_document_name: string,
-    document_number: string,
-    expiration_date: string,
-  }>,
 }
 
 const authenticationStore = useAuthenticationStore();
-const { company } = storeToRefs(authenticationStore)
+const { company, user } = storeToRefs(authenticationStore);
 const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
 const disabledFiledsView = ref<boolean>(false);
@@ -60,35 +58,54 @@ const loading = reactive({
 const form = ref<IForm>({
   id: null,
   company_id: null,
-  inspection_type_id: null,
+  maintenance_type_id: null,
   vehicle_id: null,
-  inspection_date: null,
+  maintenance_date: null,
   state_id: null,
   city_id: null,
-  user_inspector_id: null,
+  mileage: null,
+  user_mechanic_id: null,
   user_operator_id: null,
+  status: null,
   general_comment: null,
-  type_documents: []
 })
 
 const clearForm = () => {
-  isCreateAndNew.value = false
-  for (const key in form.value) {
-    form.value[key] = null
-  }
-  form.value.type_documents = []
 
-  operatorData.value = {
-    document: null,
-    license: null,
-  }
+  form.value.id = null,
+    form.value.company_id = null,
+    form.value.maintenance_type_id = null,
+    form.value.vehicle_id = null,
+    form.value.maintenance_date = null,
+    form.value.state_id = null,
+    form.value.city_id = null,
+    form.value.mileage = null,
+    form.value.user_mechanic_id = null,
+    form.value.user_operator_id = null,
+    form.value.status = null,
+    form.value.general_comment = null,
+
+
+    operatorData.value = {
+      document: null,
+      license: null,
+    }
   vehicleData.value = {
     license_plate: null,
     brand_vehicle_name: null,
     model: null,
     vehicle_structure_name: null,
-    type_documents: [],
   }
+
+  tabs.value.forEach(element => {
+    if (!isNullOrUndefined(element.maintenance_type_inputs)) {
+      element.maintenance_type_inputs.forEach(ele => {
+        form.value[ele.id].type = null
+        form.value[ele.id].type_maintenance = null
+        form.value[ele.id].comment = null
+      });
+    }
+  });
 }
 const cloneForm = ref();
 
@@ -96,7 +113,7 @@ const fetchDataForm = async () => {
 
   form.value.id = route.params.id || null
 
-  const url = form.value.id ? `/inspection/${route.params.id}/edit` : `/inspection/create/${route.params.inspection_type_id}`
+  const url = form.value.id ? `/maintenance/${route.params.id}/edit` : `/maintenance/create/${route.params.maintenance_type_id}`
 
   loading.form = true
   const { data, response } = await useApi<any>(
@@ -112,23 +129,27 @@ const fetchDataForm = async () => {
     tabs.value = data.value.tabs;
     states.value = data.value.states
     responseDocument.value = data.value.responseDocument
-    responseVehicle.value = data.value.responseVehicle
+    responseStatus.value = data.value.responseStatus
+    responseMaintenanceInput.value = data.value.responseMaintenanceInput
+    responseTypeMaintenance.value = data.value.responseTypeMaintenance
 
     tabs.value.forEach(element => {
 
       refFormValidate[element.id + '_validate'] = ref<VForm>()
 
-      if (element.inspection_type_inputs) {
-        element.inspection_type_inputs.forEach(elementSelect => {
+      if (element.maintenance_type_inputs) {
+        element.maintenance_type_inputs.forEach(elementSelect => {
           form.value[`${elementSelect.id}`] = {
-            value: '',         // Aquí se guardará el valor del AppSelect
-            observation: ''    // Aquí se guardará la observación del AppTextarea
+            type: '',
+            type_maintenance: '',
+            comment: '',
           };
         });
       }
     });
 
     //formulario 
+
     if (data.value.form) {
       cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
       form.value = data.value.form
@@ -137,8 +158,7 @@ const fetchDataForm = async () => {
       form.value.city_id = cloneForm.value.city_id
     }
   }
-  loading.form = false
-
+  if (!form.value.id) loading.form = false;
 }
 
 const updateValidationToFalse = () => {
@@ -168,18 +188,18 @@ const allValidations = async () => {
 };
 
 const isCreateAndNew = ref<boolean>(false)
+
 const submitForm = async () => {
 
   const validation = await allValidations()
 
   if (validation) {
     loading.form = true;
-    const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
+    const url = form.value.id ? `/maintenance/update/${form.value.id}` : `/maintenance/store`
 
     form.value.company_id = company.value.id
-    form.value.user_inspector_id = authenticationStore.user.id
-    form.value.inspection_type_id = route.params.inspection_type_id
-    form.value.type_documents = vehicleData.value.type_documents
+    form.value.maintenance_type_id = route.params.maintenance_type_id
+    form.value.user_inspector_id = user.value.id
 
 
     const { data, response } = await useApi(url).post(form.value);
@@ -189,10 +209,11 @@ const submitForm = async () => {
         if (isCreateAndNew.value) {
           clearForm(); // Limpiar el formulario si es "Crear y crear otro"
         } else {
-          router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
+          router.push({ name: 'Maintenance-List' }); // Redirigir si es "Crear"
         }
       }
     }
+
     if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
 
     loading.form = false;
@@ -222,7 +243,9 @@ const currentTab = ref(0)
 const tabs = ref([])
 
 const responseDocument = ref<Array<{ value: string, title: string }>>([])
-const responseVehicle = ref<Array<{ value: string, title: string }>>([])
+const responseStatus = ref<Array<{ value: string, title: string }>>([])
+const responseMaintenanceInput = ref<Array<{ value: string, title: string }>>([])
+const responseTypeMaintenance = ref<Array<{ value: string, title: string }>>([])
 
 // STATES AND CITIES
 const states = ref<Array<{ value: string, title: string }>>([])
@@ -239,7 +262,6 @@ const changeState = async (event: Event) => {
     cities.value = data.value.cities;
   }
 }
-
 
 const operatorData = ref<IOperatorData>({
   document: null,
@@ -258,13 +280,12 @@ const vehicleData = ref<IVehicleData>({
   brand_vehicle_name: null,
   model: null,
   vehicle_structure_name: null,
-  type_documents: [],
 });
 
 const changeVehicle = async (event: Event) => {
   if (event) {
 
-    const url = `/inspection/getVehicleInfo/${event.value}`
+    const url = `/maintenance/getVehicleInfo/${event.value}`
 
     const { response, data } = await useApi(url).get();
 
@@ -273,17 +294,10 @@ const changeVehicle = async (event: Event) => {
       vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
       vehicleData.value.model = data.value.vehicle.model
       vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
-      vehicleData.value.type_documents = data.value.vehicle.type_documents
-
-      cloneForm.value.type_documents.forEach(element => {
-        const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
-        search.response = element.original
-        loading.form = false
-      });
+      loading.form = false
     }
   }
 }
-
 
 //ModalQuestion
 const refModalQuestion = ref()
@@ -299,7 +313,6 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     toast('Faltan Campos Por Diligenciar', '', 'danger')
   }
 }
-
 </script>
 
 <template>
@@ -307,7 +320,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información del vehículo
+          Información del mantenimiento
         </span>
       </VCardTitle>
       <VCardText>
@@ -336,8 +349,8 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
               <VCol cols="12" md="6">
                 <AppDateTimePicker :rules="[requiredValidator]" :requiredField="true" clearable
-                  :error-messages="errorsBack.inspection_date" @input="errorsBack.inspection_date = ''"
-                  label="Fecha de inspección" :config="{ dateFormat: 'Y-m-d' }" v-model="form.inspection_date" />
+                  :error-messages="errorsBack.maintenance_date" @input="errorsBack.maintenance_date = ''"
+                  label="Fecha de mantenimiento" :config="{ dateFormat: 'Y-m-d' }" v-model="form.maintenance_date" />
               </VCol>
 
               <VCol cols="12" sm="6">
@@ -349,11 +362,31 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :disabled="cities.length == 0 || disabledFiledsView" :loading="loading.cities"
-                  :requiredField="cities.length > 0" clearable :items="cities" label="Ciudad de operación"
-                  :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''"
-                  :rules="[cities.length > 0 ? requiredValidator : null]" v-model="form.city_id">
+                  :requiredField="true" clearable :items="cities" label="Ciudad" :error-messages="errorsBack.city_id"
+                  @input="errorsBack.city_id = ''" :rules="[requiredValidator]" v-model="form.city_id">
                 </AppAutocomplete>
               </VCol>
+
+              <VCol cols="12" sm="6">
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :requiredField="true" label="Kilometraje"
+                  v-model="form.mileage" clearable :errorMessages="errorsBack.mileage" @input="errorsBack.mileage = ''"
+                  :rules="[requiredValidator]">
+                </AppTextField>
+              </VCol>
+
+              <VCol cols="12" sm="6">
+                <SelectUserMechanicForm :requiredField="true" clearable label="Realizado por"
+                  :error-messages="errorsBack.user_mechanic_id" @input="errorsBack.user_mechanic_id = ''"
+                  :rules="[requiredValidator]" v-model="form.user_mechanic_id">
+                </SelectUserMechanicForm>
+              </VCol>
+
+              <VCol cols="12" sm="6">
+                <AppSelect :requiredField="true" clearable :items="responseStatus" v-model="form.status" label="Estado"
+                  :error-messages="errorsBack.status" @input="errorsBack.status = ''">
+                </AppSelect>
+              </VCol>
+
               <VCol cols="12">
                 <AppCardActions title="Información del conductor" action-collapsed>
                   <VCardText>
@@ -403,45 +436,39 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                   </VCardText>
                 </AppCardActions>
               </VCol>
-
-              <VCol cols="12">
-                <AppCardActions title="Documentos" noActions
-                  subtitle="Verifique si los documentos del vehículo presentados son originales o copia.">
-                  <VCardText>
-                    <VRow v-for="(item, index) in vehicleData.type_documents" :key="index">
-                      <VCol cols="12" sm="4">
-                        <AppTextField disabled :label="item.type_document_name" :value="item.document_number">
-                        </AppTextField>
-                      </VCol>
-                      <VCol cols="12" sm="4">
-                        <AppTextField disabled label="Fecha de vencimiento" :value="item.expiration_date">
-                        </AppTextField>
-                      </VCol>
-                      <VCol cols="12" sm="4">
-                        <AppSelect label="¿Es original?" :requiredField="true" :items="responseDocument"
-                          v-model="item.response" :rules="[requiredValidator]">
-                        </AppSelect>
-                      </VCol>
-                    </VRow>
-                  </VCardText>
-                </AppCardActions>
-              </VCol>
-
             </VRow>
 
             <VRow v-else>
-              <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
-                <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id].value"
-                  :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''">
-                </AppSelect>
-                <AppTextarea v-if="route.params.inspection_type_id != 1" label="Observacion"
-                  v-model="form[itemSelect.id].observation">
-                </AppTextarea>
-              </VCol>
+              <template v-if="item.maintenance_type_inputs">
+                <VCol cols="12" v-for="(itemSelect) in item.maintenance_type_inputs" :key="itemSelect.order">
+                  <VCard>
+                    <VCardTitle>{{ itemSelect.name }}</VCardTitle>
+                    <VCardText>
+                      <VRow>
+                        <VCol cols="12" md="6">
+                          <AppSelect clearable :items="responseMaintenanceInput" v-model="form[itemSelect.id].type"
+                            label="Seleccionar" :error-messages="errorsBack[itemSelect.id]"
+                            @input="errorsBack[itemSelect.id] = ''">
+                          </AppSelect>
+                        </VCol>
+                        <VCol cols="12" md="6">
+                          <AppSelect clearable :items="responseTypeMaintenance"
+                            v-model="form[itemSelect.id].type_maintenance" label="Tipo de mantenimiento"
+                            :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
+                          </AppSelect>
+                        </VCol>
+                        <VCol cols="12">
+                          <AppTextarea label="Observaciones" v-model="form[itemSelect.id].comment"></AppTextarea>
+                        </VCol>
+                      </VRow>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </template>
 
               <VCol v-if="index === tabs.length - 1" cols="12">
-                <AppCardActions noActions subtitle="Registre aqui las observaciones generales de la inspección.">
+                <AppCardActions noActions
+                  subtitle="Registre aquí las observaciones generales o trabajos pendientes del mantenimiento.">
                   <VCardText>
                     <AppTextarea label="Observaciones generales" v-model="form.general_comment"></AppTextarea>
                   </VCardText>
@@ -461,6 +488,5 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="submitForm" />
-
   </div>
 </template>

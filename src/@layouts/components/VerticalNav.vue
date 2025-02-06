@@ -88,15 +88,15 @@ const titleGeneral = computed(() => {
       <slot name="nav-header">
         <RouterLink :to="{ name: 'Home' }" class="app-logo app-title-wrapper">
 
-          <VImg v-if="company?.logo" style="width: 80px;" :src="storageBack(company?.logo)">
+          <VImg v-if="company?.logo" style="inline-size: 12rem;max-block-size: 5rem;" :src="storageBack(company?.logo)">
           </VImg>
           <VNodeRenderer v-else :nodes="layoutConfig.app.logo" />
 
-          <Transition name="vertical-nav-app-title">
+          <!-- <Transition name="vertical-nav-app-title">
             <h1 v-show="!hideTitleAndIcon" class="app-logo-title">
               {{ titleGeneral }}
             </h1>
-          </Transition>
+          </Transition> -->
         </RouterLink>
         <!-- 👉 Vertical nav actions -->
         <!-- Show toggle collapsible in >md and close button in <md -->

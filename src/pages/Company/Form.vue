@@ -63,7 +63,6 @@ const fetchDataForm = async () => {
 
   loading.form = true
   const { response, data } = await useApi(url).get();
-  loading.form = false
 
   if (response.value?.ok && data.value) {
 
@@ -77,7 +76,7 @@ const fetchDataForm = async () => {
       const formClone = JSON.parse(JSON.stringify(data.value.form))
 
       if (data.value.form.id) {
-        await changeCountry(formClone.country_id.value)
+        await changeCountry(formClone.country_id)
         await changeState(formClone.state_id)
 
         form.value.country_id = formClone.country_id
@@ -86,6 +85,7 @@ const fetchDataForm = async () => {
       }
     }
   }
+  loading.form = false
 }
 
 const states = ref<Array<object>>([])
@@ -95,15 +95,15 @@ const cities = ref<Array<object>>([])
 const changeCountry = async (event: any) => {
   form.value.state_id = null;
   form.value.city_id = null;
-
   loading.states = true;
   const { data, response } = await useApi(
     `/selectStates/${event.value}`
   ).get();
-  loading.states = false;
+
   if (response.value?.ok && data.value) {
     states.value = data.value.states;
     cities.value = [];
+    loading.states = false;
   }
 }
 
@@ -224,7 +224,7 @@ const nitRules = [
 
 const phoneRules = [
   value => integerValidator(value),
-  value => (!value || value.length <= 10) || "El numero no debe tener mas de 10 caracteres",
+  value => (!value || value.length <= 10) || "El número no debe tener mas de 10 caracteres",
   value => positiveNumberValidator(value),
   value => requiredValidator(value),
 ];
@@ -298,15 +298,16 @@ const addressRules = [
                 </VCol>
 
                 <VCol cols="12" sm="4">
-                  <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
-                    v-model="form.state_id" label="Región" @update:model-value="changeState($event)"
-                    :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[...stateRules]">
+                  <AppAutocomplete :disabled="disabledFiledsView || states.length <= 0" :loading="loading.states"
+                    :requiredField="states.length > 0" clearable :items="states" v-model="form.state_id" label="Región"
+                    @update:model-value="changeState($event)" :error-messages="errorsBack.state_id"
+                    @input="errorsBack.state_id = ''" :rules="[...stateRules]">
                   </AppAutocomplete>
                 </VCol>
                 <VCol cols="12" sm="4">
-                  <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
-                    v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
-                    @input="errorsBack.city_id = ''" :rules="[...cityRules]">
+                  <AppAutocomplete :disabled="disabledFiledsView || cities.length <= 0" :loading="loading.cities"
+                    :requiredField="cities.length > 0" clearable :items="cities" v-model="form.city_id" label="Ciudad"
+                    :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''" :rules="[...cityRules]">
                   </AppAutocomplete>
                 </VCol>
 

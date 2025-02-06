@@ -28,7 +28,7 @@ const optionsTable = {
     { key: 'nit', title: 'Nit' },
     { key: 'phone', title: 'Teléfono' },
     { key: 'country', title: 'Pais' },
-    { key: 'state', title: 'Region' },
+    { key: 'state', title: 'Región' },
     { key: 'city', title: 'Ciudad' },
     { key: "is_active", title: 'Estado', },
     { key: 'actions', title: 'Acciones' },

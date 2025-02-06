@@ -51,6 +51,7 @@ const openModal = async (id: string | null = null, disabled: boolean = false) =>
   handleDialogVisible();
 
   titleModal.value = id ? "Editar usuario" : "Crear usuario"
+  titleModal.value = disabledFiledsView.value ? "Visualizar usuario" : titleModal.value
 
   form.value.id = id
   form.value.company_id = company.value.id
@@ -83,7 +84,9 @@ const fetchDataForm = async () => {
     companies.value = data.value.companies
 
     if (data.value.form) {
+      const cloneForm = JSON.parse(JSON.stringify(data.value.form))
       form.value = data.value.form
+      changeRole(cloneForm.role_id)
     }
   }
 }
@@ -129,14 +132,12 @@ const rulesFieldConfirmedPassword = computed(() => {
   ]
 })
 
-
-watch(() => form.value.role_id, () => {
-  roles.value.forEach(element => {
-    if (element.value == form.value.role_id) {
-      operator.value = element.operator
-    }
-  });
-})
+const changeRole = (event: any) => {
+  console.log(event)
+  if (event) {
+    operator.value = event.operator
+  }
+}
 
 const now = new Date();
 const currentYear = now.getFullYear();
@@ -152,6 +153,7 @@ const changeFinalDate = (event: any) => {
       errorsBack.value.expiration_date = `La fecha debe ser posterior a ${d1.format('YYYY-MM-DD')}`;
   }
 }
+
 
 const nameRules = [
   value => requiredValidator(value),
@@ -170,6 +172,9 @@ const typeLicenseRules = [
   value => requiredValidator(value),
   value => integerValidator(value),
   value => positiveNumberValidator(value),
+  value => maxCharacters(value, 10),
+  value => minCharacters(value, 4),
+  value => value != form.value.document ? 'El documento y la licencia deben ser iguales' : true,
 ]
 
 defineExpose({
@@ -203,26 +208,27 @@ defineExpose({
                   :rules="nameRules" v-model="form.surname" :error-messages="errorsBack.surname" />
               </VCol>
 
-              <VCol cols="12" md="4">
-                <AppTextField :requiredField="true" clearable :rules="[requiredValidator]" v-model="form.email"
-                  label="Email" :error-messages="errorsBack.email" @input="errorsBack.email = ''" />
+              <VCol cols="12" :md="disabledFiledsView ? 6 : 4">
+                <AppTextField :disabled="disabledFiledsView" :requiredField="true" clearable
+                  :rules="[requiredValidator]" v-model="form.email" label="Email" :error-messages="errorsBack.email"
+                  @input="errorsBack.email = ''" />
               </VCol>
 
-              <VCol cols="12" md="4">
+              <VCol cols="12" md="4" v-if="!disabledFiledsView">
                 <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Contraseña"
                   type="password" :rules="rulesFieldPassword" v-model="form.password"
                   :error-messages="errorsBack.password" />
               </VCol>
 
-              <VCol cols="12" md="4">
+              <VCol cols="12" md="4" v-if="!disabledFiledsView">
                 <AppTextField :requiredField="true" label="Confirmar Contraseña" type="password"
                   :rules="rulesFieldConfirmedPassword" v-model="form.confirmedPassword" />
               </VCol>
 
               <VCol cols="12" md="6">
-                <AppSelect :requiredField="true" :items="roles" label="Rol" :rules="[requiredValidator]"
-                  v-model="form.role_id" :error-messages="errorsBack.role_id" clearable
-                  :disabled="disabledFiledsView" />
+                <AppSelect :requiredField="true" :items="roles" returnObject @update:model-value="changeRole($event)"
+                  label="Rol" :rules="[requiredValidator]" v-model="form.role_id" :error-messages="errorsBack.role_id"
+                  clearable :disabled="disabledFiledsView" />
               </VCol>
               <VCol cols="12" md="6" v-if="operator">
                 <AppSelect :requiredField="true" :items="typeDocuments" label="Tipo de documentos"
@@ -231,8 +237,8 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :requiredField="true" label="Numero de documento" :rules="typeDocumentRules"
-                  v-model="form.document" :error-messages="errorsBack.document" />
+                <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Número de documento"
+                  :rules="typeDocumentRules" v-model="form.document" :error-messages="errorsBack.document" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
@@ -242,14 +248,16 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppTextField :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules"
-                  v-model="form.license" :error-messages="errorsBack.license" />
+                <AppTextField @keypress="onlyNumbersPositivesKeyPress" :disabled="disabledFiledsView"
+                  :requiredField="true" label="Numero de licencia" :rules="typeLicenseRules" v-model="form.license"
+                  :error-messages="errorsBack.license" />
               </VCol>
 
               <VCol cols="12" md="6" v-if="operator">
-                <AppDateTimePicker :requiredField="true" clearable :error-messages="errorsBack.expiration_date"
-                  @input="errorsBack.expiration_date = ''" v-model="form.expiration_date" :rules="[requiredValidator]"
-                  label="Fecha de expiracion de licencia" @update:model-value="changeFinalDate($event)"
+                <AppDateTimePicker :disabled="disabledFiledsView" :requiredField="true" clearable
+                  :error-messages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
+                  v-model="form.expiration_date" :rules="[requiredValidator]" label="Fecha de expiración de licencia"
+                  @update:model-value="changeFinalDate($event)"
                   :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
               </VCol>
 

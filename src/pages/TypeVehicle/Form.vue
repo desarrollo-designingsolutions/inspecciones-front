@@ -152,7 +152,7 @@ const handlerCancel = () => {
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Información del vehículo
+          Información de clase de vehículo
         </span>
       </VCardTitle>
       <VCardText>

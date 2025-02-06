@@ -31,6 +31,8 @@ declare module 'vue-router/auto-routes' {
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
     'Inspection-Form': RouteRecordInfo<'Inspection-Form', 'Inspection-form/:inspection_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'Inspection-List': RouteRecordInfo<'Inspection-List', '/Inspection/List', Record<never, never>, Record<never, never>>,
+    'Maintenance-List': RouteRecordInfo<'Maintenance-List', '/Maintenance/List', Record<never, never>, Record<never, never>>,
+    'Maintenance-Form': RouteRecordInfo<'Maintenance-Form', 'Maintenance-form/:maintenance_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'Type-Document-List': RouteRecordInfo<'Type-Document-List', '/TypeDocument/List', Record<never, never>, Record<never, never>>,
     'Type-Document-Form': RouteRecordInfo<'Type-Document-Form', 'Type-Document-form/:action/:id?', Record<never, never>, Record<never, never>>,

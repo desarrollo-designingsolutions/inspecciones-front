@@ -26,6 +26,8 @@ const formComponent = ref({
   company_id: null,
   permissions: [] as Array<Number>,
   operator: false,
+  mechanic: false,
+  inspector: false,
 });
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
@@ -37,6 +39,8 @@ const handleClearFormComponent = (): void => {
   formComponent.value.description = null;
   formComponent.value.permissions = [];
   formComponent.value.operator = false
+  formComponent.value.mechanic = false
+  formComponent.value.inspector = false
 };
 
 const handleCreate = async () => {
@@ -51,7 +55,6 @@ const handleCreate = async () => {
   componentData.isLoading = isFetching.value;
 
   formComponent.value.company_id = company.value.id
-
   componentData.menus = data.value.menus;
   arrayFather.value = componentData.menus;
 };
@@ -76,6 +79,8 @@ const handleEdit = async ({ id }: any) => {
     formComponent.value.description = data.value.role.description;
     formComponent.value.company_id = data.value.role.company_id;
     formComponent.value.operator = data.value.role.operator;
+    formComponent.value.mechanic = data.value.role.mechanic;
+    formComponent.value.inspector = data.value.role.inspector;
 
     selectedElements.value = data.value.role.permissions;
     arrayFather.value = componentData.menus;
@@ -135,6 +140,16 @@ defineExpose({
           <VCol>
             <VCard border>
               <VCheckboxBtn v-model="formComponent.operator" label="Operador"></VCheckboxBtn>
+            </VCard>
+          </VCol>
+          <VCol>
+            <VCard border>
+              <VCheckboxBtn v-model="formComponent.mechanic" label="Mecánico"></VCheckboxBtn>
+            </VCard>
+          </VCol>
+          <VCol>
+            <VCard border>
+              <VCheckboxBtn v-model="formComponent.inspector" label="Inspector"></VCheckboxBtn>
             </VCard>
           </VCol>
         </VRow>
