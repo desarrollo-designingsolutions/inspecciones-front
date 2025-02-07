@@ -17,6 +17,16 @@ const { company, user } = storeToRefs(useAuthenticationStore())
 
 <template>
   <div>
-    <CountAllData v-if="hasPermission('dashboard.countAllData')" />
+    <VRow>
+      <VCol cols="12">
+        <CountAllData />
+      </VCol>
+      <VCol cols="12" md="6">
+        <VehicleInfoForCompany />
+      </VCol>
+      <VCol cols="12" md="6">
+        <CountInspectionsGraph />
+      </VCol>
+    </VRow>
   </div>
 </template>

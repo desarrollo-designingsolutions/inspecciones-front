@@ -36,6 +36,8 @@ declare module 'vue' {
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsVerticalSimple: typeof import('./src/@core/components/CardStatisticsVerticalSimple.vue')['default']
     ConfirmDialog: typeof import('./src/components/dialogs/ConfirmDialog.vue')['default']
+    CountAllData: typeof import('./src/components/Dashboard/CountAllData.vue')['default']
+    CountInspectionsGraph: typeof import('./src/components/Dashboard/CountInspectionsGraph.vue')['default']
     CreateAppDialog: typeof import('./src/components/dialogs/CreateAppDialog.vue')['default']
     CustomCheckboxes: typeof import('./src/@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./src/@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']
@@ -82,5 +84,7 @@ declare module 'vue' {
     TwoFactorAuthDialog: typeof import('./src/components/dialogs/TwoFactorAuthDialog.vue')['default']
     UserInfoEditDialog: typeof import('./src/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./src/components/dialogs/UserUpgradePlanDialog.vue')['default']
+    VehicleInfoForCompany: typeof import('./src/components/Dashboard/VehicleInfoForCompany.vue')['default']
+    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }

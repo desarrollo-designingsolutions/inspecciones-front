@@ -46,6 +46,7 @@ const optionsTable = {
     { key: "vehicle_model", title: 'Modelo' },
     { key: "inspection_type_name", title: 'Tipo de inspección' },
     { key: "user_inspector_full_name", title: 'Inspector' },
+    { key: "is_active", title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {

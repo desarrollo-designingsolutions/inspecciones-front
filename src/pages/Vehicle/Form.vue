@@ -44,6 +44,7 @@ interface IEmergencyElement {
   vehicle_id: null | string,
   emergency_element_id: null | string,
   quantity: null | string,
+  expiration_date: null | string,
 }
 
 const form = ref({
@@ -776,6 +777,13 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                     @keypress="onlyNumbersPositivesKeyPress" :rules="[requiredValidator]"
                     :error-messages="errorsBack.quantity" @input="errorsBack.quantity = ''">
                   </AppTextField>
+                </VCol>
+
+                <VCol cols="12" sm="6">
+                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
+                    :rules="[requiredValidator]" v-model="item.expiration_date"
+                    :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
+                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
                 </VCol>
 
                 <VDivider />

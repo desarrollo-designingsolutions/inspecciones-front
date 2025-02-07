@@ -34,6 +34,7 @@ const optionsTable = {
     { key: "date_registration", title: 'Fecha de matrícula' },
     { key: "model", title: 'Modelo' },
     { key: "city_name", title: 'Ciudad de operación' },
+    { key: "is_active", title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {
