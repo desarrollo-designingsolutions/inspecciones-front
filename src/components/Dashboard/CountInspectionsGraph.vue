@@ -115,6 +115,7 @@ const shipmentConfig = computed(() => ({
             },
         },
     },
+
 }));
 </script>
 

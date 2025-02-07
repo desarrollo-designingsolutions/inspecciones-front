@@ -433,7 +433,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
                 <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id].value"
                   :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''">
+                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
                 </AppSelect>
                 <AppTextarea v-if="route.params.inspection_type_id != 1" label="Observacion"
                   v-model="form[itemSelect.id].observation">
