@@ -5,16 +5,16 @@ const authenticationStore = useAuthenticationStore();
 
 // Estado de carga
 const loading = reactive({
-    vehicleInspectionsComparison: false,
+    vehicleMaintenanceComparison: false,
 });
 
-// Aquí se almacenará el arreglo de vehículos con sus inspecciones
+// Aquí se almacenará el arreglo de vehículos con sus mantenimientos
 const vehiclesData = ref<Array<{
     vehicle_id: string;
     vehicle_license_plate: string;
-    inspections_in_month: number;
-    inspections_other: number;
-    total_inspections: number;
+    maintenances_in_month: number;
+    maintenances_other: number;
+    total_maintenances: number;
 }>>([]);
 
 const months = ref<Array<string>>([]);
@@ -28,9 +28,9 @@ const formSearch = ref({
 
 // Función para obtener la data desde el endpoint
 const fetchData = async () => {
-    loading.vehicleInspectionsComparison = true;
+    loading.vehicleMaintenanceComparison = true;
     const { data, response } = await useApi<any>(
-        createUrl(`/dashboard/vehicleInspectionsComparison`, {
+        createUrl(`/dashboard/vehicleMaintenanceComparison`, {
             query: {
                 company_id: authenticationStore.company.id,
                 month: formSearch.value.month,
@@ -38,9 +38,9 @@ const fetchData = async () => {
             },
         })
     );
-    loading.vehicleInspectionsComparison = false;
+    loading.vehicleMaintenanceComparison = false;
     if (response.value?.ok && data.value) {
-        vehiclesData.value = data.value.inspection_count;
+        vehiclesData.value = data.value.maintenance_count;
         months.value = data.value.available_months.map(monthObj => {
             return monthTranslations[monthObj.name] || monthObj.name;
         });
@@ -64,24 +64,24 @@ const monthTranslations = {
     'December': 'Diciembre'
 };
 
-// Calculamos el máximo número de inspecciones (entre ambas series)
-const maxInspection = computed(() => {
-    const arr = vehiclesData.value.flatMap(v => [v.inspections_in_month]);
+// Calculamos el máximo número de mantenimientos (entre ambas series)
+const maxMaintenance = computed(() => {
+    const arr = vehiclesData.value.flatMap(v => [v.maintenances_in_month]);
     return arr.length > 0 ? Math.max(...arr) : 0;
 });
 
 // Definición de las series, convirtiendo los valores a enteros (en caso de decimales)
 const series = computed(() => [
     {
-        name: 'Inspecciones por Mes',
-        data: vehiclesData.value.map(vehicle => parseInt(vehicle.inspections_in_month.toString(), 10) || 0),
+        name: 'Mantenimientos por Mes',
+        data: vehiclesData.value.map(vehicle => parseInt(vehicle.maintenances_in_month.toString(), 10) || 0),
     },
 ]);
 
 // Configuración de colores y estilos para la gráfica
 const chartColors = {
-    series1: '#FFB400', // Color para "Inspecciones en Mes"
-    series2: '#9055FD', // Color para "Inspecciones Otros"
+    series1: '#FFB400', // Color para "Mantenimientos en Mes"
+    series2: '#9055FD', // Color para "Mantenimientos Otros"
 };
 
 const headingColor = 'rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity))';
@@ -130,7 +130,7 @@ const shipmentConfig = computed(() => ({
         axisTicks: { show: false },
     },
     yaxis: {
-        tickAmount: maxInspection.value <= 1 ? 1 : 2,
+        tickAmount: maxMaintenance.value <= 1 ? 1 : 2,
         labels: {
             style: {
                 colors: labelColor,
@@ -139,7 +139,7 @@ const shipmentConfig = computed(() => ({
             },
             formatter(val: number) {
                 // Se redondea el valor para mostrar solo enteros
-                return `${Math.round(val)} inspecciones`;
+                return `${Math.round(val)} mantenimientos`;
             },
         },
     },
@@ -148,9 +148,9 @@ const shipmentConfig = computed(() => ({
 </script>
 
 <template>
-    <AppCardActions title="Resumen de inspecciones por mes" actionRefresh @refresh="fetchData"
-        :loading="loading.vehicleInspectionsComparison">
-        <VCardText v-if="!loading.vehicleInspectionsComparison">
+    <AppCardActions title="Resumen de mantenimientos por mes" actionRefresh @refresh="fetchData"
+        :loading="loading.vehicleMaintenanceComparison">
+        <VCardText v-if="!loading.vehicleMaintenanceComparison">
             <VRow>
                 <!-- Control para seleccionar el mes -->
                 <VCol cols="12" md="5">
@@ -168,7 +168,7 @@ const shipmentConfig = computed(() => ({
             </VRow>
         </VCardText>
         <VCardText>
-            <VueApexCharts v-if="!loading.vehicleInspectionsComparison" id="shipment-statistics" type="bar" height="320"
+            <VueApexCharts v-if="!loading.vehicleMaintenanceComparison" id="shipment-statistics" type="bar" height="320"
                 :options="shipmentConfig" :series="series" />
         </VCardText>
     </AppCardActions>

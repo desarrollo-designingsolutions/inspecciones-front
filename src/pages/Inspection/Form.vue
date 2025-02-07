@@ -306,8 +306,11 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
   <div>
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
-        <span>
-          Información del vehículo
+        <span v-if="route.params.inspection_type_id == 1">
+          Inspeccion Pre-Operacional
+        </span>
+        <span v-else>
+          Inspeccion HSEQ
         </span>
       </VCardTitle>
       <VCardText>
