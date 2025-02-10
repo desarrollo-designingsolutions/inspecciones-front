@@ -36,7 +36,6 @@ declare module 'vue' {
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsVerticalSimple: typeof import('./src/@core/components/CardStatisticsVerticalSimple.vue')['default']
     ConfirmDialog: typeof import('./src/components/dialogs/ConfirmDialog.vue')['default']
-    copy: typeof import('./src/components/Dashboard/CountInspectionsGraph copy.vue')['default']
     CountAllData: typeof import('./src/components/Dashboard/CountAllData.vue')['default']
     CountInspectionsGraph: typeof import('./src/components/Dashboard/CountInspectionsGraph.vue')['default']
     CountMaintenanceGraph: typeof import('./src/components/Dashboard/CountMaintenanceGraph.vue')['default']

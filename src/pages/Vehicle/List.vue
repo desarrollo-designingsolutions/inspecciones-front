@@ -85,6 +85,19 @@ const downloadExcel = async () => {
   }
 }
 
+const pdfExport = async (item: any) => {
+
+  const { data, response } = await useApi("/vehicle/pdfExport").post({
+    id: item.id,
+    company_id: authenticationStore.company.id,
+    pdf_name: "hoja_de_vida_" + item.license_plate,
+  })
+
+  if (response.value?.ok && data.value) {
+    openPdfBase64(data.value.pdf)
+  }
+}
+
 </script>
 
 <template>
@@ -112,6 +125,18 @@ const downloadExcel = async () => {
 
       <VCardText class=" mt-2">
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+
+          <template #item.actions2="{ item }">
+
+            <VListItem @click="pdfExport(item)">
+              <template #prepend>
+                <VIcon size="22" icon="tabler-file-type-pdf" />
+              </template>
+              <span>CV vehículo</span>
+            </VListItem>
+
+
+          </template>
 
 
         </TableFull>
