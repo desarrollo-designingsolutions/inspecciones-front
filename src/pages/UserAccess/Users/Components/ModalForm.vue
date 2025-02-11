@@ -133,7 +133,6 @@ const rulesFieldConfirmedPassword = computed(() => {
 })
 
 const changeRole = (event: any) => {
-  console.log(event)
   if (event) {
     operator.value = event.operator
   }

@@ -131,7 +131,6 @@ const fetchDataForm = async () => {
     })
   );
 
-  console.log(data.value)
 
   if (response.value?.ok && data.value) {
 

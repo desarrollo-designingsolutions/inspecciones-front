@@ -29,7 +29,6 @@ const recurrentdata = (target: IOptionsFilter, source: IOptionsFilter) => {
           // Copiamos objetos anidados de manera recursiva dentro del array
           if (typeof item === 'object' && item !== null && key != 'paramsFilter') {
             const newObj = {};
-            // console.log('key:333333', key)
 
             recurrentdata(newObj, item);
             return newObj;
@@ -40,13 +39,8 @@ const recurrentdata = (target: IOptionsFilter, source: IOptionsFilter) => {
       // Si el elemento es un objeto, llamamos recursivamente a recurrentdata
       else if (typeof element === 'object' && element !== null) {
 
-        // console.log('key:2222222', key)
         recurrentdata(target[key], element);
       } else {
-        // if (target[key]) 
-        // console.log('key: ', key)
-        // console.log('target: ', target)
-        // console.log('element: ', element)
         target[key] = element; // Copiamos valores primitivos directamente
       }
     }

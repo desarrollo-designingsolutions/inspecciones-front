@@ -77,7 +77,7 @@ const optionsFilter = ref({
     inputs: [
       {
         input_type: "selectInfinite",
-        title: "Plata del vehículo",
+        title: "Placa del vehículo",
         key: "plateVehicle",
         search_key: "license_plate",
         api: "selectInfinitePlateVehicle",
@@ -94,7 +94,7 @@ const optionsFilter = ref({
       },
       {
         input_type: "dateRange",
-        title: "Fecha de matricula",
+        title: "Fecha de matrícula",
         key: "date_registration",
       },
       {

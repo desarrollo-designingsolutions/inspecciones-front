@@ -15,10 +15,7 @@ export const useRoleStore = defineStore("useRoleStore", {
     },
 
     handleCardCheckboxChange(cardId: number | string) {
-      console.log('cardId: ', cardId)
-      console.log('this.selectedFather: ', this.selectedFather)
       if (this.selectedFather.includes(cardId)) {
-        console.log('1: ', cardId)
 
         this.selectAllPermissions(cardId);
       } else {
@@ -32,12 +29,10 @@ export const useRoleStore = defineStore("useRoleStore", {
     searchInChildrenToAdd(parent: any, cardId: number | string) {
       parent["children"].forEach(child => {
         if (child[this.keyIdComparation] === cardId && !this.selectedElements.includes(child.id)) {
-          console.log('bbbbbb')
           this.selectedElements.push(child.id);
         }
         // Llamar recursivamente para buscar en los hijos de este child si existen
         if (child["children"] && child["children"].length > 0) {
-          console.log('aaaaa')
           this.searchInChildrenToAdd(child, cardId);
         }
       });
