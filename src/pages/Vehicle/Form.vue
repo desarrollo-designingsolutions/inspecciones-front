@@ -44,6 +44,7 @@ interface IEmergencyElement {
   vehicle_id: null | string,
   emergency_element_id: null | string,
   quantity: null | string,
+  expiration_date: null | string,
 }
 
 const form = ref({
@@ -556,7 +557,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :disabled="cities.length <= 0 || disabledFiledsView" :requiredField="cities.length > 0"
-                  :loading="loading.cities" clearable :items="cities" v-model="form.city_id" label="Ciudad"
+                  :loading="loading.cities" clearable :items="cities" v-model="form.city_id" label="Ciudad de operación"
                   :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
                 </AppAutocomplete>
               </VCol>
@@ -767,15 +768,21 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                     <VIcon icon="tabler-trash"></VIcon>
                   </VBtn>
                 </VCol>
-                <VCol cols="12" sm="6">
+                <VCol cols="12" sm="4">
                   <SelectEmergencyElementForm :key="'select2_' + index" :rules="[requiredValidator]"
                     :requiredField="true" label="Elemento de emergencia" v-model="item.emergency_element_id" />
                 </VCol>
-                <VCol cols="12" sm="6">
+                <VCol cols="12" sm="4">
                   <AppTextField :requiredField="true" label="Cantidad" v-model="item.quantity"
                     @keypress="onlyNumbersPositivesKeyPress" :rules="[requiredValidator]"
                     :error-messages="errorsBack.quantity" @input="errorsBack.quantity = ''">
                   </AppTextField>
+                </VCol>
+
+                <VCol cols="12" sm="4">
+                  <AppDateTimePicker clearable label="Fecha de vencimiento" v-model="item.expiration_date"
+                    :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
+                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `2020-01-01`, to: `${currentYear}-${currentMonth}-${currentDay}` }] }" />
                 </VCol>
 
                 <VDivider />

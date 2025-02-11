@@ -46,6 +46,7 @@ const optionsTable = {
     { key: "vehicle_model", title: 'Modelo' },
     { key: "inspection_type_name", title: 'Tipo de inspección' },
     { key: "user_inspector_full_name", title: 'Inspector' },
+    { key: "is_active", title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
   ],
   actions: {
@@ -73,6 +74,21 @@ const fetchDataBtn = async () => {
   loading.btnCreate = false
 }
 
+const models = computed(() => {
+  const startYear = 1950;
+  const endYear = new Date().getFullYear() + 1; // Año actual + 1
+  const years = [];
+
+  for (let year = endYear; year >= startYear; year--) {
+    years.push(year);
+  }
+
+  return years;
+});
+
+const company = {
+  company_id: authenticationStore.company.id,
+}
 
 //FILTER
 const filterTable = ref()
@@ -93,6 +109,55 @@ const optionsFilter = ref({
         input_type: "dateRange",
         title: "Fecha de inspección",
         key: "inspection_date",
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Plata del vehículo",
+        key: "plateVehicle",
+        search_key: "license_plate",
+        relation: 'vehicle',
+        relation_key: 'license_plate',
+        api: "selectInfinitePlateVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Marca de vehículo",
+        key: "brandVehicle",
+        relation: 'vehicle',
+        relation_key: 'brand_vehicle_id',
+        api: "selectInfiniteBrandVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "select",
+        title: "Modelo",
+        key: 'model',
+        relation: 'vehicle',
+        relation_key: 'model',
+        arrayList: models,
+      },
+      {
+        input_type: "select",
+        title: "Tipo de inspección",
+        key: "inspectionType",
+        relation: 'inspectionType',
+        relation_key: 'name',
+        arrayList: ['Pre-Operacional', 'HSEQ'],
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Inspector",
+        key: "userInspector",
+        relation: 'user_inspector',
+        relation_key: 'id',
+        api: "selectInfiniteUserInspector",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "booleanActive",
+        title: "Estado",
+        key: "is_active",
       },
     ],
   }

@@ -27,8 +27,10 @@ const recurrentdata = (target: IOptionsFilter, source: IOptionsFilter) => {
       if (Array.isArray(element)) {
         target[key] = element.map(item => {
           // Copiamos objetos anidados de manera recursiva dentro del array
-          if (typeof item === 'object' && item !== null) {
+          if (typeof item === 'object' && item !== null && key != 'paramsFilter') {
             const newObj = {};
+            // console.log('key:333333', key)
+
             recurrentdata(newObj, item);
             return newObj;
           }
@@ -37,8 +39,14 @@ const recurrentdata = (target: IOptionsFilter, source: IOptionsFilter) => {
       }
       // Si el elemento es un objeto, llamamos recursivamente a recurrentdata
       else if (typeof element === 'object' && element !== null) {
+
+        // console.log('key:2222222', key)
         recurrentdata(target[key], element);
       } else {
+        // if (target[key]) 
+        // console.log('key: ', key)
+        // console.log('target: ', target)
+        // console.log('element: ', element)
         target[key] = element; // Copiamos valores primitivos directamente
       }
     }
@@ -101,6 +109,7 @@ const arrayFilter = ref<
     multiple: boolean;
     custom_search: boolean;
     chips: boolean;
+    paramsFilter: Object;
   }>
 >([]);
 
@@ -136,6 +145,7 @@ const loadArrayFilter = () => {
       multiple: element.multiple ?? false,
       custom_search: element.custom_search ?? false,
       chips: element.custom_search ?? false,
+      paramsFilter: element.paramsFilter ?? {},
     });
   });
 };
@@ -170,8 +180,10 @@ const loadSelectsInfinites = () => {
 
     selectKey[element.key] = false;
 
+    const paramsFilter = element.paramsFilter ? JSON.parse(JSON.stringify(element.paramsFilter)) : {};
+
     // Realizar la petición POST
-    const { data, response } = await useApi(`/${element.api}`).post();
+    const { data, response } = await useApi(`/${element.api}`).post(paramsFilter);
 
     // Verificar la respuesta
     if (response.value?.ok && data.value) {
@@ -180,6 +192,8 @@ const loadSelectsInfinites = () => {
       variablesDinamicas[element.key + "_countLinks"].value =
         data.value[element.key + "_countLinks"];
 
+      const paramsFilter2 = element.paramsFilter ? JSON.parse(JSON.stringify(element.paramsFilter)) : {};
+
       // Ejemplo de uso de useSelect con los datos actualizados
       let newVariable = useSelect(
         funcionesDinamicas[
@@ -187,7 +201,7 @@ const loadSelectsInfinites = () => {
         ], // Utilizamos la función dinámica correspondiente
         variablesDinamicas[element.key + "_arrayInfo"],
         variablesDinamicas[element.key + "_countLinks"],
-        {} // Opciones adicionales si es necesario
+        paramsFilter2 // Opciones adicionales si es necesario
       );
       newVariable.dataNueva.value = JSON.parse(
         JSON.stringify(variablesDinamicas[element.key + "_arrayInfo"].value)

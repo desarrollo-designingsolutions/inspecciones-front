@@ -362,8 +362,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :disabled="cities.length == 0 || disabledFiledsView" :loading="loading.cities"
-                  :requiredField="true" clearable :items="cities" label="Ciudad" :error-messages="errorsBack.city_id"
-                  @input="errorsBack.city_id = ''" :rules="[requiredValidator]" v-model="form.city_id">
+                  :requiredField="true" clearable :items="cities" label="Ciudad de operación"
+                  :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''" :rules="[requiredValidator]"
+                  v-model="form.city_id">
                 </AppAutocomplete>
               </VCol>
 
@@ -446,9 +447,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                     <VCardText>
                       <VRow>
                         <VCol cols="12" md="6">
-                          <AppSelect clearable :items="responseMaintenanceInput" v-model="form[itemSelect.id].type"
-                            label="Seleccionar" :error-messages="errorsBack[itemSelect.id]"
-                            @input="errorsBack[itemSelect.id] = ''">
+                          <AppSelect clearable :items="responseMaintenanceInput"
+                            v-model="form[itemSelect.id].type" label="Seleccionar"
+                            :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
                           </AppSelect>
                         </VCol>
                         <VCol cols="12" md="6">

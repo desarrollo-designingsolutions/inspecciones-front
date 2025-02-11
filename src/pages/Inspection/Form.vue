@@ -306,8 +306,11 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
   <div>
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
-        <span>
-          Información del vehículo
+        <span v-if="route.params.inspection_type_id == 1">
+          Inspeccion Pre-Operacional
+        </span>
+        <span v-else>
+          Inspeccion HSEQ
         </span>
       </VCardTitle>
       <VCardText>
@@ -349,7 +352,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
               <VCol cols="12" sm="6">
                 <AppAutocomplete :disabled="cities.length == 0 || disabledFiledsView" :loading="loading.cities"
-                  :requiredField="cities.length > 0" clearable :items="cities" label="Ciudad"
+                  :requiredField="cities.length > 0" clearable :items="cities" label="Ciudad de operación"
                   :error-messages="errorsBack.city_id" @input="errorsBack.city_id = ''"
                   :rules="[cities.length > 0 ? requiredValidator : null]" v-model="form.city_id">
                 </AppAutocomplete>
@@ -433,7 +436,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
                 <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id].value"
                   :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''">
+                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
                 </AppSelect>
                 <AppTextarea v-if="route.params.inspection_type_id != 1" label="Observacion"
                   v-model="form[itemSelect.id].observation">

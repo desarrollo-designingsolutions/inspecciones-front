@@ -28,8 +28,19 @@ export function useSelect(fun, arrayData = [], countLinks = 0, filterDta = {}) {
       page: page.value,
       searchQueryInfinite: searchQueryInfinite.value
     }
-    for (const key in filterDta) {
-      filter[key] = filterDta[key]
+
+
+    if (!isObject(filterDta)) {
+      filterDta = JSON.parse(filterDta);
+
+      for (const key in filterDta) {
+
+        filter[key] = filterDta
+      }
+    } else {
+      for (const key in filterDta) {
+        filter[key] = filterDta[key]
+      }
     }
     for (const key in filterInterno.value) {
       filter[key] = filterInterno[key]

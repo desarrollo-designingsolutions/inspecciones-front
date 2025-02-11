@@ -1,3 +1,5 @@
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+
 // 👉 IsEmpty
 export const isEmpty = (value: unknown): boolean => {
   if (value === null || value === undefined || value === '')
@@ -30,7 +32,6 @@ export const isToday = (date: Date) => {
     && date.getFullYear() === today.getFullYear()
   )
 }
-
 
 
 
@@ -71,14 +72,14 @@ export const openPdfBase64 = (pdfBase64: string) => {
   if (newWindow) {
     // Crear un documento HTML en la ventana emergente
     const html = `
-      <html>
-        <head>
-          <title>PDF Viewer</title>
-        </head>
-        <body>
-          <embed width="100%" height="100%" src="data:application/pdf;base64,${pdfBase64}" type="application/pdf">
-        </body>
-      </html>
+    <html>
+    <head>
+    <title>PDF Viewer</title>
+    </head>
+    <body>
+    <embed width="100%" height="100%" src="data:application/pdf;base64,${pdfBase64}" type="application/pdf">
+    </body>
+    </html>
     `;
 
     // Escribir el contenido HTML en la ventana emergente
@@ -132,4 +133,11 @@ export function onlyNumbersPositivesKeyPress(event: any) {
 
 export function storageBack(path: string) {
   return BASE_BACK_STORAGE + path
-} 
+}
+
+export const hasPermission = (permissionName: string) => {
+  const authenticationStore = useAuthenticationStore();
+  const { permissions } = storeToRefs(authenticationStore);
+
+  return permissions.value.some((permission) => permission === permissionName);
+};
