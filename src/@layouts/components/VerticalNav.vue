@@ -72,6 +72,20 @@ const titleGeneral = computed(() => {
     return texto.slice(0, longitudMaxima) + "...";
   }
 })
+
+const refModalChangePassword = ref()
+
+onMounted(() => {
+  if (authenticationStore.user.first_time) {
+
+    refModalChangePassword.value.openDialog(authenticationStore.user.id, authenticationStore.user.first_time)
+
+  }
+})
+
+const passwordSaved = () => {
+  authenticationStore.user.first_time = false
+}
 </script>
 
 <template>
@@ -125,6 +139,9 @@ const titleGeneral = computed(() => {
     </slot>
     <slot name="after-nav-items" />
   </Component>
+
+  <ModalChangePassword ref="refModalChangePassword" @execute="passwordSaved" />
+
 </template>
 
 <style lang="scss" scoped>

@@ -39,7 +39,6 @@ const fetchData = async () => {
   if (response.value?.ok && data.value) {
     userData.value = data.value.data;
   }
-  console.log(userData.value)
 }
 
 fetchData()

@@ -10,7 +10,7 @@ const componentData = reactive({
   titleDialog: "Cambiar contraseña",
   isDialogVisible: false,
   isLoading: false,
-  first_time: false,
+  first_time: false as boolean,
   statuses: [],
   form: {
     id: null as null | string | number,
@@ -33,11 +33,13 @@ const handleDialogVisible = () => {
   componentData.isDialogVisible = !componentData.isDialogVisible;
 };
 
-const openDialog = async (id: null | number | string) => {
+const openDialog = async (id: null | number | string, first_time: boolean) => {
   handleClearForm();
   handleDialogVisible();
 
   componentData.form.id = id;
+  componentData.first_time = first_time;
+
 };
 
 const submitForm = async () => {
