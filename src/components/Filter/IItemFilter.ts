@@ -12,4 +12,7 @@ interface IItemFilter {
   multiple: boolean
   custom_search: boolean
   cols: number
+  paramsFilter: {
+    [key: string]: string | number | boolean
+  }
 }

@@ -47,7 +47,21 @@ const optionsTable = {
   }
 }
 
+const models = computed(() => {
+  const startYear = 1950;
+  const endYear = new Date().getFullYear() + 1; // Año actual + 1
+  const years = [];
 
+  for (let year = endYear; year >= startYear; year--) {
+    years.push(year);
+  }
+
+  return years;
+});
+
+const company = {
+  company_id: authenticationStore.company.id,
+}
 //FILTER
 const filterTable = ref()
 const optionsFilter = ref({
@@ -62,9 +76,37 @@ const optionsFilter = ref({
     width: 500,
     inputs: [
       {
+        input_type: "selectInfinite",
+        title: "Plata del vehículo",
+        key: "plateVehicle",
+        search_key: "license_plate",
+        api: "selectInfinitePlateVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Clase de vehículo",
+        key: "typeVehicle",
+        relation: 'type_vehicle',
+        relation_key: 'id',
+        api: "selectInfiniteTypeVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
         input_type: "dateRange",
         title: "Fecha de matricula",
         key: "date_registration",
+      },
+      {
+        input_type: "select",
+        title: "Modelo",
+        key: 'model',
+        arrayList: models,
+      },
+      {
+        input_type: "booleanActive",
+        title: "Estado",
+        key: "is_active",
       },
     ],
   }
@@ -124,6 +166,8 @@ const pdfExport = async (item: any) => {
       </VCardTitle>
 
       <VCardText class=" mt-2">
+
+
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
           <template #item.actions2="{ item }">

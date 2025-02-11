@@ -447,13 +447,13 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                     <VCardText>
                       <VRow>
                         <VCol cols="12" md="6">
-                          <AppSelect :requiredField="true" clearable :items="responseMaintenanceInput"
+                          <AppSelect clearable :items="responseMaintenanceInput"
                             v-model="form[itemSelect.id].type" label="Seleccionar"
                             :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
                           </AppSelect>
                         </VCol>
                         <VCol cols="12" md="6">
-                          <AppSelect :requiredField="true" clearable :items="responseTypeMaintenance"
+                          <AppSelect clearable :items="responseTypeMaintenance"
                             v-model="form[itemSelect.id].type_maintenance" label="Tipo de mantenimiento"
                             :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
                           </AppSelect>
