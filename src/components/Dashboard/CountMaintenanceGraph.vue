@@ -1,197 +1,205 @@
 <script setup lang="ts">
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip
+} from 'chart.js';
+import chartjsPluginDatalabels from 'chartjs-plugin-datalabels'; // Importar el plugin
+import { Bar } from 'vue-chartjs';
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, chartjsPluginDatalabels);
+
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import { computed, reactive, ref } from 'vue';
 const authenticationStore = useAuthenticationStore();
 
-// Estado de carga
-const loading = reactive({
-    vehicleMaintenanceComparison: false,
-});
-
-// Aquí se almacenará el arreglo de vehículos con sus mantenimientos
-const vehiclesData = ref<Array<{
-    vehicle_id: string;
-    vehicle_license_plate: string;
-    maintenances_in_month: number;
-    maintenances_other: number;
-    total_maintenances: number;
-}>>([]);
-
-const months = ref<Array<string>>([]);
-// Formulario de búsqueda
+const labels = ref<Array<string>>([]);
+const datasets = ref<Array<object>>([]);
 const formSearch = ref({
-    month: new Intl.DateTimeFormat('es-ES', { month: 'long' })
-        .format(new Date())
-        .replace(/^./, (char) => char.toUpperCase()) as string | null,
-    vehicle_id: null as string | null,
+  year: null as null | string | number,
+  vehicle_id: null as null | string,
 });
 
-// Función para obtener la data desde el endpoint
+const loading = reactive({
+  vehicleMaintenanceComparison: false,
+  excel: false,
+})
+
+formSearch.value.year = new Date().getFullYear()
+
+const years = ref([])
+
 const fetchData = async () => {
-    loading.vehicleMaintenanceComparison = true;
-    const { data, response } = await useApi<any>(
-        createUrl(`/dashboard/vehicleMaintenanceComparison`, {
-            query: {
-                company_id: authenticationStore.company.id,
-                month: formSearch.value.month,
-                vehicle_id: formSearch.value.vehicle_id?.value,
-            },
-        })
-    );
-    loading.vehicleMaintenanceComparison = false;
-    if (response.value?.ok && data.value) {
-        vehiclesData.value = data.value.maintenance_count;
-        months.value = data.value.available_months.map(monthObj => {
-            return monthTranslations[monthObj.name] || monthObj.name;
-        });
-    }
+
+  loading.vehicleMaintenanceComparison = true;
+
+  const { data, response } = await useApi<any>(
+    createUrl(`/dashboard/vehicleMaintenanceComparison`, {
+      query: {
+        company_id: authenticationStore.company.id,
+        year: formSearch.value.year,
+        vehicle_id: formSearch.value.vehicle_id?.value,
+      },
+    })
+  );
+
+
+  if (response.value?.ok && data.value) {
+    datasets.value = data.value.datasets;
+    labels.value = data.value.labels;
+    years.value = data.value.years;
+  }
+  loading.vehicleMaintenanceComparison = false;
 };
 
 fetchData();
 
-const monthTranslations = {
-    'January': 'Enero',
-    'February': 'Febrero',
-    'March': 'Marzo',
-    'April': 'Abril',
-    'May': 'Mayo',
-    'June': 'Junio',
-    'July': 'Julio',
-    'August': 'Agosto',
-    'September': 'Septiembre',
-    'October': 'Octubre',
-    'November': 'Noviembre',
-    'December': 'Diciembre'
-};
-
-// Calculamos el máximo número de mantenimientos (entre ambas series)
-const maxMaintenance = computed(() => {
-    const arr = vehiclesData.value.flatMap(v => [v.maintenances_in_month]);
-    return arr.length > 0 ? Math.max(...arr) : 0;
+const chartData = computed(() => {
+  return {
+    labels: labels.value,
+    datasets: datasets.value,
+  };
 });
 
-// Definición de las series, convirtiendo los valores a enteros (en caso de decimales)
-const series = computed(() => [
-    {
-        name: 'Mantenimientos por Mes',
-        data: vehiclesData.value.map(vehicle => parseInt(vehicle.maintenances_in_month.toString(), 10) || 0),
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  layout: {
+    padding: {
+      top: 30,    // Ajusta el margen superior
+      bottom: 10, // Ajusta el margen inferior
+      left: 10,   // Ajusta el margen izquierdo (si es necesario)
+      right: 10,  // Ajusta el margen derecho (si es necesario)
     },
-]);
-
-// Configuración de colores y estilos para la gráfica
-const chartColors = {
-    series1: '#FFB400', // Color para "Mantenimientos en Mes"
-    series2: '#9055FD', // Color para "Mantenimientos Otros"
+  },
+  plugins: {
+    legend: {
+      position: 'bottom',
+    },
+    tooltip: {
+      callbacks: {
+        label: function (tooltipItem) {
+          const value = tooltipItem.raw;  // Este es el valor de la barra
+          const dataset = tooltipItem.dataset;  // El dataset de la barra
+          const labelDataset = tooltipItem.dataset.label;  // El label de la barra
+          // Retornar tanto el porcentaje como la cantidad de tareas
+          return `Número de mantenimientos: ${value}`;
+        },
+      },
+    },
+    // Configurar el plugin de datalabels
+    datalabels: {
+      color: 'white',  // Color del texto
+      anchor: 'end',  // Posición del texto en el extremo de la barra
+      align: 'end', // Alineación del texto (encima de la barra)
+      offset: 5,  // Espaciado de la etiqueta respecto a la barra
+      backgroundColor: (context) => {
+        // Obtener el color del dataset desde el contexto
+        const datasetIndex = context.datasetIndex;
+        const dataset = context.chart.data.datasets[datasetIndex];
+        return dataset.backgroundColor || '#000';  // Devuelve el color de fondo del dataset
+      },
+      borderColor: (context) => {
+        // Obtener el color del borde desde el contexto
+        const datasetIndex = context.datasetIndex;
+        const dataset = context.chart.data.datasets[datasetIndex];
+        return dataset.borderColor || '#000';  // Devuelve el color de borde del dataset
+      },
+      borderWidth: 1,
+      borderRadius: 5,
+      font: {
+        size: 12, // Tamaño de la fuente
+        weight: 'bold', // Peso de la fuente
+      },
+      // Formatear el valor para que solo se muestre si es diferente de cero
+      formatter: (value, tooltipItem) => {
+        // Solo mostrar la etiqueta si el valor es diferente de cero
+        return value !== 0 ? `Total: ${value}` : null;
+      },
+    },
+  },
+  scales: {
+    x: {
+      stacked: true, // Cambiar a true si quieres barras apiladas
+      barPercentage: 0.8,
+      categoryPercentage: 0.5,
+    },
+    y: {
+      ticks: {
+        stepSize: 1,
+        callback: function (value) {
+          return value;
+        },
+      },
+    },
+  },
+  elements: {
+    bar: {
+      borderWidth: 2,
+      borderColor: '#000',
+      borderRadius: 8,
+    },
+  },
 };
 
-const headingColor = 'rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity))';
-const labelColor = 'rgba(var(--v-theme-on-background), var(--v-medium-emphasis-opacity))';
-const borderColor = 'rgba(var(--v-border-color), var(--v-border-opacity))';
 
-const shipmentConfig = computed(() => ({
-    dataLabels: {
-        enabled: false,
-    },
-    layout: {
-        padding: {
-            top: 30,
-            bottom: 10,
-            left: 10,
-            right: 10,
-        },
-    },
-    chart: {
-        type: 'bar', // Gráfica de barras
-        stacked: false,
-        parentHeightOffset: 0,
-        toolbar: { show: false },
-        zoom: { enabled: false },
-    },
-    stroke: { curve: 'smooth', width: 3 },
-    legend: { show: true, position: 'bottom' },
-    colors: [chartColors.series1, chartColors.series2],
-    plotOptions: {
-        bar: {
-            columnWidth: '50%',
-            borderRadius: 5,
-        },
-    },
-    xaxis: {
-        // Se usan las placas de los vehículos como categorías
-        categories: vehiclesData.value.map(vehicle => vehicle.vehicle_license_plate) || [],
-        labels: {
-            style: {
-                colors: labelColor,
-                fontSize: '13px',
-                fontWeight: 400,
-            },
-        },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-    },
-    yaxis: {
-        tickAmount: maxMaintenance.value <= 1 ? 1 : 2,
-        labels: {
-            style: {
-                colors: labelColor,
-                fontSize: '13px',
-                fontWeight: 400,
-            },
-            formatter(val: number) {
-                // Se redondea el valor para mostrar solo enteros
-                return `${Math.round(val)} mantenimientos`;
-            },
-        },
-    },
+//EXCEL 
+const downloadExcel = async () => {
+  loading.excel = true;
+  const { data, response } = await useApi("/task/excelExport").post({
+    company_id: authenticationStore.company.id,
+    ...formSearch.value,
+  })
 
-}));
+  loading.excel = false;
+
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Lista de tareas por usuario")
+  }
+}
 </script>
 
 <template>
-    <AppCardActions title="Resumen de mantenimientos por mes" actionRefresh @refresh="fetchData"
-        :loading="loading.vehicleMaintenanceComparison">
-        <VCardText v-if="!loading.vehicleMaintenanceComparison">
-            <VRow>
-                <!-- Control para seleccionar el mes -->
-                <VCol cols="12" md="5">
-                    <AppSelect clearable v-model="formSearch.month" label="Mes" placeholder="Todos" :items="months" />
-                </VCol>
-                <!-- Control para seleccionar la placa del vehículo -->
-                <VCol cols="12" md="5">
-                    <SelectPlateVehicleForm clearable label="Placa del vehículo" v-model="formSearch.vehicle_id" />
-                </VCol>
-                <VCol cols="12" md="2" class="mt-7">
-                    <VBtn icon size="30" @click="fetchData">
-                        <VIcon icon="tabler-search"></VIcon>
-                    </VBtn>
-                </VCol>
-            </VRow>
-        </VCardText>
-        <VCardText>
-            <VueApexCharts v-if="!loading.vehicleMaintenanceComparison" id="shipment-statistics" type="bar" height="320"
-                :options="shipmentConfig" :series="series" />
-        </VCardText>
-    </AppCardActions>
+  <!-- 👉 Topic You are Interested in -->
+  <AppCardActions title="Resumen de mantenimientos por mes" actionRefresh @refresh="fetchData"
+    v-model:loading="loading.vehicleMaintenanceComparison">
+
+    <VCardText v-if="!loading.vehicleMaintenanceComparison">
+      <VRow>
+        <VCol cols="12" md="4">
+          <AppSelect label="Año" v-model="formSearch.year" :items="years" />
+        </VCol>
+        <VCol cols="12" md="4">
+          <SelectPlateVehicleForm clearable label="Placa del vehículo" v-model="formSearch.vehicle_id" />
+        </VCol>
+        <VCol cols="12" md="1" class="mt-7">
+          <VBtn icon size="30" @click="fetchData()">
+            <VIcon icon="tabler-search"></VIcon>
+          </VBtn>
+          <!-- <VBtn class="ml-2" :loading="loading.excel" :disabled="loading.excel" icon size="30" @click="downloadExcel()">
+            <VIcon icon="tabler-file-spreadsheet"></VIcon>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
+            </VTooltip>
+          </VBtn> -->
+        </VCol>
+      </VRow>
+    </VCardText>
+
+    <VCardText>
+      <div class="chart-container">
+        <Bar ref="chartInstance" :data="chartData" :options="chartOptions" />
+      </div>
+    </VCardText>
+  </AppCardActions>
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/libs/apex-chart";
-
-.v-btn-group--divided .v-btn:not(:last-child) {
-    border-inline-end-color: rgba(var(--v-theme-primary), 0.5);
-}
-
-#shipment-statistics {
-    .apexcharts-legend-text {
-        font-size: 16px !important;
-    }
-
-    .apexcharts-legend-series {
-        border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-        border-radius: 0.375rem;
-        block-size: 83%;
-        padding-block: 4px;
-        padding-inline: 16px 12px;
-    }
+.chart-container {
+  height: 20rem;
+  width: 100%;
+  /* Asegúrate de que el contenedor tome todo el espacio disponible */
 }
 </style>

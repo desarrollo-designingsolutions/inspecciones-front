@@ -19,8 +19,7 @@ const authenticationStore = useAuthenticationStore();
 const labels = ref<Array<string>>([]);
 const datasets = ref<Array<object>>([]);
 const formSearch = ref({
-  yaer: null as null | string,
-  month: null as null | string,
+  year: null as null | string | number,
   vehicle_id: null as null | string,
 });
 
@@ -29,9 +28,9 @@ const loading = reactive({
   excel: false,
 })
 
-const years = ref([])
+formSearch.value.year = new Date().getFullYear()
 
-const months = ref([])
+const years = ref([])
 
 const fetchData = async () => {
 
@@ -41,8 +40,7 @@ const fetchData = async () => {
     createUrl(`/dashboard/vehicleInspectionsComparison`, {
       query: {
         company_id: authenticationStore.company.id,
-        year: formSearch.value.yaer,
-        month: formSearch.value.month,
+        year: formSearch.value.year,
         vehicle_id: formSearch.value.vehicle_id?.value,
       },
     })
@@ -53,7 +51,6 @@ const fetchData = async () => {
     datasets.value = data.value.datasets;
     labels.value = data.value.labels;
     years.value = data.value.years;
-    months.value = data.value.months;
   }
   loading.vehicleInspectionsComparison = false;
 };
@@ -167,16 +164,13 @@ const downloadExcel = async () => {
 
 <template>
   <!-- 👉 Topic You are Interested in -->
-  <AppCardActions title="Actividades por usuario" actionRefresh @refresh="fetchData"
+  <AppCardActions title="Resumen de inspecciones por mes" actionRefresh @refresh="fetchData"
     v-model:loading="loading.vehicleInspectionsComparison">
 
     <VCardText v-if="!loading.vehicleInspectionsComparison">
       <VRow>
-        <VCol cols="12" md="3">
-          <AppSelect clearable label="Año" v-model="formSearch.yaer" :items="years" />
-        </VCol>
         <VCol cols="12" md="4">
-          <AppSelect clearable label="Mes" v-model="formSearch.month" :items="months" />
+          <AppSelect label="Año" v-model="formSearch.year" :items="years" />
         </VCol>
         <VCol cols="12" md="4">
           <SelectPlateVehicleForm clearable label="Placa del vehículo" v-model="formSearch.vehicle_id" />
