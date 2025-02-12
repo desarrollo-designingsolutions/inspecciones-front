@@ -117,7 +117,7 @@ const chartOptions = {
       // Formatear el valor para que solo se muestre si es diferente de cero
       formatter: (value, tooltipItem) => {
         // Solo mostrar la etiqueta si el valor es diferente de cero
-        return value !== 0 ? `${tooltipItem.dataset.label}: ${value}` : null;
+        return value !== 0 ? `${value}` : null;
       },
     },
   },
@@ -164,7 +164,7 @@ const downloadExcel = async () => {
 
 <template>
   <!-- 👉 Topic You are Interested in -->
-  <AppCardActions title="Resumen de inspecciones por mes" actionRefresh @refresh="fetchData"
+  <AppCardActions title="Resumen de Inspecciones por mes" actionRefresh @refresh="fetchData"
     v-model:loading="loading.vehicleInspectionsComparison">
 
     <VCardText v-if="!loading.vehicleInspectionsComparison">

@@ -48,8 +48,8 @@ const search = ref('')
 // headers
 const headers = [
   { title: 'Placa', key: 'license_plate' },
-  { title: 'cantidad de inspecciones', key: 'inspection_count' },
-  { title: 'cantidad de mantenimientos', key: 'maintenance_count' },
+  { title: 'cant. inspecciones', key: 'inspection_count' },
+  { title: 'cant. mantenimientos', key: 'maintenance_count' },
   { title: 'documentos vencidos', key: 'type_documents_count' },
   { title: 'elementos vencidos', key: 'emergency_elements_count' },
 ]

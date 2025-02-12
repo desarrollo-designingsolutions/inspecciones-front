@@ -163,7 +163,8 @@ defineExpose({
                     father, key
                   ) in componentData.menus" :key="key">
 
-                  <ListGroup :father="father" />
+                  <ListGroup :father="father" :operator="formComponent.operator" :mechanic="formComponent.mechanic"
+                    :inspector="formComponent.inspector" />
                 </template>
               </VList>
             </VCol>

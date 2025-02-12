@@ -10,6 +10,29 @@ export const useRoleStore = defineStore("useRoleStore", {
   }),
   getters: {},
   actions: {
+    chekPermissionsSelected(data: Array<string | number>) {
+      data.forEach(element => {
+
+        if (!this.selectedElements.includes(element)) {
+          this.selectedElements.push(element);
+        }
+
+      });
+    },
+    removePermission(data: Array<string | number>) {
+
+      data.forEach(element => {
+
+        if (this.selectedElements.includes(element)) {
+          const index = this.selectedElements.indexOf(element);
+          if (index > -1) {
+            this.selectedElements.splice(index, 1); // Elimina por posición
+          }
+        }
+
+      });
+
+    },
     clearPermissionsSelected() {
       this.selectedElements = [1]
     },
