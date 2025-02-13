@@ -701,6 +701,7 @@ const deleteDataArrayEmergencyElement = (index: number) => {
         <div v-show="currentTab == 2">
           <VForm ref="refFormPhoto" @submit.prevent="() => { }" :disabled="disabledFiledsView">
             <VRow>
+              <!-- Foto frontal -->
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoFront.loading"
                   label="Foto frontal" :label2="form.photo_front ? '1 archivo agregado' : ''"
@@ -709,12 +710,15 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
 
                 <template v-if="inputFilePhotoFront.imageUrl || form.photo_front">
-                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
-                    :src="inputFilePhotoFront.imageUrl ?? storageBack(form.photo_front)" alt="alt"></VImg>
+                  <div class="image-container mx-auto">
+                    <VImg class="uniform-image" :src="inputFilePhotoFront.imageUrl ?? storageBack(form.photo_front)"
+                      alt="Foto frontal" cover></VImg>
+                  </div>
                 </template>
               </VCol>
-              <VCol cols="12" sm="6">
 
+              <!-- Foto reverso -->
+              <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable :loading="inputFilePhotoRear.loading"
                   label="Foto reverso" :label2="form.photo_rear ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRear.handleImageSelected" :key="inputFilePhotoRear.key"
@@ -722,35 +726,46 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
 
                 <template v-if="inputFilePhotoRear.imageUrl || form.photo_rear">
-                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
-                    :src="inputFilePhotoRear.imageUrl ?? storageBack(form.photo_rear)" alt="alt"></VImg>
+                  <div class="image-container mx-auto">
+                    <VImg class="uniform-image" :src="inputFilePhotoRear.imageUrl ?? storageBack(form.photo_rear)"
+                      alt="Foto reverso" cover></VImg>
+                  </div>
                 </template>
               </VCol>
-              <VCol cols="12" sm="6">
 
+              <!-- Foto lado derecho -->
+              <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
-                  :loading="inputFilePhotoRightSide.loading" label="Foto  lado derecho"
+                  :loading="inputFilePhotoRightSide.loading" label="Foto lado derecho"
                   :label2="form.photo_right_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoRightSide.handleImageSelected" :key="inputFilePhotoRightSide.key"
                   :error-messages="errorsBack.photo_right_side" @input="errorsBack.photo_right_side = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
 
                 <template v-if="inputFilePhotoRightSide.imageUrl || form.photo_right_side">
-                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
-                    :src="inputFilePhotoRightSide.imageUrl ?? storageBack(form.photo_right_side)" alt="alt"></VImg>
+                  <div class="image-container mx-auto">
+                    <VImg class="uniform-image"
+                      :src="inputFilePhotoRightSide.imageUrl ?? storageBack(form.photo_right_side)" alt="Lado derecho"
+                      cover></VImg>
+                  </div>
                 </template>
               </VCol>
+
+              <!-- Foto lado izquierdo -->
               <VCol cols="12" sm="6">
                 <AppFileInput :requiredField="form.id ? false : true" clearable
-                  :loading="inputFilePhotoLeftSide.loading" label="Foto  lado izquierdo"
+                  :loading="inputFilePhotoLeftSide.loading" label="Foto lado izquierdo"
                   :label2="form.photo_left_side ? '1 archivo agregado' : ''"
                   @change="inputFilePhotoLeftSide.handleImageSelected" :key="inputFilePhotoLeftSide.key"
                   :error-messages="errorsBack.photo_left_side" @input="errorsBack.photo_left_side = ''"
                   :rules="[form.id ? true : requiredValidator, ...fileValidationRules]"></AppFileInput>
 
                 <template v-if="inputFilePhotoLeftSide.imageUrl || form.photo_left_side">
-                  <VImg class="mt-3" style=" max-block-size: 300px;max-inline-size: 500px;"
-                    :src="inputFilePhotoLeftSide.imageUrl ?? storageBack(form.photo_left_side)" alt="alt"></VImg>
+                  <div class="image-container mx-auto">
+                    <VImg class="uniform-image"
+                      :src="inputFilePhotoLeftSide.imageUrl ?? storageBack(form.photo_left_side)" alt="Lado izquierdo"
+                      cover></VImg>
+                  </div>
                 </template>
               </VCol>
             </VRow>
@@ -806,3 +821,43 @@ const deleteDataArrayEmergencyElement = (index: number) => {
     </VCard>
   </div>
 </template>
+
+
+<style lang="scss" scoped>
+/* Contenedor principal para todas las imágenes */
+.image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #2f1b44;
+  block-size: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 10%);
+  inline-size: 100%;
+  margin-block-start: 1rem;
+  max-inline-size: 500px;
+
+  /* Color de fondo mientras carga */
+}
+
+/* Estilo para las imágenes */
+.uniform-image {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+/* Efecto hover opcional */
+.uniform-image:hover {
+  transform: scale(1.03);
+}
+
+/* Responsive para móviles */
+@media (max-width: 600px) {
+  .image-container {
+    block-size: 250px;
+    max-inline-size: 100%;
+  }
+}
+</style>

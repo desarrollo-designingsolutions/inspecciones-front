@@ -136,7 +136,7 @@ const pdfExport = async (item: any) => {
   })
 
   if (response.value?.ok && data.value) {
-    openPdfBase64(data.value.pdf)
+    descargarArchivo(data.value.path, 'pdf.pdf')
   }
 }
 
