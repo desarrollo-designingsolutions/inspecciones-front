@@ -70,7 +70,6 @@ const handleEdit = async ({ id }: any) => {
 
   const { response, data, isFetching } = await useApi(`role/${id}/edit`).get();
 
-  componentData.isLoading = isFetching.value;
 
   if (response.value?.ok && data.value?.code == 200) {
 
@@ -86,6 +85,7 @@ const handleEdit = async ({ id }: any) => {
     arrayFather.value = componentData.menus;
 
   }
+  componentData.isLoading = isFetching.value;
 };
 
 const handleSubmit = async () => {
@@ -163,7 +163,8 @@ defineExpose({
                     father, key
                   ) in componentData.menus" :key="key">
 
-                  <ListGroup :father="father" />
+                  <ListGroup :father="father" :operator="formComponent.operator" :mechanic="formComponent.mechanic"
+                    :inspector="formComponent.inspector" />
                 </template>
               </VList>
             </VCol>

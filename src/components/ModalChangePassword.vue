@@ -2,6 +2,9 @@
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import type { VForm } from "vuetify/components/VForm";
 
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+const authenticationStore = useAuthenticationStore();
+
 const errorsBack = ref<IErrorsBack>({});
 const emit = defineEmits(["execute"]);
 const { toast } = useToast();
@@ -39,7 +42,6 @@ const openDialog = async (id: null | number | string, first_time: boolean) => {
 
   componentData.form.id = id;
   componentData.first_time = first_time;
-
 };
 
 const submitForm = async () => {
@@ -52,6 +54,7 @@ const submitForm = async () => {
     const { response, data } = await useApi(`/user/changePassword`).post({
       id: componentData.form.id,
       new_password: componentData.form.new_password,
+      type_user: authenticationStore.user.type_user,
     });
     componentData.isLoading = false;
 
@@ -100,21 +103,22 @@ const isPasswordVisible = ref(false);
               <VCol cols="12">
                 <AppTextField clearable v-model="componentData.form.new_password" label="Contraseña"
                   placeholder="············" :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
-                    " @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]"
-                  :error-messages="errorsBack.new_password" @keypress="errorsBack.new_password = ''" />
+                    " @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :rules="[requiredValidator, passwordValidator]" :error-messages="errorsBack.new_password"
+                  @input="errorsBack.new_password = ''" />
               </VCol>
               <VCol cols="12">
                 <span>
-                  Requisitos de la Contraseña:
-
-                  Mínimo de 8 caracteres.
-                  Debe incluir al menos:
-                  Una letra mayúscula (A-Z)
-                  Una letra minúscula (a-z)
-                  Un número (0-9)
-                  Asegúrate de que la nueva contraseña no sea igual a la contraseña actual.
-
+                  <p>Requisitos de la Contraseña:</p>
+                  <ul class="ml-4">
+                    <li>Longitud mínima de 8 caracteres.</li>
+                    <li>Al menos una letra mayúscula (A-Z).</li>
+                    <li>Al menos una letra minúscula (a-z).</li>
+                    <li>Al menos un carácter especial de este conjunto: !@#$%&*().</li>
+                    <li>Al menos un número (0-9).</li>
+                  </ul>
                 </span>
+
               </VCol>
             </VRow>
           </VForm>

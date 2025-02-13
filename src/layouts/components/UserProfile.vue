@@ -33,20 +33,29 @@ const changeCompany = () => {
 };
 
 
-
 //ModalChangePassword 
 const refModalChangePassword = ref()
 
-const openModalPassword = () => {
-  refModalChangePassword.value.openDialog(user.value.id)
+onMounted(() => {
+  if (authenticationStore.user.first_time) {
+
+    refModalChangePassword.value.openDialog(authenticationStore.user.id, authenticationStore.user.first_time)
+
+  }
+})
+
+
+const passwordSaved = () => {
+  authenticationStore.user.first_time = false
 }
 </script>
 
 <template>
   <VBadge dot location="bottom right" offset-x="3" offset-y="3" bordered color="success">
     <VAvatar class="cursor-pointer" color="primary" variant="tonal">
-      <!-- <VImg :src="avatar1" /> -->
-      {{ avatarText(avatarData) }}
+
+      <VImg v-if="user.photo" :src="storageBack(user.photo)" />
+      <span v-else> {{ avatarText(avatarData) }} </span>
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="230" location="bottom end" offset="14px">
@@ -56,16 +65,14 @@ const openModalPassword = () => {
             <template #prepend>
               <VListItemAction start>
                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
-                  <!-- <VAvatar
-                    color="primary"
-                    variant="tonal"
-                  >
-                    <VImg :src="avatar1" />
-                  </VAvatar> -->
 
-                  <VAvatar color="primary" variant="tonal">
+                  <VAvatar v-if="user.photo">
+                    <VImg :src="storageBack(user.photo)" />
+                  </VAvatar>
+                  <VAvatar v-else color="primary" variant="tonal">
                     {{ avatarText(avatarData) }}
                   </VAvatar>
+
                 </VBadge>
               </VListItemAction>
             </template>
@@ -88,12 +95,12 @@ const openModalPassword = () => {
             <VListItemTitle>Cambiar Empresa</VListItemTitle>
           </VListItem>
 
-          <VListItem @click="openModalPassword">
+          <VListItem :to="{ name: 'User-Profile' }">
             <template #prepend>
-              <VIcon class="me-2" icon="tabler-lock" size="22" />
+              <VIcon class="me-2" icon="tabler-user-circle" size="22" />
             </template>
 
-            <VListItemTitle>Cambiar Constraseña</VListItemTitle>
+            <VListItemTitle>Perfil</VListItemTitle>
           </VListItem>
 
 
@@ -115,8 +122,8 @@ const openModalPassword = () => {
       <!-- !SECTION -->
     </VAvatar>
 
-    <ModalChangePassword ref="refModalChangePassword" />
-
-
   </VBadge>
+
+  <ModalChangePassword ref="refModalChangePassword" @execute="passwordSaved" />
+
 </template>

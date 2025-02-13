@@ -38,6 +38,7 @@ const optionsTable = {
   url: "/maintenance/list",
   params: {
     company_id: authenticationStore.company.id,
+    ...((hasPermission('maintenance.make.form') && !hasPermission('maintenance.create.form')) && { user_mechanic_id: authenticationStore.user.id }),
   },
   headers: [
     { key: 'maintenance_date', title: 'Fecha de Mantenimiento' },
@@ -219,8 +220,9 @@ onMounted(() => {
 </VList>
 </VMenu> -->
 
-          <VBtn :loading="loading.btnCreate" :disabled="loading.btnCreate" v-for="(item, index) in maintenanceTypeBtn"
-            :key="index" @click="goView({ action: 'create', id: null, maintenance_type_id: item.id })">
+          <VBtn v-if="hasPermission('maintenance.create.form')" :loading="loading.btnCreate"
+            :disabled="loading.btnCreate" v-for="(item, index) in maintenanceTypeBtn" :key="index"
+            @click="goView({ action: 'create', id: null, maintenance_type_id: item.id })">
             Agregar Mantenimiento
             <VIcon icon="tabler-plus"></VIcon>
           </VBtn>
