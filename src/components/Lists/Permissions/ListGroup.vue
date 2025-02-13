@@ -57,9 +57,9 @@ watch(operator, (newVal) => {
   } else {
     roleStore.removePermission(operatorGroups);
   }
-}, { immediate: true });
+});
 
-const mechanicGroups = ["1", "14"]; // IDs de los grupos afectados
+const mechanicGroups = ["1", "14", "18"]; // IDs de los grupos afectados
 
 watch(mechanic, (newVal) => {
   if (newVal) {
@@ -67,9 +67,9 @@ watch(mechanic, (newVal) => {
   } else {
     roleStore.removePermission(mechanicGroups);
   }
-}, { immediate: true });
+});
 
-const inspectorGroups = ["1", "7", "8", "9", "10", "11", "12", "13", "14", "16"]; // IDs de los grupos afectados
+const inspectorGroups = ["1", "7", "8", "9", "10", "11", "12", "13", "14", "16", "17"]; // IDs de los grupos afectados
 
 watch(inspector, (newVal) => {
   if (newVal) {
@@ -77,7 +77,7 @@ watch(inspector, (newVal) => {
   } else {
     roleStore.removePermission(inspectorGroups);
   }
-}, { immediate: true });
+});
 </script>
 
 <template>
@@ -87,7 +87,6 @@ watch(inspector, (newVal) => {
     </template>
 
     <VListItem>
-      {{ selectedElements }}
       <template v-for="(permission, index) in father.permissions" :key="index">
         <!-- Checkbox "Todos" (solo para el primer elemento y si no es el permiso especial) -->
         <VSwitch v-if="index === 0 && permission.id !== 1" class="mb-2" label="Todos"

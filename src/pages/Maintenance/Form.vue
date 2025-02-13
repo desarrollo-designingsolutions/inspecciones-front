@@ -26,6 +26,8 @@ interface IForm {
   city_id: null | string,
   mileage: null | string,
   user_mechanic_id: null | string,
+  user_made_maintenance_id: null | string | number,
+  user_inspector_id: null | string | number,
   user_operator_id: null | string,
   status: null | string,
   general_comment: null | string,
@@ -65,6 +67,8 @@ const form = ref<IForm>({
   city_id: null,
   mileage: null,
   user_mechanic_id: null,
+  user_made_maintenance_id: null,
+  user_inspector_id: null,
   user_operator_id: null,
   status: null,
   general_comment: null,
@@ -81,6 +85,7 @@ const clearForm = () => {
     form.value.city_id = null,
     form.value.mileage = null,
     form.value.user_mechanic_id = null,
+    form.value.user_made_maintenance_id = null,
     form.value.user_operator_id = null,
     form.value.status = null,
     form.value.general_comment = null,
@@ -126,7 +131,19 @@ const fetchDataForm = async () => {
 
   if (response.value?.ok && data.value) {
 
-    tabs.value = data.value.tabs;
+    if (hasPermission('maintenance.make.form') && !hasPermission('maintenance.create.form')) {
+      // Si tiene permiso, excluimos el tab en posición 0
+      tabs.value = data.value.tabs.filter((_, index) => index !== 0);
+    }
+    else if (hasPermission('maintenance.create.form') && !hasPermission('maintenance.make.form')) {
+      // Si no tiene permiso, solo incluimos el tab en posición 0
+      tabs.value = data.value.tabs.filter((_, index) => index === 0);
+    } else {
+      tabs.value = data.value.tabs
+    }
+
+    console.log(tabs.value)
+
     states.value = data.value.states
     responseDocument.value = data.value.responseDocument
     responseStatus.value = data.value.responseStatus
@@ -157,6 +174,8 @@ const fetchDataForm = async () => {
       changeState(cloneForm.value.state_id)
       form.value.city_id = cloneForm.value.city_id
     }
+
+    loading.form = false;
   }
   if (!form.value.id) loading.form = false;
 }
@@ -199,7 +218,8 @@ const submitForm = async () => {
 
     form.value.company_id = company.value.id
     form.value.maintenance_type_id = route.params.maintenance_type_id
-    form.value.user_inspector_id = user.value.id
+    if (!form.value.id && hasPermission('maintenance.create.form')) form.value.user_inspector_id = user.value.id;
+    form.value.user_made_maintenance_id = form.value.id && hasPermission('maintenance.make.form') ? user.value.id : null;
 
 
     const { data, response } = await useApi(url).post(form.value);
@@ -335,10 +355,11 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
       <VCardText>
 
-        <div v-show="currentTab == item.order" v-for="(item, index) in tabs" :key="index">
+        <div v-show="currentTab == (hasPermission('maintenance.make.form') ? item.order - 1 : item.order)"
+          v-for="(item, index) in tabs" :key="index">
           <VForm :ref="refFormValidate[item.id + '_validate']" @submit.prevent="() => { }"
             :disabled="disabledFiledsView">
-            <VRow v-if="index === 0">
+            <VRow v-if="index === 0 && hasPermission('maintenance.create.form')">
               <VCol cols="12" sm="6">
 
                 <SelectPlateVehicleForm :requiredField="true" clearable label="Placa del vehículo"
@@ -375,17 +396,28 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                 </AppTextField>
               </VCol>
 
+
               <VCol cols="12" sm="6">
-                <SelectUserMechanicForm :requiredField="true" clearable label="Realizado por"
+                <AppSelect :requiredField="true" clearable :items="responseStatus" v-model="form.status" label="Estado"
+                  :error-messages="errorsBack.status" @input="errorsBack.status = ''">
+                </AppSelect>
+              </VCol>
+
+              <VCol cols="12" sm="6">
+                <SelectUserMechanicForm :requiredField="true" clearable label="Asignado a"
                   :error-messages="errorsBack.user_mechanic_id" @input="errorsBack.user_mechanic_id = ''"
                   :rules="[requiredValidator]" v-model="form.user_mechanic_id">
                 </SelectUserMechanicForm>
               </VCol>
 
               <VCol cols="12" sm="6">
-                <AppSelect :requiredField="true" clearable :items="responseStatus" v-model="form.status" label="Estado"
-                  :error-messages="errorsBack.status" @input="errorsBack.status = ''">
-                </AppSelect>
+                <SelectUserMechanicForm :disabled="disabledFiledsView || hasPermission('maintenance.create.form')"
+                  :requiredField="hasPermission('maintenance.make.form')" clearable label="Realizado por"
+                  :error-messages="errorsBack.user_made_maintenance_id"
+                  @input="errorsBack.user_made_maintenance_id = ''"
+                  :rules="[hasPermission('maintenance.make.form') ? requiredValidator : null]"
+                  v-model="form.user_made_maintenance_id">
+                </SelectUserMechanicForm>
               </VCol>
 
               <VCol cols="12">
@@ -447,9 +479,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                     <VCardText>
                       <VRow>
                         <VCol cols="12" md="6">
-                          <AppSelect clearable :items="responseMaintenanceInput"
-                            v-model="form[itemSelect.id].type" label="Seleccionar"
-                            :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''">
+                          <AppSelect clearable :items="responseMaintenanceInput" v-model="form[itemSelect.id].type"
+                            label="Seleccionar" :error-messages="errorsBack[itemSelect.id]"
+                            @input="errorsBack[itemSelect.id] = ''">
                           </AppSelect>
                         </VCol>
                         <VCol cols="12" md="6">
