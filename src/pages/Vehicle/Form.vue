@@ -38,6 +38,7 @@ interface ITypeDocument {
   document_number: null | string,
   date_issue: null | string,
   expiration_date: null | string,
+  photo: null | string,
 }
 interface IEmergencyElement {
   id: null | string,
@@ -98,6 +99,7 @@ const clearForm = () => {
     document_number: null,
     date_issue: null,
     expiration_date: null,
+    photo: null,
   } as ITypeDocument)
 
   //Tab 4
@@ -160,6 +162,7 @@ const fetchDataForm = async () => {
         document_number: null,
         date_issue: null,
         expiration_date: null,
+        photo: null,
       } as ITypeDocument)
 
       form.value.emergency_elements.push({
@@ -254,6 +257,17 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("photo_left_side", form.value.photo_left_side)
     formData.append("type_documents", JSON.stringify(form.value.type_documents))
     formData.append("emergency_elements", JSON.stringify(form.value.emergency_elements))
+
+    formData.append('cantfiles', String(form.value.type_documents?.length))
+    for (let i = 0; i < form.value.type_documents.length; i++) {
+      formData.append('file_id' + i, form.value.type_documents[i].id)
+      formData.append('file_vehicle_id' + i, form.value.type_documents[i].vehicle_id)
+      formData.append('file_type_document_id' + i, form.value.type_documents[i].type_document_id.value)
+      formData.append('file_document_number' + i, form.value.type_documents[i].document_number)
+      formData.append('file_date_issue' + i, form.value.type_documents[i].date_issue)
+      formData.append('file_expiration_date' + i, form.value.type_documents[i].expiration_date)
+      formData.append('file_photo' + i, form.value.type_documents[i].photo ? form.value.type_documents[i].photo : null)
+    }
 
     loading.form = true;
     const { data, response } = await useApi(url).post(formData);
@@ -433,6 +447,7 @@ const addDataArrayTypeDocument = async () => {
       document_number: null,
       date_issue: null,
       expiration_date: null,
+      photo: null,
     } as ITypeDocument)
   }
 }
@@ -485,6 +500,10 @@ const addDataArrayEmergencyElement = async () => {
 
 const deleteDataArrayEmergencyElement = (index: number) => {
   form.value.emergency_elements.splice(index, 1);
+}
+
+const changeFile = (e: any, item: any) => {
+  item.file = e[0]
 }
 </script>
 
@@ -684,6 +703,12 @@ const deleteDataArrayEmergencyElement = (index: number) => {
                     :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" />
                 </VCol>
 
+                <VCol cols="12">
+                  <AppFileInput label="Seleccione un archivo" v-model="item.photo"
+                    :label2="item.photo ? '1 archivo agregado' : ''" clearable :key="index"
+                    @change="changeFile($event, item)">
+                  </AppFileInput>
+                </VCol>
 
                 <VDivider />
               </template>
