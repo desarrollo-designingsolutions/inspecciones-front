@@ -109,7 +109,7 @@ const optionsFilter = ref({
     inputs: [
       {
         input_type: "dateRange",
-        title: "Fecha de inspección",
+        title: "Fecha de mantenimiento",
         key: "maintenance_date",
       },
       {
@@ -150,7 +150,7 @@ const optionsFilter = ref({
       },
       {
         input_type: "selectInfinite",
-        title: "Mecanico",
+        title: "Mecánico",
         key: "userMechanic",
         relation: 'user_mechanic',
         relation_key: 'id',
