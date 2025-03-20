@@ -72,6 +72,11 @@ if (isAuthenticated) {
 </script>
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
+
+    <div class="login-bg" :style="{
+      backgroundImage: `url('/images/LoginInspecciones.png')`,
+    }"></div>
+
     <div class="position-relative my-sm-16">
       <!-- 👉 Top shape -->
       <VNodeRenderer :nodes="h('div', { innerHTML: authV1TopShape })"
@@ -82,15 +87,15 @@ if (isAuthenticated) {
         class="text-primary auth-v1-bottom-shape d-none d-sm-block" />
 
       <!-- 👉 Auth Card -->
-      <VCard class="auth-card" max-width="460" :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-2'">
+      <VCard class="auth-card transparent-card" max-width="460" :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-2'">
         <div class="d-flex justify-center">
           <VImg max-width="260"
             :src="$vuetify.theme.current.dark ? logo_designing_solutions_light : logo_designing_solutions_dark" />
         </div>
         <VCardText class="d-flex justify-center">
-          <h5 class="text-h5 ">
-            Ingrese a su cuenta
-          </h5>
+          <h3 class="text-h3 white-text">
+            Bienvenido a Inspecciones
+          </h3>
         </VCardText>
 
         <VCardText>
@@ -98,20 +103,20 @@ if (isAuthenticated) {
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField :requiredField="true" v-model="form.email" autofocus label="Correo electrónico"
-                  type="email" placeholder="johndoe@email.com" />
+                <AppTextField class="transparent-field" :requiredField="true" v-model="form.email" autofocus
+                  label="Correo electrónico" type="email" placeholder="johndoe@email.com" />
               </VCol>
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField :requiredField="true" v-model="form.password" label="Contraseña"
+                <AppTextField class="transparent-field" :requiredField="true" v-model="form.password" label="Contraseña"
                   placeholder="············" :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible" />
 
                 <!-- remember me checkbox -->
                 <div class="d-flex align-center flex-wrap justify-space-between mt-1 mb-4">
-                  <VCheckbox v-model="rememberMe" label="Recuérdame" />
+                  <VCheckbox class="white-checkbox" v-model="rememberMe" label="Recuérdame" />
 
                   <RouterLink class="text-primary ms-2 mb-1" :to="{ name: 'ForgotPassword' }">
                     ¿Ha olvidado su contraseña?
@@ -119,7 +124,8 @@ if (isAuthenticated) {
                 </div>
 
                 <!-- login button -->
-                <VBtn class="mt-2" :loading="loading" :disabled="loading" block type="submit" @click="login()">
+                <VBtn class="floating-btn mt-2" :loading="loading" :disabled="loading" block type="submit"
+                  @click="login()">
                   Ingresar
                 </VBtn>
               </VCol>
@@ -134,4 +140,101 @@ if (isAuthenticated) {
 
 <style lang="scss">
 @use "@core/scss/template/pages/page-auth";
+
+.login-bg {
+  position: fixed;
+  z-index: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  block-size: 100%;
+  inline-size: 100%;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+}
+
+.auth-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-block-size: 100vh;
+}
+
+// Fondo de pantalla con la imagen
+.login-bg {
+  position: fixed;
+  z-index: 0;
+  background-image: url("/images/LoginInspecciones.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  inset: 0;
+}
+
+// La tarjeta de login con fondo semitransparente
+.auth-card.transparent-card {
+  position: relative;
+  z-index: 1;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+
+  /* Ajusta el color y la opacidad a tu gusto.
+     Si prefieres un velo blanco, usa rgba(255, 255, 255, 0.3) */
+  background-color: rgba(26, 24, 54, 36.3%) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 20%);
+  color: #fff !important;
+
+  /* Para que todo el texto interno sea blanco */
+}
+
+// Clase para forzar texto blanco
+.white-text {
+  color: #fff !important;
+}
+
+// Inputs transparentes con texto y labels blancos
+.transparent-field :deep(.v-field) {
+  border: 1px solid rgba(255, 255, 255, 50%) !important;
+  background-color: transparent !important;
+  color: #fff !important;
+
+  .v-label {
+    color: #fff !important;
+  }
+
+  input::placeholder {
+    color: rgba(255, 255, 255, 70%) !important;
+  }
+}
+
+// Checkbox y su label en blanco
+.white-checkbox :deep(.v-input--selection-controls__input) {
+  border-color: #fff !important;
+}
+
+.white-checkbox :deep(.v-label) {
+  color: #fff !important;
+}
+
+// Enlace de "¿Ha olvidado su contraseña?" en blanco
+.forgot-password-link {
+  color: #fff !important;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Botón con efecto semitransparente
+.floating-btn {
+  border: 1px solid rgba(255, 255, 255, 30%);
+  background-color: rgba(255, 255, 255, 20%) !important;
+  color: #fff !important;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 30%) !important;
+  }
+}
 </style>
