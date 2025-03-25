@@ -25,7 +25,10 @@ const emit = defineEmits<{
   (e: 'deleteSuccess', id: string | number): void;
   (e: 'dataFetched', data: any): void;
   (e: 'update:selected', value: any[]): void; // Emit para v-model  
+  (e: 'update:loading', value: boolean): void; // Nuevo emit para loading 
 }>();
+
+
 
 const loading = ref<boolean>(false);
 const tableData = ref<any[]>([]);
@@ -85,23 +88,26 @@ watch(selected, (newValue) => {
   emit('update:selected', newValue); // Emitimos cambios al padre
 });
 
+// Observamos cambios en loading y los emitimos
+watch(loading, (newValue) => {
+  emit('update:loading', newValue);
+});
+
 /**
  * Obtiene los datos de la tabla desde la API y actualiza la URL del navegador.
  * @param page Número de página opcional para la paginación.
  * @param fromWatch Indica si la llamada viene del watcher.
  */
-const fetchTableData = async (page: number | null = null, fromWatch = false) => {
-  if (!options.url || isFetching.value) return;
+const fetchTableData = async (page: number | null = null, fromWatch = false, force = false) => {
+  if (!options.url || (isFetching.value && !force)) return; // Solo evita si no es forzado
 
   isFetching.value = true;
   loading.value = true;
   if (page !== null) options.pagination.currentPage = page;
 
-  // Si options.sortBy está vacío, no mantener sort previo de route.query
   const sortQuery = options.sortBy.length
     ? options.sortBy.map(s => `${s.order === 'desc' ? '-' : ''}${s.key}`).join(',')
     : '';
-
 
   const queryParams = {
     page: options.pagination.currentPage.toString(),
@@ -115,25 +121,21 @@ const fetchTableData = async (page: number | null = null, fromWatch = false) => 
     router.push({ query: queryParams });
   }
 
-  const { data, response } = await useApi<any>(
-    createUrl(`${options.url}`, {
-      query: queryParams,
-    })
-  );
+  const { data, response } = await useAxios(`${options.url}`).get({ params: queryParams });
 
   loading.value = false;
   isFetching.value = false;
 
-  if (data.value && data.value.code === 200) {
-    tableData.value = data.value.tableData || [];
-    options.pagination.totalPages = data.value.lastPage || 0;
-    options.pagination.totalItems = data.value.totalData || 0;
-    if (data.value.currentPage && !fromWatch) {
-      options.pagination.currentPage = data.value.currentPage;
+  if (response.status == 200 && data && data.code === 200) {
+    tableData.value = data.tableData || [];
+    options.pagination.totalPages = data.lastPage || 0;
+    options.pagination.totalItems = data.totalData || 0; // Ajusté totalData a total
+    if (data.currentPage && !fromWatch) {
+      options.pagination.currentPage = data.currentPage;
     }
-    options.pagination.rowsPerPage = data.value.totalPage || options.pagination.rowsPerPage;
-    options.tableData = data.value.tableData || [];
-    emit('dataFetched', data.value);
+    options.pagination.rowsPerPage = data.totalPage || options.pagination.rowsPerPage;
+    options.tableData = data.tableData || [];
+    emit('dataFetched', data);
   }
 };
 
@@ -144,13 +146,13 @@ const fetchTableData = async (page: number | null = null, fromWatch = false) => 
  * @param value Nuevo valor para el campo.
  */
 const changeStatus = async (obj: object, field: string, value: number | string) => {
-  const { data, response } = await useApi(`${options.actions.changeStatus.url}`).post({
+  const { data, response } = await useAxios(`${options.actions.changeStatus.url}`).post({
     id: obj.id,
     value: value,
     field: field,
   });
 
-  if (response.value?.ok && data.value) {
+  if (response.status == 200 && data) {
     obj[field] = value;
     obj.is_active = value; // Actualizamos is_active si es el campo por defecto
   }
@@ -192,12 +194,12 @@ const deleteItem = async (id: string | number) => {
 
   loading.value = true;
   const deleteUrl = `${options.actions.delete.url}/${id}`;
-  const { data, response } = await useApi(deleteUrl).delete();
+  const { data, response } = await useAxios(deleteUrl).delete();
   loading.value = false;
 
 
 
-  if (data.value && (data.value.code === 200 || !data.value.code)) {
+  if (data && (data.code === 200 || !data.code)) {
     emit('deleteSuccess', id);
     await fetchTableData();
   }

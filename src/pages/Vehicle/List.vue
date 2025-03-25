@@ -16,12 +16,9 @@ const loading = reactive({ excel: false })
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Vehicle-Form", params: { action: data.action, id: data.id } })
-}
 
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/vehicle/paginate",
@@ -114,7 +111,7 @@ const optionsFilterNew = ref({
 
 const downloadExcel = async () => {
   loading.excel = true;
-  refFilterTable.value = tableFull.value.optionsTable.searchQuery;
+  refFilterTable.value = refTableFull.value.optionsTable.searchQuery;
 
   const { data, response } = await useApi("/vehicle/excelExport").post({
     searchQuery: refFilterTable.value,
@@ -129,20 +126,37 @@ const downloadExcel = async () => {
 
 const pdfExport = async (item: any) => {
 
-  const { data, response } = await useApi("/vehicle/pdfExport").post({
+  const { data, response } = await useAxios("/vehicle/pdfExport").post({
     id: item.id,
     company_id: authenticationStore.company.id,
     pdf_name: "hoja_de_vida_" + item.license_plate,
   })
 
-  if (response.value?.ok && data.value) {
-    descargarArchivo(data.value.path, 'pdf.pdf')
+  if (response.status == 200 && data) {
+    descargarArchivo(data.path, 'pdf.pdf')
   }
 }
 
-const goViewEdit = async (data: any) => {
-  refModalForm.value.openModal(data.id)
+const goViewView = async (data: any) => {
+  router.push({ name: "Vehicle-Form", params: { action: 'view', id: data.id } })
 }
+
+const goViewEdit = async (data: any) => {
+  router.push({ name: "Vehicle-Form", params: { action: 'edit', id: data.id } })
+}
+
+const goViewCreate = async () => {
+  router.push({ name: "Vehicle-Form", params: { action: 'create' } })
+}
+
+const tableLoading = ref(false);
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
+  }
+};
 
 </script>
 
@@ -163,19 +177,20 @@ const goViewEdit = async (data: any) => {
             </VTooltip>
           </VBtn>
 
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar vehículo
           </VBtn>
         </div>
       </VCardTitle>
 
       <VCardText>
-        <FilterDialogNew :options-filter="optionsFilterNew">
+        <FilterDialogNew :options-filter="optionsFilterNew" @force-search="refreshTable" :table-loading="tableLoading">
         </FilterDialogNew>
       </VCardText>
 
       <VCardText class=" mt-2">
-        <TableFullNew ref="tableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewEdit">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
+          @update:loading="tableLoading = $event">
           <template #item.actions2="{ item }">
             <VListItem @click="pdfExport(item)">
               <template #prepend>
