@@ -138,9 +138,7 @@ if (isAuthenticated) {
 </template>
 
 
-<style lang="scss">
-@use "@core/scss/template/pages/page-auth";
-
+<style lang="scss" scoped>
 .login-bg {
   position: fixed;
   z-index: 0;
@@ -195,17 +193,50 @@ if (isAuthenticated) {
 }
 
 // Inputs transparentes con texto y labels blancos
-.transparent-field :deep(.v-field) {
+.transparent-field ::v-deep .v-field {
   border: 1px solid rgba(255, 255, 255, 50%) !important;
   background-color: transparent !important;
   color: #fff !important;
+}
 
-  .v-label {
+.transparent-field ::v-deep .v-label {
+  color: #fff !important;
+}
+
+.transparent-field {
+
+  /* Fuerza el color del texto del input */
+  ::v-deep input {
     color: #fff !important;
   }
 
-  input::placeholder {
-    color: rgba(255, 255, 255, 70%) !important;
+  /* Placeholder en blanco */
+  ::v-deep input::placeholder {
+    color: #fff !important;
+  }
+
+  /* Elimina el fondo blanco de autocompletar y fuerza texto a blanco */
+  ::v-deep input:-webkit-autofill,
+  ::v-deep input:-webkit-autofill:hover,
+  ::v-deep input:-webkit-autofill:focus,
+  ::v-deep input:-webkit-autofill:active {
+    /* Ajusta el color o la transparencia del fondo
+       (puedes usar rgba(26, 24, 54, 0.5) o el que prefieras) */
+    box-shadow: 0 0 0 1000px rgb(32, 32, 60) inset !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
+  /* Ícono clearable en blanco */
+
+  /* Ajusta el selector según la versión de Vuetify:
+     - .v-field__clearable, .v-text-field__clearable
+     - .v-field__append-inner, .v-input__append-inner
+  */
+  ::v-deep .v-field__clearable .v-icon,
+  ::v-deep .v-text-field__clearable .v-icon,
+  ::v-deep .v-field__append-inner .v-icon,
+  ::v-deep .v-input__append-inner .v-icon {
+    color: #fff !important;
   }
 }
 
