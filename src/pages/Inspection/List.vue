@@ -109,79 +109,77 @@ const optionsFilterNew = ref({
   dialog: {
     width: 800,
     cols: 6,
-    inputs: [],
-    // inputs: [
-    //   {
-    //     type: "dateRange",
-    //     label: "Fecha de inspección",
-    //     name: "inspection_date",
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Placa del vehículo",
-    //     arrayInfo: "plateVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfinitePlateVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Marca de vehículo",
-    //     arrayInfo: "brandVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfiniteBrandVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "select",
-    //     label: "Modelo",
-    //     name: 'model',
-    //     options: models,
-    //   },
-    //   {
-    //     type: "select",
-    //     label: "Tipo de inspección",
-    //     name: 'inspectionType',
-    //     options: inspectionTypes.value,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Marca de vehículo",
-    //     arrayInfo: "brandVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfiniteBrandVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Inspector",
-    //     arrayInfo: "userInspector",
-    //     name: "user_inspector",
-    //     url: "selectInfiniteUserInspector",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "booleanActive",
-    //     label: "Estado",
-    //     name: 'is_active',
-    //   },
-    // ],
+    inputs: [
+      {
+        type: "dateRange",
+        label: "Fecha de inspección",
+        name: "inspection_date",
+      },
+      {
+        type: "selectApi",
+        label: "Placa del vehículo",
+        arrayInfo: "plateVehicle",
+        name: "vehicle_id",
+        url: "selectInfinitePlateVehicle",
+        param: company,
+      },
+      {
+        type: "selectApi",
+        label: "Marca de vehículo",
+        arrayInfo: "brandVehicle",
+        name: "vehicle.brand_vehicle",
+        url: "selectInfiniteBrandVehicle",
+        param: company,
+      },
+      {
+        type: "select",
+        label: "Modelo",
+        name: 'vehicle.model',
+        options: models,
+      },
+      {
+        type: "select",
+        label: "Tipo de inspección",
+        name: 'inspectionType.name',
+        options: inspectionTypes.value,
+      },
+      {
+        type: "selectApi",
+        label: "Inspector",
+        arrayInfo: "userInspector",
+        name: "user_inspector_id",
+        url: "selectInfiniteUserInspector",
+        param: company,
+      },
+      {
+        type: "booleanActive",
+        label: "Estado",
+        name: 'is_active',
+      },
+    ],
   },
   filterLabels: { inputGeneral: 'Buscar en todo' }
 })
 
+const setFilterTable = async (data: any) => {
+  filterTable.value = data;
+}
+
+const route = useRoute()
 const downloadExcel = async () => {
   loading.excel = true;
-  filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/inspection/excelExport").post({
-    searchQuery: filterTable.value,
-    company_id: authenticationStore.company.id,
+  const { data, response } = await useAxios("/inspection/excelExport").get({
+    params: {
+      ...route.query,
+      company_id: authenticationStore.company.id
+    }
   })
+
   loading.excel = false;
 
-  if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista inspecciones")
+  if (response.status == 200 && data) {
+    downloadExcelBase64(data.excel, "Lista inspecciones")
   }
 }
 
@@ -263,7 +261,7 @@ const pdfExport = async (item: any) => {
 
       <VCardText class="mt-2">
         <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
-          @update:loading="tableLoading = $event">
+          @update:loading="tableLoading = $event" @searchParams="setFilterTable">
           <template #item.actions2="{ item }">
             <VListItem @click="pdfExport(item)">
               <template #prepend>
