@@ -2,15 +2,6 @@
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
-definePage({
-  name: "Inspection-List",
-  meta: {
-    redirectIfLoggedIn: true,
-    requiresAuth: true,
-    requiredPermission: "inspection.list",
-  },
-});
-
 
 const loading = reactive({
   excel: false,
@@ -33,9 +24,10 @@ const goView = (data: { action: string, id: string | null, inspection_type_id: s
 
 //TABLE
 const tableFull = ref()
+
 const optionsTable = {
-  url: "/inspection/paginate",
-  paramsGlobal: {
+  url: "/inspection/list",
+  params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
@@ -46,7 +38,7 @@ const optionsTable = {
     { key: "inspection_type_name", title: 'Tipo de inspección' },
     { key: "user_inspector_full_name", title: 'Inspector' },
     { key: "is_active", title: 'Estado' },
-    { key: 'actions', title: 'Acciones', sortable: false },
+    { key: 'actions', title: 'Acciones' },
   ],
   actions: {
     changeStatus: {
@@ -79,25 +71,11 @@ const models = computed(() => {
   const years = [];
 
   for (let year = endYear; year >= startYear; year--) {
-    years.push({
-      value: year.toString(),
-      title: year.toString(),
-    });
+    years.push(year);
   }
 
   return years;
 });
-
-const inspectionTypes = ref([
-  {
-    value: 'Pre-Operacional',
-    title: 'Pre-Operacional',
-  },
-  {
-    value: 'HSEQ',
-    title: 'HSEQ',
-  },
-])
 
 const company = {
   company_id: authenticationStore.company.id,
@@ -105,69 +83,75 @@ const company = {
 
 //FILTER
 const filterTable = ref()
-const optionsFilterNew = ref({
-  dialog: {
-    width: 800,
-    cols: 6,
-    inputs: [],
-    // inputs: [
-    //   {
-    //     type: "dateRange",
-    //     label: "Fecha de inspección",
-    //     name: "inspection_date",
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Placa del vehículo",
-    //     arrayInfo: "plateVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfinitePlateVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Marca de vehículo",
-    //     arrayInfo: "brandVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfiniteBrandVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "select",
-    //     label: "Modelo",
-    //     name: 'model',
-    //     options: models,
-    //   },
-    //   {
-    //     type: "select",
-    //     label: "Tipo de inspección",
-    //     name: 'inspectionType',
-    //     options: inspectionTypes.value,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Marca de vehículo",
-    //     arrayInfo: "brandVehicle",
-    //     name: "vehicles.id",
-    //     url: "selectInfiniteBrandVehicle",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "selectApi",
-    //     label: "Inspector",
-    //     arrayInfo: "userInspector",
-    //     name: "user_inspector",
-    //     url: "selectInfiniteUserInspector",
-    //     param: company,
-    //   },
-    //   {
-    //     type: "booleanActive",
-    //     label: "Estado",
-    //     name: 'is_active',
-    //   },
-    // ],
+const optionsFilter = ref({
+  inputGeneral: {
+    relationsGeneral: {
+      all: [],
+      vehicle: ["license_plate", "model"],
+      'vehicle.brand_vehicle': ["name"],
+      inspectionType: ["name"],
+      user: ["name", "surname"],
+    },
   },
-  filterLabels: { inputGeneral: 'Buscar en todo' }
+  dialog: {
+    width: 500,
+    inputs: [
+      {
+        input_type: "dateRange",
+        title: "Fecha de inspección",
+        key: "inspection_date",
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Placa del vehículo",
+        key: "plateVehicle",
+        search_key: "license_plate",
+        relation: 'vehicle',
+        relation_key: 'license_plate',
+        api: "selectInfinitePlateVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Marca de vehículo",
+        key: "brandVehicle",
+        relation: 'vehicle',
+        relation_key: 'brand_vehicle_id',
+        api: "selectInfiniteBrandVehicle",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "select",
+        title: "Modelo",
+        key: 'model',
+        relation: 'vehicle',
+        relation_key: 'model',
+        arrayList: models,
+      },
+      {
+        input_type: "select",
+        title: "Tipo de inspección",
+        key: "inspectionType",
+        relation: 'inspectionType',
+        relation_key: 'name',
+        arrayList: ['Pre-Operacional', 'HSEQ'],
+      },
+      {
+        input_type: "selectInfinite",
+        title: "Inspector",
+        key: "userInspector",
+        relation: 'user_inspector',
+        relation_key: 'id',
+        api: "selectInfiniteUserInspector",
+        paramsFilter: JSON.stringify(company),
+      },
+      {
+        input_type: "booleanActive",
+        title: "Estado",
+        key: "is_active",
+      },
+    ],
+  }
 })
 
 const downloadExcel = async () => {
@@ -253,26 +237,27 @@ const pdfExport = async (item: any) => {
             Agregar Inspeccion HSEQ
             <VIcon icon="tabler-plus"></VIcon>
           </VBtn>
+
+
         </div>
       </VCardTitle>
 
-      <VCardText>
-        <FilterDialogNew :options-filter="optionsFilterNew" @force-search="refreshTable" :table-loading="tableLoading">
-        </FilterDialogNew>
-      </VCardText>
+      <VCardText class=" mt-2">
+        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
-      <VCardText class="mt-2">
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
-          @update:loading="tableLoading = $event">
           <template #item.actions2="{ item }">
+
             <VListItem @click="pdfExport(item)">
               <template #prepend>
                 <VIcon size="22" icon="tabler-file-type-pdf" />
               </template>
               <span>Reporte</span>
             </VListItem>
+
+
           </template>
-        </TableFullNew>
+
+        </TableFull>
       </VCardText>
     </VCard>
   </div>
