@@ -20,19 +20,8 @@ const loading = reactive({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: string | null, inspection_type_id: string | null } = { action: "create", id: null, inspection_type_id: null }) => {
-
-  if (isNullOrUndefined(data.inspection_type_id)) {
-    const tableData = tableFull.value.optionsTable.tableData;
-    const search = tableData.find((item: any) => item.id == data.id)
-    data.inspection_type_id = search.inspection_type_id;
-  }
-
-  router.push({ name: "Inspection-Form", params: { action: data.action, id: data.id, inspection_type_id: data.inspection_type_id } })
-}
-
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 const optionsTable = {
   url: "/inspection/paginate",
   paramsGlobal: {
@@ -200,6 +189,38 @@ const pdfExport = async (item: any) => {
   }
 }
 
+const goViewView = async (data: any) => {
+  if (isNullOrUndefined(data.inspection_type_id)) {
+    const tableData = refTableFull.value.optionsTable.tableData;
+    const search = tableData.find((item: any) => item.id == data.id)
+    data.inspection_type_id = search.inspection_type_id;
+  }
+  router.push({ name: "Inspection-Form", params: { action: 'view', id: data.id, inspection_type_id: data.inspection_type_id } })
+}
+
+const goViewEdit = async (data: any) => {
+  if (isNullOrUndefined(data.inspection_type_id)) {
+    const tableData = refTableFull.value.optionsTable.tableData;
+    const search = tableData.find((item: any) => item.id == data.id)
+    data.inspection_type_id = search.inspection_type_id;
+  }
+  router.push({ name: "Inspection-Form", params: { action: 'edit', id: data.id, inspection_type_id: data.inspection_type_id } })
+}
+
+const goViewCreate = async (data: any) => {
+  router.push({ name: "Inspection-Form", params: { action: 'create', inspection_type_id: data.inspection_type_id } })
+}
+
+const tableLoading = ref(false);
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
+  }
+};
+
+
 </script>
 
 <template>
@@ -230,27 +251,11 @@ const pdfExport = async (item: any) => {
 
             <VList>
               <VListItem v-for="(item, index) in inspectionTypeBtn" :key="index"
-                @click="goView({ action: 'create', id: null, inspection_type_id: item.id })">
-
+                @click="goViewCreate({ inspection_type_id: item.id })">
                 {{ item.name }}
               </VListItem>
             </VList>
           </VMenu>
-
-
-          <VBtn v-if="hasPermission('inspection.type1.form') && !hasPermission('inspection.type2.form')"
-            :loading="loading.btnCreate" :disabled="loading.btnCreate"
-            @click="goView({ action: 'create', id: null, inspection_type_id: '1' })">
-            Agregar Inspeccion Pre-Operacional
-            <VIcon icon="tabler-plus"></VIcon>
-          </VBtn>
-
-          <VBtn v-if="!hasPermission('inspection.type1.form') && hasPermission('inspection.type2.form')"
-            :loading="loading.btnCreate" :disabled="loading.btnCreate"
-            @click="goView({ action: 'create', id: null, inspection_type_id: '2' })">
-            Agregar Inspeccion HSEQ
-            <VIcon icon="tabler-plus"></VIcon>
-          </VBtn>
         </div>
       </VCardTitle>
 
