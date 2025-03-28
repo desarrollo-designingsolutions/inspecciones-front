@@ -17,11 +17,10 @@ const disabledFiledsView = ref<boolean>(false)
 
 
 //TABLE
-const tableFull = ref()
-
+const refTableFull = ref()
 const optionsTable = {
-  url: "/user/list",
-  params: {
+  url: "/user/paginate",
+  paramsGlobal: {
     company_id: company.value.id
   },
   headers: [
@@ -29,7 +28,7 @@ const optionsTable = {
     { key: 'email', title: 'Email' },
     { key: 'role_name', title: 'Rol' },
     { key: "is_active", title: 'Estado', },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {
@@ -46,45 +45,47 @@ const optionsTable = {
 }
 
 //FILTER
-const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["name", "surname", "email", "phone"],
-      role: ["description"],
-    },
-  },
+const optionsFilterNew = ref({
   dialog: {
     width: 500,
     inputs: [
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        type: "booleanActive",
+        label: "Estado",
+        name: "is_active",
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo' }
 })
-
 
 //ModalForm
 const refModalForm = ref()
 
-const openModalForm = () => {
+const reloadTable = () => {
+  refTableFull.value.fetchTableData()
+}
+
+const goViewView = async (data: any) => {
+  refModalForm.value.openModal(data.id, true)
+}
+
+const goViewEdit = async (data: any) => {
+  refModalForm.value.openModal(data.id, false)
+}
+
+const goViewCreate = async () => {
   refModalForm.value.openModal()
 }
 
-const goView = async (data: any = { action: 'created', id: null }) => {
-  disabledFiledsView.value = false
-  if (data.action == 'view') {
-    disabledFiledsView.value = true
+const tableLoading = ref(false);
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
   }
-  refModalForm.value.openModal(data.id, disabledFiledsView.value)
-}
-
-const reloadTable = () => {
-  tableFull.value.executeFetchTable()
-
-}
+};
 </script>
 
 <template>
@@ -97,15 +98,21 @@ const reloadTable = () => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <VBtn @click="openModalForm">
+          <VBtn @click="goViewCreate">
             Agregar usuario
           </VBtn>
         </div>
       </VCardTitle>
 
-      <VCardText class="mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
-        </TableFull>
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilterNew" @force-search="refreshTable" :table-loading="tableLoading">
+        </FilterDialogNew>
+      </VCardText>
+
+      <VCardText class=" mt-2">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
+          @update:loading="tableLoading = $event">
+        </TableFullNew>
       </VCardText>
     </VCard>
 
