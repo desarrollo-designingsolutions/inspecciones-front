@@ -13,6 +13,7 @@ import { useRoute, useRouter } from 'vue-router';
 const props = defineProps<{
   optionsFilter: OptionsFilter;
   tableLoading?: boolean; // Nueva prop para el estado de carga de la tabla
+  disableUrlSync?: boolean; // Nueva prop para deshabilitar la sincronización con la URL (default: false)
 }>();
 
 // Estado reactivo local para los filtros
@@ -31,7 +32,7 @@ const filters = reactive({
 
 // Emits
 const emit = defineEmits<{
-  (e: 'forceSearch'): void;
+  (e: 'forceSearch', queries?: Queries): void; // Modificamos para incluir queries opcionalmente
 }>();
 
 const generalSearch = ref<string>('');
@@ -51,7 +52,8 @@ const isButtonSearchMode = ref(false);
 const debounceTimeout = ref<NodeJS.Timeout | null>(null);
 
 // Actualiza los parámetros de la URL con los valores actuales de los filtros
-const updateQueries = async () => {
+// Actualiza los parámetros de búsqueda y opcionalmente la URL
+const updateQueries = async (skipUrlUpdate: boolean = props.disableUrlSync) => {
   queries.value = {
     sort: route.query.sort ? route.query.sort as string : '', // Preservamos el sort existente
     'filter[inputGeneral]': '',
@@ -86,7 +88,10 @@ const updateQueries = async () => {
     }
   }
 
-  await router.push({ query: { ...queries.value } });
+  // Solo actualizamos la URL si skipUrlUpdate es false
+  if (!skipUrlUpdate) {
+    await router.push({ query: { ...queries.value } });
+  }
 };
 
 // Combinamos isLoading y tableLoading para deshabilitar el botón
@@ -95,9 +100,9 @@ const isButtonDisabled = computed(() => isLoading.value || props.tableLoading);
 // Método para forzar la búsqueda
 const forceSearch = async () => {
   isLoading.value = true; // Indicamos que está cargando
-  await updateQueries(); // Esperamos a que los parámetros se actualicen
+  await updateQueries(props.disableUrlSync); // Pasamos la prop para decidir si se actualiza la URL
   isLoading.value = false; // Reseteamos el estado de carga
-  emit('forceSearch'); // Emitimos el evento después de actualizar la URL
+  emit('forceSearch', queries.value); // Emitimos el evento con los queries actuales
 };
 
 // Aplica los filtros manualmente al hacer clic en el botón "Buscar"
@@ -109,8 +114,11 @@ const applySearch = async () => {
 // Ejecuta updateQueries con un debounce de 500ms
 const debounceUpdateQueries = () => {
   if (debounceTimeout.value) clearTimeout(debounceTimeout.value);
-  debounceTimeout.value = setTimeout(() => {
-    updateQueries();
+  debounceTimeout.value = setTimeout(async () => {
+    await updateQueries(props.disableUrlSync); // Actualizamos queries
+    if (!isButtonSearchMode.value) {
+      emit('forceSearch', queries.value); // Emitimos forceSearch directamente en modo automático
+    }
     debounceTimeout.value = null;
   }, 500);
 };
@@ -157,7 +165,9 @@ const clearFilters = () => {
 
 // Inicializa los valores desde los parámetros de la URL
 const initializeFromQuery = () => {
-  const queryParams = route.query;
+  // const source = props.disableUrlSync ? queries.value : route.query;
+
+  const queryParams = props.disableUrlSync ? queries.value : route.query
 
   generalSearch.value = queryParams['filter[inputGeneral]'] ? queryParams['filter[inputGeneral]'] as string : '';
 
@@ -208,12 +218,15 @@ const clearGeneralSearchInput = () => {
 // Calcula los filtros activos para mostrar como chips
 const activeFilters = computed(() => {
   const filters: Record<string, string> = {};
-  for (const key in route.query) {
+  // Elegimos la fuente de datos según disableUrlSync
+  const source = props.disableUrlSync ? queries.value : route.query;
+
+  for (const key in source) {
     if (key.startsWith('filter[')) {
       const filterKey = key.replace('filter[', '').replace(']', '');
-      const value = route.query[key]; // No asumimos que es string directamente
-      const stringValue = value !== null && value !== undefined ? String(value) : ''; // Convertimos a string de forma segura
-      if (stringValue.trim() !== '') { // Usamos stringValue para trim
+      const value = source[key];
+      const stringValue = value !== null && value !== undefined ? String(value) : '';
+      if (stringValue.trim() !== '') {
         const field = props.optionsFilter.dialog?.inputs?.find(f => f.name === filterKey);
         if (field) {
           if (field.type === 'selectApi') {
@@ -229,7 +242,7 @@ const activeFilters = computed(() => {
             filters[filterKey] = stringValue;
           }
         } else {
-          filters[filterKey] = stringValue; // Fallback para filtros no definidos en dialog.inputs
+          filters[filterKey] = stringValue;
         }
       }
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableOptions } from '@/components/CustomComponents/TableNew/TableOptions'; // Ajusta la ruta según tu proyecto 
+import { TableOptions } from '@/components/CustomComponents/Table/TableOptions'; // Ajusta la ruta según tu proyecto 
 import { defineEmits, defineProps, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -94,11 +94,20 @@ watch(loading, (newValue) => {
 });
 
 /**
- * Obtiene los datos de la tabla desde la API y actualiza la URL del navegador.
- * @param page Número de página opcional para la paginación.
+ * Obtiene los datos de la tabla desde la API, con opción de omitir la actualización de la URL y usar parámetros externos.
+ * @param page Número de página opcional.
  * @param fromWatch Indica si la llamada viene del watcher.
+ * @param force Forzar la petición incluso si está en curso.
+ * @param skipUrlUpdate Omitir la actualización de la URL.
+ * @param externalParams Parámetros externos para la petición (opcional).
  */
-const fetchTableData = async (page: number | null = null, fromWatch = false, force = false) => {
+const fetchTableData = async (
+  page: number | null = null,
+  fromWatch = false,
+  force = false,
+  skipUrlUpdate = false,
+  externalParams: Record<string, any> | null = null
+) => {
   if (!options.url || (isFetching.value && !force)) return; // Solo evita si no es forzado
 
   isFetching.value = true;
@@ -109,16 +118,28 @@ const fetchTableData = async (page: number | null = null, fromWatch = false, for
     ? options.sortBy.map(s => `${s.order === 'desc' ? '-' : ''}${s.key}`).join(',')
     : '';
 
-  const queryParams = {
-    page: options.pagination.currentPage.toString(),
-    perPage: options.pagination.rowsPerPage.toString(),
-    ...(sortQuery && { sort: sortQuery }),
-    ...options.params,
-    ...options.paramsGlobal,
-  };
+  // Usamos externalParams si se proporcionan, de lo contrario usamos los parámetros actuales
+  let queryParams = null
 
-  if (!fromWatch) {
-    router.push({ query: queryParams });
+  if (externalParams) {
+    queryParams = {
+      ...externalParams,
+      ...options.paramsGlobal,
+    };
+  } else {
+    queryParams = {
+      page: options.pagination.currentPage.toString(),
+      perPage: options.pagination.rowsPerPage.toString(),
+      ...(sortQuery && { sort: sortQuery }),
+      ...options.params,
+      ...options.paramsGlobal,
+    }
+  }
+
+
+  // Solo actualizamos la URL si skipUrlUpdate es false y no viene del watcher
+  if (!skipUrlUpdate && !fromWatch) {
+    await router.push({ query: queryParams });
   }
 
   const { data, response } = await useAxios(`${options.url}`).get({ params: queryParams });
