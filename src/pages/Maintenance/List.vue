@@ -71,7 +71,10 @@ const models = computed(() => {
   const years = [];
 
   for (let year = endYear; year >= startYear; year--) {
-    years.push(year);
+    years.push({
+      value: year.toString(),
+      title: year.toString(),
+    });
   }
 
   return years;
@@ -85,90 +88,63 @@ const company = {
 //FILTER
 const optionsFilterNew = ref({
   dialog: {
-    width: 500,
+    width: 600,
     inputs: [
       {
-        type: "booleanActive",
+        type: "dateRange",
+        label: "Fecha de mantenimiento",
+        name: "maintenance_date",
+      },
+      {
+        type: "selectApi",
+        label: "Placa del vehículo",
+        arrayInfo: "plateVehicle",
+        name: "vehicle_id",
+        url: "selectInfinitePlateVehicle",
+        param: company,
+      },
+      {
+        type: "selectApi",
+        label: "Marca de vehículo",
+        arrayInfo: "brandVehicle",
+        name: "vehicle.brand_vehicle_id",
+        url: "selectInfiniteBrandVehicle",
+        param: company,
+      },
+      {
+        type: "select",
+        label: "Modelo",
+        name: 'vehicle.model',
+        options: models,
+      },
+      {
+        type: "selectApi",
+        label: "Inspector",
+        arrayInfo: "userInspector",
+        name: "user_inspector.id",
+        url: "selectInfiniteUserInspector",
+        param: company,
+      },
+      {
+        type: "selectApi",
+        label: "Mecánico",
+        arrayInfo: "userMechanic",
+        name: "user_mechanic.id",
+        url: "selectInfiniteUserMechanic",
+        param: company,
+      },
+      {
+        type: "selectApi",
         label: "Estado",
-        name: "is_active",
+        arrayInfo: "status",
+        name: "status",
+        url: "selectResponseStatus",
+        param: company,
       },
     ],
   },
   filterLabels: { inputGeneral: 'Buscar en todo' }
 })
-
-// const optionsFilter = ref({
-//   inputGeneral: {
-//     relationsGeneral: {
-//       all: ['status|custom'],
-//       vehicle: ["license_plate", "model"],
-//       'vehicle.brand_vehicle': ["name"],
-//       user_inspector: ["name", "surname"],
-//       user_mechanic: ["name", "surname"],
-//     },
-//   },
-//   dialog: {
-//     width: 500,
-//     inputs: [
-//       {
-//         input_type: "dateRange",
-//         title: "Fecha de mantenimiento",
-//         key: "maintenance_date",
-//       },
-//       {
-//         input_type: "selectInfinite",
-//         title: "Placa del vehículo",
-//         key: "plateVehicle",
-//         search_key: "license_plate",
-//         relation: 'vehicle',
-//         relation_key: 'license_plate',
-//         api: "selectInfinitePlateVehicle",
-//         paramsFilter: JSON.stringify(company),
-//       },
-//       {
-//         input_type: "selectInfinite",
-//         title: "Marca de vehículo",
-//         key: "brandVehicle",
-//         relation: 'vehicle',
-//         relation_key: 'brand_vehicle_id',
-//         api: "selectInfiniteBrandVehicle",
-//         paramsFilter: JSON.stringify(company),
-//       },
-//       {
-//         input_type: "select",
-//         title: "Modelo",
-//         key: 'model',
-//         relation: 'vehicle',
-//         relation_key: 'model',
-//         arrayList: models,
-//       },
-//       {
-//         input_type: "selectInfinite",
-//         title: "Inspector",
-//         key: "userInspector",
-//         relation: 'user_inspector',
-//         relation_key: 'id',
-//         api: "selectInfiniteUserInspector",
-//         paramsFilter: JSON.stringify(company),
-//       },
-//       {
-//         input_type: "selectInfinite",
-//         title: "Mecánico",
-//         key: "userMechanic",
-//         relation: 'user_mechanic',
-//         relation_key: 'id',
-//         api: "selectInfiniteUserMechanic",
-//         paramsFilter: JSON.stringify(company),
-//       },
-//       {
-//         input_type: "selectInfinite",
-//         title: "Estado",
-//         key: "status",
-//         api: "selectResponseStatus",
-//       },
-//     ],
-//   }
-// })
 
 const goViewView = async (data: any) => {
   if (isNullOrUndefined(data.maintenance_type_id)) {

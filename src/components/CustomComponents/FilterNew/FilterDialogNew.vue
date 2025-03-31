@@ -116,7 +116,7 @@ const debounceUpdateQueries = () => {
   if (debounceTimeout.value) clearTimeout(debounceTimeout.value);
   debounceTimeout.value = setTimeout(async () => {
     await updateQueries(props.disableUrlSync); // Actualizamos queries
-    if (!isButtonSearchMode.value) {
+    if (props.disableUrlSync) {
       emit('forceSearch', queries.value); // Emitimos forceSearch directamente en modo automático
     }
     debounceTimeout.value = null;
