@@ -124,16 +124,6 @@ const downloadExcel = async () => {
 
       <VCardText class=" mt-2">
         <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView" @update:loading="tableLoading = $event">
-          <template #item.logo="{ item }">
-            <div class="my-2">
-              <VAvatar v-if="item.logo" :size="38" class="me-3">
-                <VImg :src="storageBack(item.logo)"></VImg>
-              </VAvatar>
-              <VAvatar v-else :size="38" class="me-3" color="primary" variant="tonal">
-                {{ avatarText(item.name) }}
-              </VAvatar>
-            </div>
-          </template>
         </TableFullNew>
       </VCardText>
     </VCard>
