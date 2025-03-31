@@ -147,30 +147,27 @@ const optionsFilterNew = ref({
 })
 
 const goViewView = async (data: any) => {
+
   if (isNullOrUndefined(data.maintenance_type_id)) {
-    const tableData = refTableFull.value.optionsTable.tableData;
+    const tableData = refTableFull.value.options.tableData;
     const search = tableData.find((item: any) => item.id == data.id)
     data.maintenance_type_id = search.maintenance_type_id;
   }
-  router.push({ name: "Maintenance-Form", params: { action: 'view', id: data.id } })
+
+  router.push({ name: "Maintenance-Form", params: { action: 'view', id: data.id, maintenance_type_id: data.maintenance_type_id } })
 }
 
 const goViewEdit = async (data: any) => {
   if (isNullOrUndefined(data.maintenance_type_id)) {
-    const tableData = refTableFull.value.optionsTable.tableData;
+    const tableData = refTableFull.value.options.tableData;
     const search = tableData.find((item: any) => item.id == data.id)
     data.maintenance_type_id = search.maintenance_type_id;
   }
-  router.push({ name: "Maintenance-Form", params: { action: 'edit', id: data.id } })
+  router.push({ name: "Maintenance-Form", params: { action: 'edit', id: data.id, maintenance_type_id: data.maintenance_type_id } })
 }
 
 const goViewCreate = async (data: any) => {
-  if (isNullOrUndefined(data.maintenance_type_id)) {
-    const tableData = refTableFull.value.optionsTable.tableData;
-    const search = tableData.find((item: any) => item.id == data.id)
-    data.maintenance_type_id = search.maintenance_type_id;
-  }
-  router.push({ name: "Maintenance-Form", params: { action: 'create' } })
+  router.push({ name: "Maintenance-Form", params: { action: 'create', maintenance_type_id: data.maintenance_type_id } })
 }
 
 const tableLoading = ref(false);

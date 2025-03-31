@@ -138,9 +138,9 @@ const fetchTableData = async (
 
 
   // Solo actualizamos la URL si skipUrlUpdate es false y no viene del watcher
-  if (!skipUrlUpdate && !fromWatch) {
-    await router.push({ query: queryParams });
-  }
+  // if (!skipUrlUpdate && !fromWatch) {
+  //   await router.push({ query: queryParams });
+  // }
 
   const { data, response } = await useAxios(`${options.url}`).get({ params: queryParams });
 
