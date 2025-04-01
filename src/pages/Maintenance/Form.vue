@@ -121,34 +121,30 @@ const fetchDataForm = async () => {
   const url = form.value.id ? `/maintenance/${route.params.id}/edit` : `/maintenance/create/${route.params.maintenance_type_id}`
 
   loading.form = true
-  const { data, response } = await useApi<any>(
-    createUrl(url, {
-      query: {
-        company_id: company.value.id
-      },
-    })
-  );
+  const { data, response } = await useAxios(url).get({
+    company_id: company.value.id
+  });
 
-  if (response.value?.ok && data.value) {
+  if (response.status == 200 && data) {
 
     if (hasPermission('maintenance.make.form') && !hasPermission('maintenance.create.form')) {
       // Si tiene permiso, excluimos el tab en posición 0
-      tabs.value = data.value.tabs.filter((_, index) => index !== 0);
+      tabs.value = data.tabs.filter((_, index) => index !== 0);
     }
     else if (hasPermission('maintenance.create.form') && !hasPermission('maintenance.make.form')) {
       // Si no tiene permiso, solo incluimos el tab en posición 0
-      tabs.value = data.value.tabs.filter((_, index) => index === 0);
+      tabs.value = data.tabs.filter((_, index) => index === 0);
     } else {
-      tabs.value = data.value.tabs
+      tabs.value = data.tabs
     }
 
     console.log(tabs.value)
 
-    states.value = data.value.states
-    responseDocument.value = data.value.responseDocument
-    responseStatus.value = data.value.responseStatus
-    responseMaintenanceInput.value = data.value.responseMaintenanceInput
-    responseTypeMaintenance.value = data.value.responseTypeMaintenance
+    states.value = data.states
+    responseDocument.value = data.responseDocument
+    responseStatus.value = data.responseStatus
+    responseMaintenanceInput.value = data.responseMaintenanceInput
+    responseTypeMaintenance.value = data.responseTypeMaintenance
 
     tabs.value.forEach(element => {
 
@@ -167,9 +163,13 @@ const fetchDataForm = async () => {
 
     //formulario 
 
-    if (data.value.form) {
-      cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
-      form.value = data.value.form
+    console.log(data)
+
+    if (data.form) {
+
+      console.log('entra al data.form')
+      cloneForm.value = JSON.parse(JSON.stringify(data.form));
+      form.value = data.form
 
       changeState(cloneForm.value.state_id)
       form.value.city_id = cloneForm.value.city_id
@@ -222,10 +222,10 @@ const submitForm = async () => {
     form.value.user_made_maintenance_id = form.value.id && hasPermission('maintenance.make.form') ? user.value.id : null;
 
 
-    const { data, response } = await useApi(url).post(form.value);
+    const { data, response } = await useAxios(url).post(form.value);
 
-    if (response.value?.ok && data.value) {
-      if (data.value.code == 200) {
+    if (response.status == 200 && data) {
+      if (data.code == 200) {
         if (isCreateAndNew.value) {
           clearForm(); // Limpiar el formulario si es "Crear y crear otro"
         } else {
@@ -234,7 +234,7 @@ const submitForm = async () => {
       }
     }
 
-    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+    if (data.code === 422) errorsBack.value = data.errors ?? {};
 
     loading.form = false;
   }
@@ -275,11 +275,11 @@ const changeState = async (event: Event) => {
   form.value.city_id = null;
 
   loading.cities = true;
-  const { data, response } = await useApi(`/selectCities/${event}`).get();
+  const { data, response } = await useAxios(`/selectCities/${event}`).get();
   loading.cities = false;
 
-  if (response.value?.ok && data.value) {
-    cities.value = data.value.cities;
+  if (response.status == 200 && data) {
+    cities.value = data.cities;
   }
 }
 
@@ -307,13 +307,13 @@ const changeVehicle = async (event: Event) => {
 
     const url = `/maintenance/getVehicleInfo/${event.value}`
 
-    const { response, data } = await useApi(url).get();
+    const { response, data } = await useAxios(url).get();
 
-    if (response.value?.ok && data.value) {
-      vehicleData.value.license_plate = data.value.vehicle.license_plate
-      vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
-      vehicleData.value.model = data.value.vehicle.model
-      vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
+    if (response.status == 200 && data) {
+      vehicleData.value.license_plate = data.vehicle.license_plate
+      vehicleData.value.brand_vehicle_name = data.vehicle.brand_vehicle_name
+      vehicleData.value.model = data.vehicle.model
+      vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name
       loading.form = false
     }
   }
@@ -354,9 +354,8 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
       </VCardText>
 
       <VCardText>
-
-        <div v-show="currentTab == (hasPermission('maintenance.make.form') ? item.order - 1 : item.order)"
-          v-for="(item, index) in tabs" :key="index">
+        <!-- <div v-show="currentTab == (hasPermission('maintenance.make.form') ? item.order - 1 : item.order)" -->
+        <div v-show="currentTab == item.order" v-for="(item, index) in tabs" :key="index">
           <VForm :ref="refFormValidate[item.id + '_validate']" @submit.prevent="() => { }"
             :disabled="disabledFiledsView">
             <VRow v-if="index === 0 && hasPermission('maintenance.create.form')">
@@ -410,7 +409,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                 </SelectUserMechanicForm>
               </VCol>
 
-              <VCol cols="12" sm="6">
+              <!-- <VCol cols="12" sm="6">
                 <SelectUserMechanicForm :disabled="disabledFiledsView || hasPermission('maintenance.create.form')"
                   :requiredField="hasPermission('maintenance.make.form')" clearable label="Realizado por"
                   :error-messages="errorsBack.user_made_maintenance_id"
@@ -418,7 +417,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                   :rules="[hasPermission('maintenance.make.form') ? requiredValidator : null]"
                   v-model="form.user_made_maintenance_id">
                 </SelectUserMechanicForm>
-              </VCol>
+              </VCol> -->
 
               <VCol cols="12">
                 <AppCardActions title="Información del conductor" action-collapsed>
