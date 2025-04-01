@@ -151,6 +151,8 @@ const allValidations = async () => {
   const validationPromises = processedTabs.value.map(async (element, key) => {
     const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
+    console.log(element.id + '_validate', validation);
+
     if (validation) {
       exito.push(validation.valid);
       tabs.value[key].errorsValidations = !validation.valid;
@@ -267,9 +269,12 @@ const previousVehicleData = ref<IVehicleData | null>(null);
 
 const processVehicleChange = async (event: any) => {
   loading.form = true;
+
+  form.value.id = route.params.id || null
+
   const url = `/inspection/getVehicleInfo/${event.value}`;
   const { response, data } = await useAxios(url).get({
-    params: { inspection_type_id: route.params.inspection_type_id }
+    params: { inspection_type_id: route.params.inspection_type_id, inspection_id: form.value.id }
   });
   if (response.status === 200 && data) {
     vehicleData.value.license_plate = data.vehicle.license_plate;
@@ -278,7 +283,10 @@ const processVehicleChange = async (event: any) => {
     vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name;
     vehicleData.value.type_documents = data.vehicle.type_documents;
 
-    cloneForm.value = JSON.parse(JSON.stringify(data.vehicle));
+    if (data.form) {
+      form.value = JSON.parse(JSON.stringify(data.form));
+    }
+
 
     tabs.value = [
       tabs.value[0], // Mantener primer tab
@@ -518,12 +526,13 @@ watch(
 
             <VRow v-else>
               <VCol cols="12" sm="6" v-for="(itemSelect) in item.inspection_type_inputs" :key="itemSelect.order">
-                <AppSelect :requiredField="true" clearable :items="responseVehicle" v-model="form[itemSelect.id].value"
-                  :label="itemSelect.name" :error-messages="errorsBack[itemSelect.id]"
-                  @input="errorsBack[itemSelect.id] = ''" :rules="[requiredValidator]">
+                <AppSelect :name="'select_' + itemSelect.id" :requiredField="true" clearable :items="responseVehicle"
+                  v-model="form[itemSelect.id].value" :label="itemSelect.name"
+                  :error-messages="errorsBack[itemSelect.id]" @input="errorsBack[itemSelect.id] = ''"
+                  :rules="[requiredValidator]">
                 </AppSelect>
-                <AppTextarea v-if="route.params.inspection_type_id != 1" label="Observacion"
-                  v-model="form[itemSelect.id].observation">
+                <AppTextarea :name="'textArea_' + itemSelect.id" v-if="route.params.inspection_type_id != 1"
+                  label="Observacion" v-model="form[itemSelect.id].observation">
                 </AppTextarea>
               </VCol>
 
