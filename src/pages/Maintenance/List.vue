@@ -192,7 +192,7 @@ const downloadExcel = async () => {
   loading.excel = false;
 
   if (response.status == 200 && data) {
-    downloadExcelBase64(data.excel, "Listado de mantenimientos")
+    downloadExcelBase64(data.excel, "Listado de mantenimientos ")
   }
 }
 

@@ -9,7 +9,6 @@ import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustratio
 import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import type { VForm } from "vuetify/components"
 
 const refForm = ref<VForm>();
@@ -78,20 +77,9 @@ if (isAuthenticated) {
     }"></div>
 
     <div class="position-relative my-sm-16">
-      <!-- 👉 Top shape -->
-      <VNodeRenderer :nodes="h('div', { innerHTML: authV1TopShape })"
-        class="text-primary auth-v1-top-shape d-none d-sm-block" />
-
-      <!-- 👉 Bottom shape -->
-      <VNodeRenderer :nodes="h('div', { innerHTML: authV1BottomShape })"
-        class="text-primary auth-v1-bottom-shape d-none d-sm-block" />
-
       <!-- 👉 Auth Card -->
       <VCard class="auth-card transparent-card" max-width="460" :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-2'">
-        <div class="d-flex justify-center">
-          <VImg max-width="260"
-            :src="$vuetify.theme.current.dark ? logo_designing_solutions_light : logo_designing_solutions_dark" />
-        </div>
+
         <VCardText class="d-flex justify-center">
           <h3 class="text-h3 white-text">
             Bienvenido a Inspecciones
