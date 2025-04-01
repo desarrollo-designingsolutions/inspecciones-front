@@ -53,9 +53,11 @@ const fetchDataBtn = async () => {
   loading.btnCreate = true
   const url = "/inspection/loadBtnCreate";
 
-  const { data, response } = await useAxios(url);
-  if (response.status == 200 && data) {
-    inspectionTypeBtn.value = data.inspection_type;
+  const { data, response } = await useApi<any>(
+    createUrl(url)
+  );
+  if (response.value?.ok && data.value) {
+    inspectionTypeBtn.value = data.value.inspection_type;
   }
   loading.btnCreate = false
 }
