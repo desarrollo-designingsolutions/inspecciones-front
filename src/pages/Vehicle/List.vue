@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import ModalForm from '@/pages/Vehicle/Components/ModalForm.vue';
 
 definePage({
   name: "Vehicle-List",
@@ -12,14 +13,16 @@ definePage({
 });
 
 
-const loading = reactive({ excel: false })
+const loading = reactive({
+  excel: false,
+  report: false
+})
 
 const authenticationStore = useAuthenticationStore();
 
 
 //TABLE
 const refTableFull = ref()
-
 const optionsTable = {
   url: "/vehicle/paginate",
   paramsGlobal: {
@@ -158,6 +161,9 @@ const refreshTable = () => {
   }
 };
 
+//ModalForm
+const refModalForm = ref()
+
 </script>
 
 <template>
@@ -175,6 +181,10 @@ const refreshTable = () => {
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
+          </VBtn>
+
+          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="refModalForm.openModal()">
+            Generar reporte
           </VBtn>
 
           <VBtn @click="goViewCreate()">
@@ -202,5 +212,8 @@ const refreshTable = () => {
         </TableFullNew>
       </VCardText>
     </VCard>
+
+    <ModalForm ref="refModalForm" />
+
   </div>
 </template>
