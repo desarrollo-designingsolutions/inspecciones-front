@@ -518,6 +518,33 @@ const deleteDataArrayEmergencyElement = (index: number) => {
 const changeFile = (e: any, item: any) => {
   item.file = e[0]
 }
+
+// Computed to check if all inputs in an inspection are selected
+const todosSeleccionados = (inspection) => {
+  return inspection.inputs.every(input => typeGroups.value.includes(input.id));
+}
+
+// Method to toggle all inputs in an inspection
+const toggleTodos = (inspection, event) => {
+  const isChecked = event.target.checked;
+
+  if (isChecked) {
+    // Select all inputs that aren't already selected (except disabled ones)
+    inspection.inputs.forEach(input => {
+      if (!typeGroups.value.includes(input.id) && input.id !== 1) {
+        typeGroups.value.push(input.id);
+      }
+    });
+  } else {
+    // Deselect all inputs from this inspection
+    inspection.inputs.forEach(input => {
+      const index = typeGroups.value.indexOf(input.id);
+      if (index !== -1) {
+        typeGroups.value.splice(index, 1);
+      }
+    });
+  }
+}
 </script>
 
 <template>
@@ -865,7 +892,8 @@ const changeFile = (e: any, item: any) => {
                       <!-- Columna Todos -->
                       <VCol cols="12" md="4" v-if="inspection.inputs.length > 0">
                         <div class="d-flex align-center">
-                          <VSwitch label="Todos" class="ma-0" />
+                          <VSwitch label="Todos" class="ma-0" :model-value="todosSeleccionados(inspection)"
+                            @change="toggleTodos(inspection, $event)" />
                         </div>
                       </VCol>
 
