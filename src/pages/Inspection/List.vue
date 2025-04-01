@@ -236,14 +236,14 @@ const pdfExport = async (item: any) => {
           <VBtn v-if="hasPermission('inspection.type1.form') && !hasPermission('inspection.type2.form')"
             :loading="loading.btnCreate" :disabled="loading.btnCreate"
             @click="goView({ action: 'create', id: null, inspection_type_id: '1' })">
-            Agregar Inspeccion Pre-Operacional
+            Agregar Inspección Pre-Operacional
             <VIcon icon="tabler-plus"></VIcon>
           </VBtn>
 
           <VBtn v-if="!hasPermission('inspection.type1.form') && hasPermission('inspection.type2.form')"
             :loading="loading.btnCreate" :disabled="loading.btnCreate"
             @click="goView({ action: 'create', id: null, inspection_type_id: '2' })">
-            Agregar Inspeccion HSEQ
+            Agregar Inspección HSEQ
             <VIcon icon="tabler-plus"></VIcon>
           </VBtn>
 

@@ -42,6 +42,7 @@ interface IVehicleData {
     type_document_name: string,
     document_number: string,
     expiration_date: string,
+    original: string,
   }>,
 }
 
@@ -151,7 +152,7 @@ const allValidations = async () => {
   updateValidationToFalse();
   let exito: any[] = [];
 
-  const validationPromises = tabs.value.map(async (element, key) => {
+  const validationPromises = processedTabs.value.map(async (element, key) => {
     const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
     if (validation) {
@@ -170,36 +171,36 @@ const allValidations = async () => {
 const isCreateAndNew = ref<boolean>(false)
 const submitForm = async () => {
 
-  const validation = await allValidations()
+  // const validation = await allValidations()
 
-  if (validation) {
-    loading.form = true;
-    const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
+  // if (validation) {
+  loading.form = true;
+  const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
 
-    form.value.company_id = company.value.id
-    form.value.user_inspector_id = authenticationStore.user.id
-    form.value.inspection_type_id = route.params.inspection_type_id
-    form.value.type_documents = vehicleData.value.type_documents
+  form.value.company_id = company.value.id
+  form.value.user_inspector_id = authenticationStore.user.id
+  form.value.inspection_type_id = route.params.inspection_type_id
+  form.value.type_documents = vehicleData.value.type_documents
 
 
-    const { data, response } = await useApi(url).post(form.value);
+  const { data, response } = await useApi(url).post(form.value);
 
-    if (response.value?.ok && data.value) {
-      if (data.value.code == 200) {
-        if (isCreateAndNew.value) {
-          clearForm(); // Limpiar el formulario si es "Crear y crear otro"
-        } else {
-          router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
-        }
+  if (response.value?.ok && data.value) {
+    if (data.value.code == 200) {
+      if (isCreateAndNew.value) {
+        clearForm(); // Limpiar el formulario si es "Crear y crear otro"
+      } else {
+        router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
       }
     }
-    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+  }
+  if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
 
-    loading.form = false;
-  }
-  else {
-    toast('Faltan Campos Por Diligenciar', '', 'danger')
-  }
+  loading.form = false;
+  // }
+  // else {
+  //   toast('Faltan Campos Por Diligenciar', '', 'danger')
+  // }
 
 }
 
@@ -264,40 +265,65 @@ const vehicleData = ref<IVehicleData>({
 const changeVehicle = async (event: Event) => {
   if (event) {
 
+    loading.form = true;
+
     const url = `/inspection/getVehicleInfo/${event.value}`
 
-    const { response, data } = await useApi(url).get();
+    const { response, data } = await useAxios(url).get({ params: { inspection_type_id: route.params.inspection_type_id } });
 
-    if (response.value?.ok && data.value) {
-      vehicleData.value.license_plate = data.value.vehicle.license_plate
-      vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
-      vehicleData.value.model = data.value.vehicle.model
-      vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
-      vehicleData.value.type_documents = data.value.vehicle.type_documents
+    if (response.status == 200 && data) {
+      vehicleData.value.license_plate = data.vehicle.license_plate
+      vehicleData.value.brand_vehicle_name = data.vehicle.brand_vehicle_name
+      vehicleData.value.model = data.vehicle.model
+      vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name
+      vehicleData.value.type_documents = data.vehicle.type_documents
 
-      cloneForm.value.type_documents.forEach(element => {
-        const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
-        search.response = element.original
-        loading.form = false
-      });
+      cloneForm.value = JSON.parse(JSON.stringify(data.vehicle));
+
+      // cloneForm.value.type_documents.forEach(element => {
+      //   const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
+      //   search.response = element.original
+      // });
+
+      tabs.value = [
+        tabs.value[0], // Mantener primer tab
+        ...data.tabs.map(tab => ({ ...tab, show: true }))
+      ];
+
+      loading.form = false
     }
   }
 }
+
+const processedTabs = computed(() => {
+  // Inicializar campos del formulario para los inputs de los tabs
+  tabs.value.forEach(tab => {
+    if (tab.inspection_type_inputs) {
+      tab.inspection_type_inputs.forEach(input => {
+        if (!form.value[input.id]) {
+          form.value[input.id] = { value: '', observation: '' }; // Estructura inicial
+        }
+      });
+    }
+  });
+
+  return tabs.value.filter(tab => tab.show); // Filtra solo tabs visibles
+});
 
 
 //ModalQuestion
 const refModalQuestion = ref()
 
 const openModalQuestionSave = async (typeCreate: boolean) => {
-  const validation = await allValidations()
-  if (validation) {
-    isCreateAndNew.value = typeCreate
-    refModalQuestion.value.openModal()
-    refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
-  }
-  else {
-    toast('Faltan Campos Por Diligenciar', '', 'danger')
-  }
+  // const validation = await allValidations()
+  // if (validation) {
+  isCreateAndNew.value = typeCreate
+  refModalQuestion.value.openModal()
+  refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
+  // }
+  // else {
+  //   toast('Faltan Campos Por Diligenciar', '', 'danger')
+  // }
 }
 
 </script>
@@ -307,15 +333,15 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span v-if="route.params.inspection_type_id == 1">
-          Inspeccion Pre-Operacional
+          Inspección Pre-Operacional
         </span>
         <span v-else>
-          Inspeccion HSEQ
+          Inspección HSEQ
         </span>
       </VCardTitle>
       <VCardText>
         <VTabs v-model="currentTab">
-          <VTab class="text-none" v-for="(item, index) in tabs" :key="index" v-show="item.show">
+          <VTab class="text-none" v-for="(item, index) in processedTabs" :key="index" v-show="item.show">
             <VIcon start :icon="!item.errorsValidations ? '' : 'tabler-alert-circle-filled'"
               :color="!item.errorsValidations ? '' : 'error'" />
             {{ item.name }}
@@ -325,7 +351,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
       <VCardText>
 
-        <div v-show="currentTab == item.order" v-for="(item, index) in tabs" :key="index">
+        <div v-show="currentTab == item.order" v-for="(item, index) in processedTabs" :key="index">
           <VForm :ref="refFormValidate[item.id + '_validate']" @submit.prevent="() => { }"
             :disabled="disabledFiledsView">
             <VRow v-if="index === 0">
@@ -422,7 +448,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                       </VCol>
                       <VCol cols="12" sm="4">
                         <AppSelect label="¿Es original?" :requiredField="true" :items="responseDocument"
-                          v-model="item.response" :rules="[requiredValidator]">
+                          v-model="item.original" :rules="[requiredValidator]">
                         </AppSelect>
                       </VCol>
                     </VRow>
