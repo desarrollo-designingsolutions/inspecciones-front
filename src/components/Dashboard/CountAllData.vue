@@ -19,7 +19,11 @@ const countData = ref<CountData[]>([
         "title": 'Vehículos activos',
         "value": 0,
         "isHover": false,
-        "to": { name: "Vehicle-List" },
+        "to": {
+            name: "Vehicle-List", query: {
+                'filter[inputGeneral]': 'Activo'
+            }
+        },
     },
     {
         "icon": 'tabler-users-group',
@@ -27,7 +31,11 @@ const countData = ref<CountData[]>([
         "title": 'Clientes activos',
         "value": 0,
         "isHover": false,
-        "to": { name: "Client-List" },
+        "to": {
+            name: "Client-List", query: {
+                'filter[inputGeneral]': 'Activo'
+            }
+        },
     },
     {
         "icon": 'tabler-checkup-list',
@@ -35,7 +43,11 @@ const countData = ref<CountData[]>([
         "title": 'Inspecciones pre-operacionales activas',
         "value": 0,
         "isHover": false,
-        "to": { name: "Inspection-List" },
+        "to": {
+            name: "Inspection-List", query: {
+                'filter[inputGeneral]': 'Pre-Operacional'
+            }
+        },
     },
     {
         "icon": 'tabler-checklist',
@@ -43,7 +55,11 @@ const countData = ref<CountData[]>([
         "title": 'Inspecciones HSEQ activas',
         "value": 0,
         "isHover": false,
-        "to": { name: "Inspection-List" },
+        "to": {
+            name: "Inspection-List", query: {
+                'filter[inputGeneral]': 'HSEQ'
+            }
+        },
     },
     {
         "icon": 'tabler-traffic-cone',
@@ -51,7 +67,11 @@ const countData = ref<CountData[]>([
         "title": 'Mantenimientos completados',
         "value": 0,
         "isHover": false,
-        "to": { name: "Maintenance-List" },
+        "to": {
+            name: "Maintenance-List", query: {
+                'filter[inputGeneral]': 'Completado'
+            }
+        },
     },
     {
         "icon": 'tabler-traffic-cone',
@@ -59,7 +79,11 @@ const countData = ref<CountData[]>([
         "title": 'Mantenimientos asignados',
         "value": 0,
         "isHover": false,
-        "to": { name: "Maintenance-List" },
+        "to": {
+            name: "Maintenance-List", query: {
+                'filter[inputGeneral]': 'Asignado'
+            }
+        },
     },
 ]);
 const isLoading = ref<boolean>(false)
