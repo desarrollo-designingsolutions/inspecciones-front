@@ -20,23 +20,11 @@ const loading = reactive({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: string | null, inspection_type_id: string | null } = { action: "create", id: null, inspection_type_id: null }) => {
-
-  if (isNullOrUndefined(data.inspection_type_id)) {
-    const tableData = tableFull.value.optionsTable.tableData;
-    const search = tableData.find((item: any) => item.id == data.id)
-    data.inspection_type_id = search.inspection_type_id;
-  }
-
-  router.push({ name: "Inspection-Form", params: { action: data.action, id: data.id, inspection_type_id: data.inspection_type_id } })
-}
-
 //TABLE
-const tableFull = ref()
-
+const refTableFull = ref()
 const optionsTable = {
-  url: "/inspection/list",
-  params: {
+  url: "/inspection/paginate",
+  paramsGlobal: {
     company_id: authenticationStore.company.id,
   },
   headers: [
@@ -47,7 +35,7 @@ const optionsTable = {
     { key: "inspection_type_name", title: 'Tipo de inspección' },
     { key: "user_inspector_full_name", title: 'Inspector' },
     { key: "is_active", title: 'Estado' },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {
@@ -80,11 +68,25 @@ const models = computed(() => {
   const years = [];
 
   for (let year = endYear; year >= startYear; year--) {
-    years.push(year);
+    years.push({
+      value: year.toString(),
+      title: year.toString(),
+    });
   }
 
   return years;
 });
+
+const inspectionTypes = ref([
+  {
+    value: 'Pre-Operacional',
+    title: 'Pre-Operacional',
+  },
+  {
+    value: 'HSEQ',
+    title: 'HSEQ',
+  },
+])
 
 const company = {
   company_id: authenticationStore.company.id,
@@ -92,89 +94,81 @@ const company = {
 
 //FILTER
 const filterTable = ref()
-const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: [],
-      vehicle: ["license_plate", "model"],
-      'vehicle.brand_vehicle': ["name"],
-      inspectionType: ["name"],
-      user: ["name", "surname"],
-    },
-  },
+const optionsFilterNew = ref({
   dialog: {
-    width: 500,
+    width: 800,
+    cols: 6,
     inputs: [
       {
-        input_type: "dateRange",
-        title: "Fecha de inspección",
-        key: "inspection_date",
+        type: "dateRange",
+        label: "Fecha de inspección",
+        name: "inspection_date",
       },
       {
-        input_type: "selectInfinite",
-        title: "Placa del vehículo",
-        key: "plateVehicle",
-        search_key: "license_plate",
-        relation: 'vehicle',
-        relation_key: 'license_plate',
-        api: "selectInfinitePlateVehicle",
-        paramsFilter: JSON.stringify(company),
+        type: "selectApi",
+        label: "Placa del vehículo",
+        arrayInfo: "plateVehicle",
+        name: "vehicle_id",
+        url: "selectInfinitePlateVehicle",
+        param: company,
       },
       {
-        input_type: "selectInfinite",
-        title: "Marca de vehículo",
-        key: "brandVehicle",
-        relation: 'vehicle',
-        relation_key: 'brand_vehicle_id',
-        api: "selectInfiniteBrandVehicle",
-        paramsFilter: JSON.stringify(company),
+        type: "selectApi",
+        label: "Marca de vehículo",
+        arrayInfo: "brandVehicle",
+        name: "vehicle.brand_vehicle",
+        url: "selectInfiniteBrandVehicle",
+        param: company,
       },
       {
-        input_type: "select",
-        title: "Modelo",
-        key: 'model',
-        relation: 'vehicle',
-        relation_key: 'model',
-        arrayList: models,
+        type: "select",
+        label: "Modelo",
+        name: 'vehicle.model',
+        options: models,
       },
       {
-        input_type: "select",
-        title: "Tipo de inspección",
-        key: "inspectionType",
-        relation: 'inspectionType',
-        relation_key: 'name',
-        arrayList: ['Pre-Operacional', 'HSEQ'],
+        type: "select",
+        label: "Tipo de inspección",
+        name: 'inspectionType.name',
+        options: inspectionTypes.value,
       },
       {
-        input_type: "selectInfinite",
-        title: "Inspector",
-        key: "userInspector",
-        relation: 'user_inspector',
-        relation_key: 'id',
-        api: "selectInfiniteUserInspector",
-        paramsFilter: JSON.stringify(company),
+        type: "selectApi",
+        label: "Inspector",
+        arrayInfo: "userInspector",
+        name: "user_inspector_id",
+        url: "selectInfiniteUserInspector",
+        param: company,
       },
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        type: "booleanActive",
+        label: "Estado",
+        name: 'is_active',
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo' }
 })
 
+const setFilterTable = async (data: any) => {
+  filterTable.value = data;
+}
+
+const route = useRoute()
 const downloadExcel = async () => {
   loading.excel = true;
-  filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/inspection/excelExport").post({
-    searchQuery: filterTable.value,
-    company_id: authenticationStore.company.id,
+  const { data, response } = await useAxios("/inspection/excelExport").get({
+    params: {
+      ...route.query,
+      company_id: authenticationStore.company.id
+    }
   })
+
   loading.excel = false;
 
-  if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista inspecciones")
+  if (response.status == 200 && data) {
+    downloadExcelBase64(data.excel, "Lista inspecciones")
   }
 }
 
@@ -194,6 +188,38 @@ const pdfExport = async (item: any) => {
     openPdfBase64(data.value.pdf)
   }
 }
+
+const goViewView = async (data: any) => {
+  if (isNullOrUndefined(data.inspection_type_id)) {
+    const tableData = refTableFull.value.optionsTable.tableData;
+    const search = tableData.find((item: any) => item.id == data.id)
+    data.inspection_type_id = search.inspection_type_id;
+  }
+  router.push({ name: "Inspection-Form", params: { action: 'view', id: data.id, inspection_type_id: data.inspection_type_id } })
+}
+
+const goViewEdit = async (data: any) => {
+  if (isNullOrUndefined(data.inspection_type_id)) {
+    const tableData = refTableFull.value.optionsTable.tableData;
+    const search = tableData.find((item: any) => item.id == data.id)
+    data.inspection_type_id = search.inspection_type_id;
+  }
+  router.push({ name: "Inspection-Form", params: { action: 'edit', id: data.id, inspection_type_id: data.inspection_type_id } })
+}
+
+const goViewCreate = async (data: any) => {
+  router.push({ name: "Inspection-Form", params: { action: 'create', inspection_type_id: data.inspection_type_id } })
+}
+
+const tableLoading = ref(false);
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
+  }
+};
+
 
 </script>
 
@@ -225,48 +251,31 @@ const pdfExport = async (item: any) => {
 
             <VList>
               <VListItem v-for="(item, index) in inspectionTypeBtn" :key="index"
-                @click="goView({ action: 'create', id: null, inspection_type_id: item.id })">
-
+                @click="goViewCreate({ inspection_type_id: item.id })">
                 {{ item.name }}
               </VListItem>
             </VList>
           </VMenu>
-
-
-          <VBtn v-if="hasPermission('inspection.type1.form') && !hasPermission('inspection.type2.form')"
-            :loading="loading.btnCreate" :disabled="loading.btnCreate"
-            @click="goView({ action: 'create', id: null, inspection_type_id: '1' })">
-            Agregar Inspección Pre-Operacional
-            <VIcon icon="tabler-plus"></VIcon>
-          </VBtn>
-
-          <VBtn v-if="!hasPermission('inspection.type1.form') && hasPermission('inspection.type2.form')"
-            :loading="loading.btnCreate" :disabled="loading.btnCreate"
-            @click="goView({ action: 'create', id: null, inspection_type_id: '2' })">
-            Agregar Inspección HSEQ
-            <VIcon icon="tabler-plus"></VIcon>
-          </VBtn>
-
-
         </div>
       </VCardTitle>
 
-      <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilterNew" @force-search="refreshTable" :table-loading="tableLoading">
+        </FilterDialogNew>
+      </VCardText>
 
+      <VCardText class="mt-2">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
+          @update:loading="tableLoading = $event" @searchParams="setFilterTable">
           <template #item.actions2="{ item }">
-
             <VListItem @click="pdfExport(item)">
               <template #prepend>
                 <VIcon size="22" icon="tabler-file-type-pdf" />
               </template>
               <span>Reporte</span>
             </VListItem>
-
-
           </template>
-
-        </TableFull>
+        </TableFullNew>
       </VCardText>
     </VCard>
   </div>

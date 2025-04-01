@@ -3,92 +3,82 @@ import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
-  name: "Client-List",
+  name: "Emergency-Element-List",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "client.list",
+    requiredPermission: "menu.emergency.element",
   },
 });
 
-const route = useRoute()
+const loading = reactive({ excel: false })
 
 const authenticationStore = useAuthenticationStore();
 
-const loading = reactive({ excel: false })
+const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
+  router.push({ name: "Emergency-Element-Form", params: { action: data.action, id: data.id } })
+}
 
 //TABLE
-const refTableFull = ref()
+const tableFull = ref()
+
 const optionsTable = {
-  url: "/client/paginate",
-  paramsGlobal: {
+  url: "/emergency-element/list",
+  params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
     { key: 'name', title: 'Nombre' },
     { key: "is_active", title: 'Estado' },
-    { key: 'actions', title: 'Acciones', sortable: false },
+    { key: 'actions', title: 'Acciones' },
   ],
   actions: {
     changeStatus: {
-      url: "/client/changeStatus"
+      url: "/emergency-element/changeStatus"
     },
     delete: {
-      url: "/client/delete"
+      url: "/emergency-element/delete"
     },
   }
 }
 
+
 //FILTER
-const optionsFilterNew = ref({
+const filterTable = ref()
+const optionsFilter = ref({
+  inputGeneral: {
+    relationsGeneral: {
+      all: ["name"],
+    },
+  },
   dialog: {
     width: 500,
     inputs: [
       {
-        type: "booleanActive",
-        label: "Estado",
-        name: "is_active",
+        input_type: "booleanActive",
+        title: "Estado",
+        key: "is_active",
       },
     ],
-  },
-  filterLabels: { inputGeneral: 'Buscar en todo' }
+  }
 })
 
-const goViewView = async (data: any) => {
-  router.push({ name: "Client-Form", params: { action: 'view', id: data.id } })
+const returnFilter = (filter: any) => {
+  filterTable.value = filter
 }
-
-const goViewEdit = async (data: any) => {
-  router.push({ name: "Client-Form", params: { action: 'edit', id: data.id } })
-}
-
-const goViewCreate = async () => {
-  router.push({ name: "Client-Form", params: { action: 'create' } })
-}
-
-const tableLoading = ref(false);
-
-// Método para refrescar los datos
-const refreshTable = () => {
-  if (refTableFull.value) {
-    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
-  }
-};
 
 const downloadExcel = async () => {
   loading.excel = true;
+  filterTable.value = tableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useAxios("/client/excelExport").get({
-    params: {
-      ...route.query,
-      company_id: authenticationStore.company.id
-    }
+  const { data, response } = await useApi("/emergency-element/excelExport").post({
+    searchQuery: filterTable.value,
+    company_id: authenticationStore.company.id,
   })
-
   loading.excel = false;
 
-  if (response.status == 200 && data) {
-    downloadExcelBase64(data.excel, "Lista de clientes")
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Lista Elementos de emergencia")
   }
 }
 
@@ -96,10 +86,11 @@ const downloadExcel = async () => {
 
 <template>
   <div>
+
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Clientes
+          Elementos de emergencia
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
@@ -110,19 +101,15 @@ const downloadExcel = async () => {
             </VTooltip>
           </VBtn>
 
-          <VBtn @click="goViewCreate()">
-            Agregar cliente
+          <VBtn @click="goView()">
+            Agregar elemento de emergencia
           </VBtn>
         </div>
       </VCardTitle>
 
-      <VCardText>
-        <FilterDialogNew :options-filter="optionsFilterNew" @force-search="refreshTable" :table-loading="tableLoading">
-        </FilterDialogNew>
-      </VCardText>
-
       <VCardText class=" mt-2">
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView" @update:loading="tableLoading = $event">
+        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+
           <template #item.logo="{ item }">
             <div class="my-2">
               <VAvatar v-if="item.logo" :size="38" class="me-3">
@@ -133,7 +120,8 @@ const downloadExcel = async () => {
               </VAvatar>
             </div>
           </template>
-        </TableFullNew>
+
+        </TableFull>
       </VCardText>
     </VCard>
   </div>

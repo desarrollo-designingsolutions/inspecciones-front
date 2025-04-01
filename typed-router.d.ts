@@ -26,6 +26,8 @@ declare module 'vue-router/auto-routes' {
     'Brand-Vehicle-Form': RouteRecordInfo<'Brand-Vehicle-Form', 'Brand-Vehicle-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Brand-Vehicle-List': RouteRecordInfo<'Brand-Vehicle-List', '/BrandVehicle/List', Record<never, never>, Record<never, never>>,
     'Client-Form': RouteRecordInfo<'Client-Form', 'client-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Emergency-Element-Form': RouteRecordInfo<'Emergency-Element-Form', 'Emergency-Element-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Emergency-Element-List': RouteRecordInfo<'Emergency-Element-List', '/Client/EmergencyElement/List', Record<never, never>, Record<never, never>>,
     'Client-List': RouteRecordInfo<'Client-List', '/Client/List', Record<never, never>, Record<never, never>>,
     'Company-Form': RouteRecordInfo<'Company-Form', 'company-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Company-List': RouteRecordInfo<'Company-List', '/Company/List', Record<never, never>, Record<never, never>>,
