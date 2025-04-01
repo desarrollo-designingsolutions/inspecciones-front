@@ -80,6 +80,10 @@ const form = ref({
 
 })
 
+const typeInspectionInputs = ref([])
+
+const typeGroups = ref<Array<number | string>>([])
+
 const clearForm = () => {
 
   currentTab.value = 0;
@@ -138,11 +142,12 @@ const fetchDataForm = async () => {
 
     states.value = data.value.states
     vehicle_structures.value = data.value.vehicle_structures
-
+    typeInspectionInputs.value = data.value.type_inspection_inputs
 
     //formulario 
     if (data.value.form) {
       form.value = data.value.form
+      typeGroups.value = data.value.form.type_groups
 
       const formClone = JSON.parse(JSON.stringify(data.value.form))
 
@@ -164,7 +169,9 @@ const fetchDataForm = async () => {
         expiration_date: null,
         photo: null,
       } as ITypeDocument)
+    }
 
+    if (form.value.emergency_elements.length == 0) {
       form.value.emergency_elements.push({
         id: null,
         vehicle_id: null,
@@ -257,6 +264,7 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
     formData.append("photo_left_side", form.value.photo_left_side)
     formData.append("type_documents", JSON.stringify(form.value.type_documents))
     formData.append("emergency_elements", JSON.stringify(form.value.emergency_elements))
+    formData.append("type_groups", JSON.stringify(typeGroups.value))
 
     formData.append('cantfiles', String(form.value.type_documents?.length))
     for (let i = 0; i < form.value.type_documents.length; i++) {
@@ -332,6 +340,11 @@ const tabs = ref([
   },
   {
     title: "Elementos de emergencia",
+    show: true,
+    errorsValidations: false,
+  },
+  {
+    title: "Tipos de inspección",
     show: true,
     errorsValidations: false,
   },
@@ -808,8 +821,9 @@ const changeFile = (e: any, item: any) => {
                   </VBtn>
                 </VCol>
                 <VCol cols="12" sm="4">
-                  <SelectEmergencyElementForm :key="'select2_' + index" :rules="[requiredValidator]"
-                    :requiredField="true" label="Elemento de emergencia" v-model="item.emergency_element_id" />
+                  <SelectEmergencyElementForm :key="'select2_' + index" name="Select2" :rules="[requiredValidator]"
+                    :requiredField="true" label="Elemento de emergencia" v-model="item.emergency_element_id"
+                    :error-messages="errorsBack.emergency_element_id" @input="errorsBack.emergency_element_id = ''" />
                 </VCol>
                 <VCol cols="12" sm="4">
                   <AppTextField :requiredField="true" label="Cantidad" v-model="item.quantity"
@@ -837,6 +851,42 @@ const changeFile = (e: any, item: any) => {
           </VForm>
         </div>
 
+        <div v-show="currentTab == 4">
+          <VSkeletonLoader type="card, list-item-avatar-three-line, list-item-three-line">
+            <VRow>
+              <template v-for="(inspection, key) in typeInspectionInputs" :key="key">
+                <VCol cols="12">
+                  <VCard class="mb-4">
+                    <VCardTitle class="text-h6 pa-4">
+                      Inspección {{ inspection.name }}
+                    </VCardTitle>
+
+                    <VRow dense class="px-4 pb-4">
+                      <!-- Columna Todos -->
+                      <VCol cols="12" md="4" v-if="inspection.inputs.length > 0">
+                        <div class="d-flex align-center">
+                          <VSwitch label="Todos" class="ma-0" />
+                        </div>
+                      </VCol>
+
+                      <!-- Columnas de switches -->
+                      <template v-for="(input, index) in inspection.inputs" :key="index">
+                        <VCol cols="12" md="4">
+                          <VRow dense class="d-flex align-center">
+                            <VCol cols="auto">
+                              <VSwitch :disabled="input.id === 1" :label="input.description" :value="input.id"
+                                v-model="typeGroups" />
+                            </VCol>
+                          </VRow>
+                        </VCol>
+                      </template>
+                    </VRow>
+                  </VCard>
+                </VCol>
+              </template>
+            </VRow>
+          </VSkeletonLoader>
+        </div>
       </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">

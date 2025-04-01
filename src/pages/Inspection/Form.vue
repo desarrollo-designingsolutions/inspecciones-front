@@ -42,6 +42,7 @@ interface IVehicleData {
     type_document_name: string,
     document_number: string,
     expiration_date: string,
+    original: string,
   }>,
 }
 
@@ -51,7 +52,7 @@ const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
 const disabledFiledsView = ref<boolean>(false);
 const route = useRoute()
-const refFormValidate = {}
+const refFormValidate = ref<IForm>();
 const loading = reactive({
   form: false,
   cities: false,
@@ -99,20 +100,16 @@ const fetchDataForm = async () => {
   const url = form.value.id ? `/inspection/${route.params.id}/edit` : `/inspection/create/${route.params.inspection_type_id}`
 
   loading.form = true
-  const { data, response } = await useApi<any>(
-    createUrl(url, {
-      query: {
-        company_id: company.value.id
-      },
-    })
-  );
+  const { data, response } = await useAxios(url).get({
+    company_id: company.value.id
+  });
 
-  if (response.value?.ok && data.value) {
+  if (response.status == 200 && data) {
 
-    tabs.value = data.value.tabs;
-    states.value = data.value.states
-    responseDocument.value = data.value.responseDocument
-    responseVehicle.value = data.value.responseVehicle
+    tabs.value = data.tabs;
+    states.value = data.states
+    responseDocument.value = data.responseDocument
+    responseVehicle.value = data.responseVehicle
 
     tabs.value.forEach(element => {
 
@@ -129,9 +126,9 @@ const fetchDataForm = async () => {
     });
 
     //formulario 
-    if (data.value.form) {
-      cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
-      form.value = data.value.form
+    if (data.form) {
+      cloneForm.value = JSON.parse(JSON.stringify(data.form));
+      form.value = data.form
 
       changeState(cloneForm.value.state_id)
       form.value.city_id = cloneForm.value.city_id
@@ -151,7 +148,7 @@ const allValidations = async () => {
   updateValidationToFalse();
   let exito: any[] = [];
 
-  const validationPromises = tabs.value.map(async (element, key) => {
+  const validationPromises = processedTabs.value.map(async (element, key) => {
     const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
     if (validation) {
@@ -173,6 +170,7 @@ const submitForm = async () => {
   const validation = await allValidations()
 
   if (validation) {
+    form.value.id = route.params.id || null
     loading.form = true;
     const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
 
@@ -182,10 +180,10 @@ const submitForm = async () => {
     form.value.type_documents = vehicleData.value.type_documents
 
 
-    const { data, response } = await useApi(url).post(form.value);
+    const { data, response } = await useAxios(url).post(form.value);
 
-    if (response.value?.ok && data.value) {
-      if (data.value.code == 200) {
+    if (response.status == 200 && data) {
+      if (data.code == 200) {
         if (isCreateAndNew.value) {
           clearForm(); // Limpiar el formulario si es "Crear y crear otro"
         } else {
@@ -193,7 +191,7 @@ const submitForm = async () => {
         }
       }
     }
-    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+    if (data.code === 422) errorsBack.value = data.errors ?? {};
 
     loading.form = false;
   }
@@ -232,11 +230,11 @@ const changeState = async (event: Event) => {
   form.value.city_id = null;
 
   loading.cities = true;
-  const { data, response } = await useApi(`/selectCities/${event}`).get();
+  const { data, response } = await useAxios(`/selectCities/${event}`).get();
   loading.cities = false;
 
-  if (response.value?.ok && data.value) {
-    cities.value = data.value.cities;
+  if (response.status == 200 && data) {
+    cities.value = data.cities;
   }
 }
 
@@ -261,44 +259,130 @@ const vehicleData = ref<IVehicleData>({
   type_documents: [],
 });
 
-const changeVehicle = async (event: Event) => {
-  if (event) {
+const isFirstVehicleChange = ref(true)
 
-    const url = `/inspection/getVehicleInfo/${event.value}`
+const pendingVehicleEvent = ref(null)
 
-    const { response, data } = await useApi(url).get();
+const previousVehicleData = ref<IVehicleData | null>(null);
 
-    if (response.value?.ok && data.value) {
-      vehicleData.value.license_plate = data.value.vehicle.license_plate
-      vehicleData.value.brand_vehicle_name = data.value.vehicle.brand_vehicle_name
-      vehicleData.value.model = data.value.vehicle.model
-      vehicleData.value.vehicle_structure_name = data.value.vehicle.vehicle_structure_name
-      vehicleData.value.type_documents = data.value.vehicle.type_documents
+const processVehicleChange = async (event: any) => {
+  loading.form = true;
+  const url = `/inspection/getVehicleInfo/${event.value}`;
+  const { response, data } = await useAxios(url).get({
+    params: { inspection_type_id: route.params.inspection_type_id }
+  });
+  if (response.status === 200 && data) {
+    vehicleData.value.license_plate = data.vehicle.license_plate;
+    vehicleData.value.brand_vehicle_name = data.vehicle.brand_vehicle_name;
+    vehicleData.value.model = data.vehicle.model;
+    vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name;
+    vehicleData.value.type_documents = data.vehicle.type_documents;
 
-      cloneForm.value.type_documents.forEach(element => {
-        const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
-        search.response = element.original
-        loading.form = false
+    cloneForm.value = JSON.parse(JSON.stringify(data.vehicle));
+
+    tabs.value = [
+      tabs.value[0], // Mantener primer tab
+      ...data.tabs.map(tab => ({ ...tab, show: true }))
+    ];
+  }
+  loading.form = false;
+};
+
+const changeVehicle = async (event: any) => {
+  if (!event) return;
+
+  previousVehicleData.value = JSON.parse(JSON.stringify(form.value.vehicle_id));
+
+  if (isFirstVehicleChange.value) {
+    await processVehicleChange(event);
+    isFirstVehicleChange.value = false;
+  } else {
+    pendingVehicleEvent.value = event;
+    openModalQuestionChangeVehicleSave();
+  }
+};
+
+const confirmVehicleChange = async () => {
+  if (pendingVehicleEvent.value) {
+    await clearForm()
+    form.value.vehicle_id = pendingVehicleEvent.value
+    await processVehicleChange(pendingVehicleEvent.value);
+    pendingVehicleEvent.value = null;
+  }
+};
+
+const cancelVehicleChange = () => {
+  // Si se cancela, revertir la información del vehículo a la anterior
+  if (previousVehicleData.value) {
+    form.value.vehicle_id = previousVehicleData.value;
+  }
+  // Limpiar el evento pendiente
+  pendingVehicleEvent.value = null;
+};
+
+const processedTabs = computed(() => {
+  // Inicializar campos del formulario para los inputs de los tabs
+  tabs.value.forEach(tab => {
+    if (tab.inspection_type_inputs) {
+      tab.inspection_type_inputs.forEach(input => {
+        if (!form.value[input.id]) {
+          form.value[input.id] = { value: '', observation: '' }; // Estructura inicial
+        }
       });
     }
-  }
-}
+  });
+
+  return tabs.value.filter(tab => tab.show); // Filtra solo tabs visibles
+});
 
 
 //ModalQuestion
 const refModalQuestion = ref()
 
 const openModalQuestionSave = async (typeCreate: boolean) => {
-  const validation = await allValidations()
-  if (validation) {
-    isCreateAndNew.value = typeCreate
-    refModalQuestion.value.openModal()
-    refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
-  }
-  else {
-    toast('Faltan Campos Por Diligenciar', '', 'danger')
-  }
+  // const validation = await allValidations()
+  // if (validation) {
+  isCreateAndNew.value = typeCreate
+  refModalQuestion.value.openModal()
+  refModalQuestion.value.componentData.title = "Está seguro que usted revisó todos los ítems"
+  // }
+  // else {
+  //   toast('Faltan Campos Por Diligenciar', '', 'danger')
+  // }
 }
+
+//ModalQuestionChangeVehicle
+const refModalQuestionChangeVehicle = ref()
+
+const openModalQuestionChangeVehicleSave = async () => {
+  refModalQuestionChangeVehicle.value.openModal()
+  refModalQuestionChangeVehicle.value.componentData.title = "Si cambia de vehiculo perdera la informacion ya ingresada"
+}
+
+watch(
+  processedTabs,
+  (newTabs) => {
+    // Primero definimos cuáles deberían ser las claves actuales basadas en los tabs
+    const validKeys = newTabs.map((tab) => tab.id + '_validate');
+
+    // Eliminar del objeto las claves que ya no están en los nuevos tabs
+    Object.keys(refFormValidate).forEach((key) => {
+      if (!validKeys.includes(key)) {
+        delete refFormValidate[key];
+      }
+    });
+
+    // Agregar nuevas claves si no existen
+    newTabs.forEach((tab) => {
+      const key = tab.id + '_validate';
+      if (!(key in refFormValidate)) {
+        // Se crea el ref para el formulario del tab
+        refFormValidate[key] = ref<VForm>();
+      }
+    });
+  },
+  { immediate: true, deep: true }
+);
 
 </script>
 
@@ -307,15 +391,15 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     <VCard :loading="loading.form" :disabled="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span v-if="route.params.inspection_type_id == 1">
-          Inspeccion Pre-Operacional
+          Inspección Pre-Operacional
         </span>
         <span v-else>
-          Inspeccion HSEQ
+          Inspección HSEQ
         </span>
       </VCardTitle>
-      <VCardText>
+      <VCardText v-if="!loading.form">
         <VTabs v-model="currentTab">
-          <VTab class="text-none" v-for="(item, index) in tabs" :key="index" v-show="item.show">
+          <VTab class="text-none" v-for="(item, index) in processedTabs" :key="index" v-show="item.show">
             <VIcon start :icon="!item.errorsValidations ? '' : 'tabler-alert-circle-filled'"
               :color="!item.errorsValidations ? '' : 'error'" />
             {{ item.name }}
@@ -325,7 +409,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
 
       <VCardText>
 
-        <div v-show="currentTab == item.order" v-for="(item, index) in tabs" :key="index">
+        <div v-show="currentTab == item.order" v-for="(item, index) in processedTabs" :key="index">
           <VForm :ref="refFormValidate[item.id + '_validate']" @submit.prevent="() => { }"
             :disabled="disabledFiledsView">
             <VRow v-if="index === 0">
@@ -422,7 +506,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                       </VCol>
                       <VCol cols="12" sm="4">
                         <AppSelect label="¿Es original?" :requiredField="true" :items="responseDocument"
-                          v-model="item.response" :rules="[requiredValidator]">
+                          v-model="item.original" :rules="[requiredValidator]">
                         </AppSelect>
                       </VCol>
                     </VRow>
@@ -464,6 +548,8 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="submitForm" />
+
+    <ModalQuestion ref="refModalQuestionChangeVehicle" @success="confirmVehicleChange" @cancel="cancelVehicleChange" />
 
   </div>
 </template>
