@@ -52,7 +52,7 @@ const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
 const disabledFiledsView = ref<boolean>(false);
 const route = useRoute()
-const refFormValidate = {}
+const refFormValidate = ref<IForm>();
 const loading = reactive({
   form: false,
   cities: false,
@@ -100,20 +100,16 @@ const fetchDataForm = async () => {
   const url = form.value.id ? `/inspection/${route.params.id}/edit` : `/inspection/create/${route.params.inspection_type_id}`
 
   loading.form = true
-  const { data, response } = await useApi<any>(
-    createUrl(url, {
-      query: {
-        company_id: company.value.id
-      },
-    })
-  );
+  const { data, response } = await useAxios(url).get({
+    company_id: company.value.id
+  });
 
-  if (response.value?.ok && data.value) {
+  if (response.status == 200 && data) {
 
-    tabs.value = data.value.tabs;
-    states.value = data.value.states
-    responseDocument.value = data.value.responseDocument
-    responseVehicle.value = data.value.responseVehicle
+    tabs.value = data.tabs;
+    states.value = data.states
+    responseDocument.value = data.responseDocument
+    responseVehicle.value = data.responseVehicle
 
     tabs.value.forEach(element => {
 
@@ -130,9 +126,9 @@ const fetchDataForm = async () => {
     });
 
     //formulario 
-    if (data.value.form) {
-      cloneForm.value = JSON.parse(JSON.stringify(data.value.form));
-      form.value = data.value.form
+    if (data.form) {
+      cloneForm.value = JSON.parse(JSON.stringify(data.form));
+      form.value = data.form
 
       changeState(cloneForm.value.state_id)
       form.value.city_id = cloneForm.value.city_id
@@ -171,36 +167,37 @@ const allValidations = async () => {
 const isCreateAndNew = ref<boolean>(false)
 const submitForm = async () => {
 
-  // const validation = await allValidations()
+  const validation = await allValidations()
 
-  // if (validation) {
-  loading.form = true;
-  const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
+  if (validation) {
+    form.value.id = route.params.id || null
+    loading.form = true;
+    const url = form.value.id ? `/inspection/update/${form.value.id}` : `/inspection/store`
 
-  form.value.company_id = company.value.id
-  form.value.user_inspector_id = authenticationStore.user.id
-  form.value.inspection_type_id = route.params.inspection_type_id
-  form.value.type_documents = vehicleData.value.type_documents
+    form.value.company_id = company.value.id
+    form.value.user_inspector_id = authenticationStore.user.id
+    form.value.inspection_type_id = route.params.inspection_type_id
+    form.value.type_documents = vehicleData.value.type_documents
 
 
-  const { data, response } = await useApi(url).post(form.value);
+    const { data, response } = await useAxios(url).post(form.value);
 
-  if (response.value?.ok && data.value) {
-    if (data.value.code == 200) {
-      if (isCreateAndNew.value) {
-        clearForm(); // Limpiar el formulario si es "Crear y crear otro"
-      } else {
-        router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
+    if (response.status == 200 && data) {
+      if (data.code == 200) {
+        if (isCreateAndNew.value) {
+          clearForm(); // Limpiar el formulario si es "Crear y crear otro"
+        } else {
+          router.push({ name: 'Inspection-List' }); // Redirigir si es "Crear"
+        }
       }
     }
-  }
-  if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+    if (data.code === 422) errorsBack.value = data.errors ?? {};
 
-  loading.form = false;
-  // }
-  // else {
-  //   toast('Faltan Campos Por Diligenciar', '', 'danger')
-  // }
+    loading.form = false;
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+  }
 
 }
 
@@ -233,11 +230,11 @@ const changeState = async (event: Event) => {
   form.value.city_id = null;
 
   loading.cities = true;
-  const { data, response } = await useApi(`/selectCities/${event}`).get();
+  const { data, response } = await useAxios(`/selectCities/${event}`).get();
   loading.cities = false;
 
-  if (response.value?.ok && data.value) {
-    cities.value = data.value.cities;
+  if (response.status == 200 && data) {
+    cities.value = data.cities;
   }
 }
 
@@ -262,38 +259,66 @@ const vehicleData = ref<IVehicleData>({
   type_documents: [],
 });
 
-const changeVehicle = async (event: Event) => {
-  if (event) {
+const isFirstVehicleChange = ref(true)
 
-    loading.form = true;
+const pendingVehicleEvent = ref(null)
 
-    const url = `/inspection/getVehicleInfo/${event.value}`
+const previousVehicleData = ref<IVehicleData | null>(null);
 
-    const { response, data } = await useAxios(url).get({ params: { inspection_type_id: route.params.inspection_type_id } });
+const processVehicleChange = async (event: any) => {
+  loading.form = true;
+  const url = `/inspection/getVehicleInfo/${event.value}`;
+  const { response, data } = await useAxios(url).get({
+    params: { inspection_type_id: route.params.inspection_type_id }
+  });
+  if (response.status === 200 && data) {
+    vehicleData.value.license_plate = data.vehicle.license_plate;
+    vehicleData.value.brand_vehicle_name = data.vehicle.brand_vehicle_name;
+    vehicleData.value.model = data.vehicle.model;
+    vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name;
+    vehicleData.value.type_documents = data.vehicle.type_documents;
 
-    if (response.status == 200 && data) {
-      vehicleData.value.license_plate = data.vehicle.license_plate
-      vehicleData.value.brand_vehicle_name = data.vehicle.brand_vehicle_name
-      vehicleData.value.model = data.vehicle.model
-      vehicleData.value.vehicle_structure_name = data.vehicle.vehicle_structure_name
-      vehicleData.value.type_documents = data.vehicle.type_documents
+    cloneForm.value = JSON.parse(JSON.stringify(data.vehicle));
 
-      cloneForm.value = JSON.parse(JSON.stringify(data.vehicle));
-
-      // cloneForm.value.type_documents.forEach(element => {
-      //   const search = vehicleData.value.type_documents.find(ele => ele.id === element.vehicle_document_id);
-      //   search.response = element.original
-      // });
-
-      tabs.value = [
-        tabs.value[0], // Mantener primer tab
-        ...data.tabs.map(tab => ({ ...tab, show: true }))
-      ];
-
-      loading.form = false
-    }
+    tabs.value = [
+      tabs.value[0], // Mantener primer tab
+      ...data.tabs.map(tab => ({ ...tab, show: true }))
+    ];
   }
-}
+  loading.form = false;
+};
+
+const changeVehicle = async (event: any) => {
+  if (!event) return;
+
+  previousVehicleData.value = JSON.parse(JSON.stringify(form.value.vehicle_id));
+
+  if (isFirstVehicleChange.value) {
+    await processVehicleChange(event);
+    isFirstVehicleChange.value = false;
+  } else {
+    pendingVehicleEvent.value = event;
+    openModalQuestionChangeVehicleSave();
+  }
+};
+
+const confirmVehicleChange = async () => {
+  if (pendingVehicleEvent.value) {
+    await clearForm()
+    form.value.vehicle_id = pendingVehicleEvent.value
+    await processVehicleChange(pendingVehicleEvent.value);
+    pendingVehicleEvent.value = null;
+  }
+};
+
+const cancelVehicleChange = () => {
+  // Si se cancela, revertir la información del vehículo a la anterior
+  if (previousVehicleData.value) {
+    form.value.vehicle_id = previousVehicleData.value;
+  }
+  // Limpiar el evento pendiente
+  pendingVehicleEvent.value = null;
+};
 
 const processedTabs = computed(() => {
   // Inicializar campos del formulario para los inputs de los tabs
@@ -326,6 +351,39 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
   // }
 }
 
+//ModalQuestionChangeVehicle
+const refModalQuestionChangeVehicle = ref()
+
+const openModalQuestionChangeVehicleSave = async () => {
+  refModalQuestionChangeVehicle.value.openModal()
+  refModalQuestionChangeVehicle.value.componentData.title = "Si cambia de vehiculo perdera la informacion ya ingresada"
+}
+
+watch(
+  processedTabs,
+  (newTabs) => {
+    // Primero definimos cuáles deberían ser las claves actuales basadas en los tabs
+    const validKeys = newTabs.map((tab) => tab.id + '_validate');
+
+    // Eliminar del objeto las claves que ya no están en los nuevos tabs
+    Object.keys(refFormValidate).forEach((key) => {
+      if (!validKeys.includes(key)) {
+        delete refFormValidate[key];
+      }
+    });
+
+    // Agregar nuevas claves si no existen
+    newTabs.forEach((tab) => {
+      const key = tab.id + '_validate';
+      if (!(key in refFormValidate)) {
+        // Se crea el ref para el formulario del tab
+        refFormValidate[key] = ref<VForm>();
+      }
+    });
+  },
+  { immediate: true, deep: true }
+);
+
 </script>
 
 <template>
@@ -339,7 +397,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
           Inspección HSEQ
         </span>
       </VCardTitle>
-      <VCardText>
+      <VCardText v-if="!loading.form">
         <VTabs v-model="currentTab">
           <VTab class="text-none" v-for="(item, index) in processedTabs" :key="index" v-show="item.show">
             <VIcon start :icon="!item.errorsValidations ? '' : 'tabler-alert-circle-filled'"
@@ -490,6 +548,8 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="submitForm" />
+
+    <ModalQuestion ref="refModalQuestionChangeVehicle" @success="confirmVehicleChange" @cancel="cancelVehicleChange" />
 
   </div>
 </template>
