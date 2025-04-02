@@ -21,7 +21,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Vehicle-List", query: {
-                'filter[is_active]': 'Activo'
+                'filter[is_active]': 1
             }
         },
     },
@@ -33,7 +33,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Client-List", query: {
-                'filter[is_active]': 'Activo'
+                'filter[is_active]': 1
             }
         },
     },
