@@ -8,7 +8,8 @@ const loadingReport = ref(false)
 const form = ref({
   month: null,
   year: 2025,
-  license_plate: null
+  license_plate: null,
+  inspectionType: null
 });
 
 const months = ref([
@@ -35,6 +36,7 @@ const handleClearForm = (): void => {
   form.value.month = null;
   form.value.year = 2025;
   form.value.license_plate = null;
+  form.value.inspectionType = null;
 };
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
@@ -54,6 +56,8 @@ const handleSubmit = async () => {
     year: form.value.year,
     license_plate: form.value.license_plate?.title,
     license_plate_id: form.value.license_plate?.value,
+    inspectionType: form.value.inspectionType?.title,
+    inspectionType_id: form.value.inspectionType?.value,
 
   })
   loadingReport.value = false;
@@ -85,17 +89,23 @@ defineExpose({
       <VCardText class="pa-sm-10 pa-2">
         <VForm>
           <VRow>
-            <VCol cols="4">
+            <VCol cols="3">
               <AppSelect label="Mes" v-model="form.month" :items="months" clearable />
             </VCol>
 
-            <VCol cols="4">
+            <VCol cols="3">
               <AppSelect label="Año" v-model="form.year" :items="years" clearable />
             </VCol>
 
-            <VCol cols="4">
+            <VCol cols="3">
               <AppSelectRemote label="Placa del vehículo" v-model="form.license_plate" url="/selectInfinitePlateVehicle"
                 arrayInfo="plateVehicle">
+              </AppSelectRemote>
+            </VCol>
+            
+            <VCol cols="3">
+              <AppSelectRemote label="Tipo de inspecciones" v-model="form.inspectionType" url="/selectInspectionType"
+                arrayInfo="inspectionType">
               </AppSelectRemote>
             </VCol>
           </VRow>
