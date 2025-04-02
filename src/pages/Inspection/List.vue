@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ModalShowReportInfo from "@/pages/Inspection/components/ModalShowReportInfo.vue";
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -220,6 +221,13 @@ const refreshTable = () => {
   }
 };
 
+//ModalShowReportInfo
+const refModalShowReportInfo = ref()
+
+const openModalShowReportInfo = (inspection: object) => {
+  refModalShowReportInfo.value.openModal(inspection)
+}
+
 
 </script>
 
@@ -274,9 +282,18 @@ const refreshTable = () => {
               </template>
               <span>Reporte</span>
             </VListItem>
+
+            <VListItem @click="openModalShowReportInfo(item)">
+              <template #prepend>
+                <VIcon size="22" icon="tabler-file-report" />
+              </template>
+              <span>Informe</span>
+            </VListItem>
           </template>
         </TableFullNew>
       </VCardText>
     </VCard>
+
+    <ModalShowReportInfo ref="refModalShowReportInfo" />
   </div>
 </template>
