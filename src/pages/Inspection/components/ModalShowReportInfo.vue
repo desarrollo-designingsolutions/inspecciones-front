@@ -14,6 +14,14 @@ const componentData = reactive({
 const inspection = ref<any>({});
 const toggleExclusive = ref('Todos')
 
+const itemPerPageOptions = [
+    { value: 10, title: '10' },
+    { value: 25, title: '25' },
+    { value: 50, title: '50' },
+    { value: 100, title: '100' },
+    { value: -1, title: 'Todos' }
+]
+
 const headers = [
     { title: 'Sección', key: 'section' },
     { title: 'Ítem', key: 'item' },
@@ -163,8 +171,9 @@ defineExpose({
                 </VCardText>
 
                 <VCardText>
-                    <VDataTable v-if="!componentData.isLoading" :headers="headers" :items="filteredRows"
-                        :items-per-page="5" class="text-no-wrap">
+                    <VDataTable v-if="!componentData.isLoading" :headers="headers"
+                        items-per-page-text="Elementos por pagina" :items-per-page-options="itemPerPageOptions"
+                        :items="filteredRows" :items-per-page="5" class="text-no-wrap">
                         <template #item.status="{ item }">
                             <div class="d-flex align-center gap-3">
                                 <VChip label size="small" :color="item.status.color">
