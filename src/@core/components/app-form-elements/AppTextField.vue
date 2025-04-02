@@ -18,6 +18,9 @@ const requiredField = computed(
 const tooltip = computed(
   () => useAttrs().tooltip as object | undefined
 );
+const iconLabel = computed(
+  () => useAttrs().iconLabel as object | undefined
+);
 </script>
 
 <template>
@@ -27,10 +30,13 @@ const tooltip = computed(
       <span v-if="requiredField">&nbsp; <b class="text-warning">*</b></span>
       <VTooltip v-if="tooltip" :location="tooltip.location ?? 'top'">
         <template #activator="{ props }">
-          <VIcon v-if="tooltip.icon" v-bind="props" :icon="tooltip.icon" />
+          <VIcon v-if="tooltip.icon" v-bind="props" :icon="tooltip.icon" :color="tooltip.color" />
         </template>
         <span>{{ tooltip.text }}</span>
       </VTooltip>
+
+      <VIcon v-if="iconLabel" :icon="iconLabel.icon" :color="iconLabel.color" />
+
     </VLabel>
     <VTextField v-bind="{
       ...$attrs,
