@@ -178,14 +178,14 @@ onMounted(() => {
 
 const pdfExport = async (item: any) => {
 
-  const { data, response } = await useApi("/inspection/pdfExport").post({
+  const { data, response } = await useAxios("/inspection/pdfExport").post({
     id: item.id,
     company_id: authenticationStore.company.id,
     pdf_name: "Lista inspecciones",
   })
 
-  if (response.value?.ok && data.value) {
-    openPdfBase64(data.value.pdf)
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
   }
 }
 
