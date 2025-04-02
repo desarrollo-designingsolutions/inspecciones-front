@@ -509,7 +509,10 @@ watch(
                         </AppTextField>
                       </VCol>
                       <VCol cols="12" sm="4">
-                        <AppTextField disabled label="Fecha de vencimiento" :value="item.expiration_date">
+                        <AppTextField disabled :iconLabel="{
+                          icon: 'tabler-circle-filled',
+                          color: item.traffic_light_color,
+                        }" label="Fecha de vencimiento" :value="item.expiration_date">
                         </AppTextField>
                       </VCol>
                       <VCol cols="12" sm="4">
