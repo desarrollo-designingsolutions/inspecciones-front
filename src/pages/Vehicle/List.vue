@@ -12,14 +12,16 @@ definePage({
 });
 
 
-const loading = reactive({ excel: false })
+const loading = reactive({
+  excel: false,
+  report: false
+})
 
 const authenticationStore = useAuthenticationStore();
 
 
 //TABLE
 const refTableFull = ref()
-
 const optionsTable = {
   url: "/vehicle/paginate",
   paramsGlobal: {
@@ -157,7 +159,6 @@ const refreshTable = () => {
     refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
   }
 };
-
 </script>
 
 <template>
@@ -202,5 +203,6 @@ const refreshTable = () => {
         </TableFullNew>
       </VCardText>
     </VCard>
+
   </div>
 </template>

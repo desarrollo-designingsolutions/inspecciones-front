@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import ModalShowReportInfo from "@/pages/Inspection/components/ModalShowReportInfo.vue";
+import ModalReportForMonth from "@/pages/Inspection/Components/ModalReportForMonth.vue";
+import ModalShowReportInfo from "@/pages/Inspection/Components/ModalShowReportInfo.vue";
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -229,6 +230,13 @@ const openModalShowReportInfo = (inspection: object) => {
 }
 
 
+//ModalReportForMonth
+const refModalReportForMonth = ref()
+
+const openModalReportForMonth = () => {
+  refModalReportForMonth.value.openModal()
+}
+
 </script>
 
 <template>
@@ -246,6 +254,10 @@ const openModalShowReportInfo = (inspection: object) => {
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
+          </VBtn>
+
+          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="openModalReportForMonth()">
+            Generar reporte
           </VBtn>
 
           <VMenu location="bottom"
@@ -295,5 +307,6 @@ const openModalShowReportInfo = (inspection: object) => {
     </VCard>
 
     <ModalShowReportInfo ref="refModalShowReportInfo" />
+    <ModalReportForMonth ref="refModalReportForMonth" />
   </div>
 </template>

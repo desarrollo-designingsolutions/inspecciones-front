@@ -32,9 +32,15 @@ export const useAxios = (url, config = {}) => {
       response.value = result;
       data.value = result.data;
 
-      if (data.value?.message && data.value?.code === 200) {
-        toast('Éxito', data.value.message, 'success');
+      if (data.value?.code && data.value.message) {
+        if (data.value?.code != 200) {
+          toast("Error", data.value.message, "danger");
+        } else {
+          toast("Exito", data.value.message, "success");
+        }
       }
+
+
 
       return { data: data.value, response: result };
     } catch (err) {
