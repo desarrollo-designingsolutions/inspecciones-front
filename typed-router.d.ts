@@ -34,6 +34,7 @@ declare module 'vue-router/auto-routes' {
     'Emergency-Element-Form': RouteRecordInfo<'Emergency-Element-Form', 'Emergency-Element-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Emergency-Element-List': RouteRecordInfo<'Emergency-Element-List', '/EmergencyElement/List', Record<never, never>, Record<never, never>>,
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
+    'inspection-components-modal-form': RouteRecordInfo<'inspection-components-modal-form', '/Inspection/Components/ModalForm', Record<never, never>, Record<never, never>>,
     'Inspection-Form': RouteRecordInfo<'Inspection-Form', 'Inspection-form/:inspection_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'Inspection-List': RouteRecordInfo<'Inspection-List', '/Inspection/List', Record<never, never>, Record<never, never>>,
     'Maintenance-List': RouteRecordInfo<'Maintenance-List', '/Maintenance/List', Record<never, never>, Record<never, never>>,
@@ -48,7 +49,6 @@ declare module 'vue-router/auto-routes' {
     'user-access-users-components-modal-form': RouteRecordInfo<'user-access-users-components-modal-form', '/UserAccess/Users/Components/ModalForm', Record<never, never>, Record<never, never>>,
     'User-List': RouteRecordInfo<'User-List', '/UserAccess/Users/List', Record<never, never>, Record<never, never>>,
     'User-Profile': RouteRecordInfo<'User-Profile', '/UserAccess/Users/Profile', Record<never, never>, Record<never, never>>,
-    'vehicle-components-modal-form': RouteRecordInfo<'vehicle-components-modal-form', '/Vehicle/Components/ModalForm', Record<never, never>, Record<never, never>>,
     'Vehicle-List': RouteRecordInfo<'Vehicle-List', '/Vehicle/List', Record<never, never>, Record<never, never>>,
     'Vehicle-Form': RouteRecordInfo<'Vehicle-Form', 'Vehicle-form/:action/:id?', Record<never, never>, Record<never, never>>,
   }

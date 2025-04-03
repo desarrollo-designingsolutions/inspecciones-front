@@ -1,30 +1,33 @@
 <script setup lang="ts">
+import type { VForm } from 'vuetify/components/VForm';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
+const { toast } = useToast()
+
 const isDialogVisible = ref(false)
 const loadingReport = ref(false)
 
 const form = ref({
   month: null,
-  year: 2025,
+  year: null,
   license_plate: null,
   inspectionType: null
 });
 
 const months = ref([
-  { value: "Enero", title: "Enero" },
-  { value: "Febrero", title: "Febrero" },
-  { value: "Marzo", title: "Marzo" },
-  { value: "Abril", title: "Abril" },
-  { value: "Mayo", title: "Mayo" },
-  { value: "Junio", title: "Junio" },
-  { value: "Julio", title: "Julio" },
-  { value: "Agosto", title: "Agosto" },
-  { value: "Septiembre", title: "Septiembre" },
-  { value: "Octubre", title: "Octubre" },
-  { value: "Noviembre", title: "Noviembre" },
-  { value: "Diciembre", title: "Diciembre" }
+  { value: 1, title: "Enero" },
+  { value: 2, title: "Febrero" },
+  { value: 3, title: "Marzo" },
+  { value: 4, title: "Abril" },
+  { value: 5, title: "Mayo" },
+  { value: 6, title: "Junio" },
+  { value: 7, title: "Julio" },
+  { value: 8, title: "Agosto" },
+  { value: 9, title: "Septiembre" },
+  { value: 10, title: "Octubre" },
+  { value: 11, title: "Noviembre" },
+  { value: 12, title: "Diciembre" }
 ]);
 
 const years = ref([
@@ -34,7 +37,7 @@ const years = ref([
 
 const handleClearForm = (): void => {
   form.value.month = null;
-  form.value.year = 2025;
+  form.value.year = new Date().getFullYear();
   form.value.license_plate = null;
   form.value.inspectionType = null;
 };
@@ -48,23 +51,31 @@ const openModal = async () => {
   handleIsDialogVisible(true);
 };
 
+const formValidation = ref<VForm>()
+
 const handleSubmit = async () => {
-  loadingReport.value = true;
-  const { data, response } = await useApi("/vehicle/excelReportExport").post({
-    company_id: authenticationStore.company.id,
-    month: form.value.month,
-    year: form.value.year,
-    license_plate: form.value.license_plate?.title,
-    license_plate_id: form.value.license_plate?.value,
-    inspectionType: form.value.inspectionType?.title,
-    inspectionType_id: form.value.inspectionType?.value,
+  const validation = await formValidation.value?.validate()
+  if (validation?.valid) {
+    loadingReport.value = true;
 
-  })
-  loadingReport.value = false;
+    const { data, response } = await useAxios("/vehicle/excelReportExport").post({
+      company_id: authenticationStore.company.id,
+      month: form.value.month,
+      year: form.value.year,
+      license_plate: form.value.license_plate?.title,
+      vehicle_id: form.value.license_plate?.value,
+      inspectionType: form.value.inspectionType?.title,
+      inspectionType_id: form.value.inspectionType?.value,
+    })
+    loadingReport.value = false;
 
-  if (response.value?.ok && data.value) {
-    handleIsDialogVisible(false);
-    downloadExcelBase64(data.value.excel, "Reporte de vehículos")
+    if (response.status == 200 && data) {
+      // handleIsDialogVisible(false);
+      downloadExcelBase64(data.excel, "Reporte de vehículos")
+    }
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
   }
 };
 
@@ -87,25 +98,27 @@ defineExpose({
       </div>
 
       <VCardText class="pa-sm-10 pa-2">
-        <VForm>
+        <VForm ref="formValidation" @submit.prevent="() => { }">
           <VRow>
             <VCol cols="3">
-              <AppSelect label="Mes" v-model="form.month" :items="months" clearable />
+              <AppSelect label="Mes" v-model="form.month" :items="months" :requiredField="true"
+                :rules="[requiredValidator]" clearable />
             </VCol>
 
             <VCol cols="3">
-              <AppSelect label="Año" v-model="form.year" :items="years" clearable />
+              <AppSelect label="Año" v-model="form.year" :items="years" :requiredField="true"
+                :rules="[requiredValidator]" clearable />
             </VCol>
 
             <VCol cols="3">
               <AppSelectRemote label="Placa del vehículo" v-model="form.license_plate" url="/selectInfinitePlateVehicle"
-                arrayInfo="plateVehicle">
+                arrayInfo="plateVehicle" :requiredField="true" :rules="[requiredValidator]" clearable>
               </AppSelectRemote>
             </VCol>
-            
+
             <VCol cols="3">
               <AppSelectRemote label="Tipo de inspecciones" v-model="form.inspectionType" url="/selectInspectionType"
-                arrayInfo="inspectionType">
+                arrayInfo="inspectionType" :requiredField="true" :rules="[requiredValidator]" clearable>
               </AppSelectRemote>
             </VCol>
           </VRow>

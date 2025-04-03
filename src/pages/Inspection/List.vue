@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { router } from "@/plugins/1.router";
+import ModalForm from '@/pages/Inspection/Components/ModalForm.vue';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
@@ -220,6 +221,9 @@ const refreshTable = () => {
   }
 };
 
+//ModalForm
+const refModalForm = ref()
+
 
 </script>
 
@@ -238,6 +242,10 @@ const refreshTable = () => {
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
+          </VBtn>
+
+          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="refModalForm.openModal()">
+            Generar reporte
           </VBtn>
 
           <VMenu location="bottom"
@@ -278,5 +286,8 @@ const refreshTable = () => {
         </TableFullNew>
       </VCardText>
     </VCard>
+
+    <ModalForm ref="refModalForm" />
+
   </div>
 </template>

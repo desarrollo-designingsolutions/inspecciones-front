@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import ModalForm from '@/pages/Vehicle/Components/ModalForm.vue';
 
 definePage({
   name: "Vehicle-List",
@@ -160,10 +159,6 @@ const refreshTable = () => {
     refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
   }
 };
-
-//ModalForm
-const refModalForm = ref()
-
 </script>
 
 <template>
@@ -181,10 +176,6 @@ const refModalForm = ref()
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
-          </VBtn>
-
-          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="refModalForm.openModal()">
-            Generar reporte
           </VBtn>
 
           <VBtn @click="goViewCreate()">
@@ -212,8 +203,6 @@ const refModalForm = ref()
         </TableFullNew>
       </VCardText>
     </VCard>
-
-    <ModalForm ref="refModalForm" />
 
   </div>
 </template>
