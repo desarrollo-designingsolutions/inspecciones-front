@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { VForm } from 'vuetify/components/VForm';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import type { VForm } from 'vuetify/components/VForm';
 
 const authenticationStore = useAuthenticationStore();
 const { toast } = useToast()
@@ -42,13 +42,13 @@ const handleClearForm = (): void => {
   form.value.inspectionType = null;
 };
 
-const handleIsDialogVisible = (isVisible: boolean = false) => {
-  isDialogVisible.value = isVisible;
+const handleIsDialogVisible = () => {
+  isDialogVisible.value = !isDialogVisible.value;
 };
 
 const openModal = async () => {
   handleClearForm();
-  handleIsDialogVisible(true);
+  handleIsDialogVisible();
 };
 
 const formValidation = ref<VForm>()
@@ -58,7 +58,7 @@ const handleSubmit = async () => {
   if (validation?.valid) {
     loadingReport.value = true;
 
-    const { data, response } = await useAxios("/vehicle/excelReportExport").post({
+    const { data, response } = await useAxios("/inspection/excelReportExport").post({
       company_id: authenticationStore.company.id,
       month: form.value.month,
       year: form.value.year,
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
     loadingReport.value = false;
 
     if (response.status == 200 && data) {
-      // handleIsDialogVisible(false);
+      handleIsDialogVisible();
       downloadExcelBase64(data.excel, "Reporte de vehículos")
     }
   }
@@ -88,7 +88,7 @@ defineExpose({
   <VDialog v-model="isDialogVisible" max-width="50rem" persistent transition="dialog-transition">
     <DialogCloseBtn @click="handleIsDialogVisible()" />
 
-    <VCard>
+    <VCard :loading="loadingReport" :disabled="loadingReport">
       <div>
         <VToolbar color="primary">
           <VToolbarTitle>
@@ -126,10 +126,11 @@ defineExpose({
       </VCardText>
 
       <VCardText class="d-flex align-right justify-end gap-4">
-        <VBtn color="secondary" @click="handleIsDialogVisible()">
+        <VBtn color="secondary" @click="handleIsDialogVisible()" :loading="loadingReport" :disabled="loadingReport">
           Cerrar
         </VBtn>
-        <VBtn prepend-icon="tabler-device-floppy" @click="handleSubmit()" :loading="loadingReport">
+        <VBtn prepend-icon="tabler-device-floppy" @click="handleSubmit()" :loading="loadingReport"
+          :disabled="loadingReport">
           Generar
         </VBtn>
       </VCardText>

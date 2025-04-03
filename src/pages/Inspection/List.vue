@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ModalShowReportInfo from "@/pages/Inspection/components/ModalShowReportInfo.vue";
+import ModalReportForMonth from "@/pages/Inspection/Components/ModalReportForMonth.vue";
+import ModalShowReportInfo from "@/pages/Inspection/Components/ModalShowReportInfo.vue";
 import { router } from "@/plugins/1.router";
-import ModalForm from '@/pages/Inspection/Components/ModalForm.vue';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
@@ -230,6 +230,13 @@ const openModalShowReportInfo = (inspection: object) => {
 }
 
 
+//ModalReportForMonth
+const refModalReportForMonth = ref()
+
+const openModalReportForMonth = () => {
+  refModalReportForMonth.value.openModal()
+}
+
 </script>
 
 <template>
@@ -249,7 +256,7 @@ const openModalShowReportInfo = (inspection: object) => {
             </VTooltip>
           </VBtn>
 
-          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="refModalForm.openModal()">
+          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="openModalReportForMonth()">
             Generar reporte
           </VBtn>
 
@@ -300,5 +307,6 @@ const openModalShowReportInfo = (inspection: object) => {
     </VCard>
 
     <ModalShowReportInfo ref="refModalShowReportInfo" />
+    <ModalReportForMonth ref="refModalReportForMonth" />
   </div>
 </template>
