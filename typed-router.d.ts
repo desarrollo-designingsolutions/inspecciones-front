@@ -34,7 +34,7 @@ declare module 'vue-router/auto-routes' {
     'Emergency-Element-Form': RouteRecordInfo<'Emergency-Element-Form', 'Emergency-Element-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Emergency-Element-List': RouteRecordInfo<'Emergency-Element-List', '/EmergencyElement/List', Record<never, never>, Record<never, never>>,
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
-    'inspection-components-modal-form': RouteRecordInfo<'inspection-components-modal-form', '/Inspection/Components/ModalForm', Record<never, never>, Record<never, never>>,
+    'inspection-components-modal-report-for-month': RouteRecordInfo<'inspection-components-modal-report-for-month', '/Inspection/Components/ModalReportForMonth', Record<never, never>, Record<never, never>>,
     'inspection-components-modal-show-report-info': RouteRecordInfo<'inspection-components-modal-show-report-info', '/Inspection/Components/ModalShowReportInfo', Record<never, never>, Record<never, never>>,
     'Inspection-Form': RouteRecordInfo<'Inspection-Form', 'Inspection-form/:inspection_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'Inspection-List': RouteRecordInfo<'Inspection-List', '/Inspection/List', Record<never, never>, Record<never, never>>,

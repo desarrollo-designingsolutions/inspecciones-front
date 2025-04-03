@@ -79,6 +79,10 @@ const handleSubmit = async () => {
   }
 };
 
+const company = {
+  company_id: authenticationStore.company.id,
+}
+
 defineExpose({
   openModal,
 });
@@ -112,7 +116,7 @@ defineExpose({
 
             <VCol cols="3">
               <AppSelectRemote label="Placa del vehículo" v-model="form.license_plate" url="/selectInfinitePlateVehicle"
-                arrayInfo="plateVehicle" :requiredField="true" :rules="[requiredValidator]" clearable>
+                arrayInfo="plateVehicle" :requiredField="true" :rules="[requiredValidator]" clearable :params="company">
               </AppSelectRemote>
             </VCol>
 
