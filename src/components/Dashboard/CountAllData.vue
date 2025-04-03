@@ -21,7 +21,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Vehicle-List", query: {
-                'filter[inputGeneral]': 'Activo'
+                'filter[is_active]': 1
             }
         },
     },
@@ -33,7 +33,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Client-List", query: {
-                'filter[inputGeneral]': 'Activo'
+                'filter[is_active]': 1
             }
         },
     },
@@ -45,7 +45,8 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Inspection-List", query: {
-                'filter[inputGeneral]': 'Pre-Operacional'
+                'filter[inspectionType.name]': 'Pre-Operacional',
+                'filter[is_active]': 1,
             }
         },
     },
@@ -57,7 +58,8 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Inspection-List", query: {
-                'filter[inputGeneral]': 'HSEQ'
+                'filter[inspectionType.name]': 'HSEQ',
+                'filter[is_active]': 1,
             }
         },
     },
@@ -69,7 +71,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Maintenance-List", query: {
-                'filter[inputGeneral]': 'Completado'
+                'filter[status]': 'completed|Completado'
             }
         },
     },
@@ -81,7 +83,7 @@ const countData = ref<CountData[]>([
         "isHover": false,
         "to": {
             name: "Maintenance-List", query: {
-                'filter[inputGeneral]': 'Asignado'
+                'filter[status]': 'assigned|Asignado'
             }
         },
     },

@@ -73,7 +73,7 @@ if (isAuthenticated) {
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
 
     <div class="login-bg" :style="{
-      backgroundImage: `url('/images/LoginInspecciones.png')`,
+      backgroundImage: `url('/images/LoginInspecciones.jpg')`,
     }"></div>
 
     <div class="position-relative my-sm-16">
