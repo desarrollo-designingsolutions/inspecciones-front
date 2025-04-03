@@ -70,7 +70,7 @@ const handleSubmit = async () => {
     loadingReport.value = false;
 
     if (response.status == 200 && data) {
-      handleIsDialogVisible();
+      // handleIsDialogVisible();
       downloadExcelBase64(data.excel, "Reporte de vehículos")
     }
   }
