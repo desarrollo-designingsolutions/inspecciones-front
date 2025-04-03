@@ -164,8 +164,8 @@ defineExpose({
                             </VBtnToggle>
                         </VCol>
                         <VCol cols="12">
-                            <AppTextField v-model="search" placeholder="Buscar ..." append-inner-icon="tabler-search"
-                                single-line hide-details dense outlined />
+                            <AppTextField clearable v-model="search" placeholder="Buscar ..."
+                                append-inner-icon="tabler-search" single-line hide-details dense outlined />
                         </VCol>
                     </VRow>
                 </VCardText>
