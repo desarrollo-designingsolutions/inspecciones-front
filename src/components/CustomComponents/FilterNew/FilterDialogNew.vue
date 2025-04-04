@@ -407,7 +407,7 @@ defineExpose({
                 :label="field.label" :chips="field.chips" :closable-chips="field.chips" clearable />
               <AppSelectRemote v-if="field.type === 'selectApi'" v-model="field.value" :url="field.url"
                 :arrayInfo="field.arrayInfo" :item-title="field.itemTitle" :item-value="field.itemValue"
-                :multiple="field.multiple" :search-param="field.searchParam" :label="field.label">
+                :multiple="field.multiple" :search-param="field.searchParam" :label="field.label" :params="field.params">
                 <template v-slot:selection="{ item, index }">
                   <v-chip closable @click:close="field.value.splice(index, 1)" v-if="index < 5">
                     <span>{{ item.title }}</span>
