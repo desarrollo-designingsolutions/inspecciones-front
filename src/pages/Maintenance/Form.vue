@@ -138,8 +138,6 @@ const fetchDataForm = async () => {
       tabs.value = data.tabs
     }
 
-    console.log(tabs.value)
-
     states.value = data.states
     responseDocument.value = data.responseDocument
     responseStatus.value = data.responseStatus
@@ -163,11 +161,8 @@ const fetchDataForm = async () => {
 
     //formulario 
 
-    console.log(data)
-
     if (data.form) {
 
-      console.log('entra al data.form')
       cloneForm.value = JSON.parse(JSON.stringify(data.form));
       form.value = data.form
 

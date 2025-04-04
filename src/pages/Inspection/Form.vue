@@ -151,8 +151,6 @@ const allValidations = async () => {
   const validationPromises = processedTabs.value.map(async (element, key) => {
     const validation = await refFormValidate[element.id + '_validate'].value[0]?.validate();
 
-    console.log(element.id + '_validate', validation);
-
     if (validation) {
       exito.push(validation.valid);
       tabs.value[key].errorsValidations = !validation.valid;
