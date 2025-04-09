@@ -214,13 +214,13 @@ defineExpose({
               </VCol>
 
               <VCol cols="12" md="4" v-if="!disabledFiledsView">
-                <AppTextField :requiredField="true" clearable :disabled="disabledFiledsView" label="Contraseña"
-                  type="password" :rules="rulesFieldPassword" v-model="form.password"
+                <AppTextField :requiredField="form.id ? false : true" clearable :disabled="disabledFiledsView"
+                  label="Contraseña" type="password" :rules="rulesFieldPassword" v-model="form.password"
                   :error-messages="errorsBack.password" />
               </VCol>
 
               <VCol cols="12" md="4" v-if="!disabledFiledsView">
-                <AppTextField :requiredField="true" label="Confirmar Contraseña" type="password"
+                <AppTextField :requiredField="form.id ? false : true" label="Confirmar Contraseña" type="password"
                   :rules="rulesFieldConfirmedPassword" v-model="form.confirmedPassword" />
               </VCol>
 

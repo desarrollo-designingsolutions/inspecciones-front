@@ -11,6 +11,7 @@ definePage({
   },
 });
 
+const route = useRoute()
 
 const loading = reactive({
   excel: false,
@@ -110,19 +111,20 @@ const optionsFilterNew = ref({
   filterLabels: { inputGeneral: 'Buscar en todo' }
 })
 
-
 const downloadExcel = async () => {
   loading.excel = true;
-  refFilterTable.value = refTableFull.value.optionsTable.searchQuery;
 
-  const { data, response } = await useApi("/vehicle/excelExport").post({
-    searchQuery: refFilterTable.value,
-    company_id: authenticationStore.company.id,
+  const { data, response } = await useAxios("/vehicle/excelExport").get({
+    params: {
+      ...route.query,
+      company_id: authenticationStore.company.id
+    }
   })
+
   loading.excel = false;
 
-  if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Lista vehículos")
+  if (response.status == 200 && data) {
+    downloadExcelBase64(data.excel, "Lista vehículos")
   }
 }
 
