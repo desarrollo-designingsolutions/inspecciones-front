@@ -390,10 +390,9 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                 </AppTextField>
               </VCol>
 
-
               <VCol cols="12" sm="6">
                 <AppSelect :requiredField="true" clearable :items="responseStatus" v-model="form.status" label="Estado"
-                  :error-messages="errorsBack.status" @input="errorsBack.status = ''">
+                  :error-messages="errorsBack.status" @input="errorsBack.status = ''" :rules="[requiredValidator]">
                 </AppSelect>
               </VCol>
 
