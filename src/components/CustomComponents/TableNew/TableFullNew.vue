@@ -234,7 +234,7 @@ const deleteItem = async (id: string | number) => {
   const { data, response } = await useAxios(deleteUrl).delete();
   loading.value = false;
 
-  if (data.value && (data.value.code === 200 || !data.value.code)) {
+  if (data && (data.code === 200 || !data.code)) {
     emit('deleteSuccess', id);
     await fetchTableData();
   }
