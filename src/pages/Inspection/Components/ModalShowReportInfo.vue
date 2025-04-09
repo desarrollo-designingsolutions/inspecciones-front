@@ -154,10 +154,13 @@ defineExpose({
                         <VCol cols="12">
                             <VBtnToggle v-model="toggleExclusive">
                                 <VBtn value="Todos" style="min-inline-size: 100px; white-space: nowrap;">Todos</VBtn>
-                                <VBtn value="Regular" style="min-inline-size: 100px; white-space: nowrap;">Regular
+                                <VBtn v-if="inspection.inspection_type_id == 1" value="Regular"
+                                    style="min-inline-size: 100px; white-space: nowrap;">Regular
                                 </VBtn>
-                                <VBtn value="Malo" style="min-inline-size: 100px; white-space: nowrap;">Malo</VBtn>
-                                <VBtn value="No Cumple" style="min-inline-size: 100px; white-space: nowrap;">No Cumple
+                                <VBtn v-if="inspection.inspection_type_id == 1" value="Malo"
+                                    style="min-inline-size: 100px; white-space: nowrap;">Malo</VBtn>
+                                <VBtn v-if="inspection.inspection_type_id == 2" value="No Cumple"
+                                    style="min-inline-size: 100px; white-space: nowrap;">No Cumple
                                 </VBtn>
                                 <VBtn value="Vencido" style="min-inline-size: 100px; white-space: nowrap;">Vencido
                                 </VBtn>
