@@ -738,9 +738,12 @@ const toggleTodos = (inspection, event) => {
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
                     :rules="[requiredValidator]" v-model="item.expiration_date"
+                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" />
+                  <!-- <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
+                    :rules="[requiredValidator]" v-model="item.expiration_date"
                     :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
                     @update:model-value="validationExpirationDate($event, item.date_issue)"
-                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" />
+                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" /> -->
                 </VCol>
 
                 <VCol cols="12">
