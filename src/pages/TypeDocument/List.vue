@@ -27,7 +27,7 @@ const optionsTable = {
   headers: [
     { key: 'name', title: 'Nombre' },
     { key: "is_active", title: 'Estado' },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {
