@@ -86,6 +86,7 @@ const handleIsDialogVisible = () => {
 
 const openModal = async (inspectionData: any) => {
     handleIsDialogVisible();
+    console.log(inspectionData)
     await fetchListData(inspectionData.id);
     inspection.value = inspectionData;
 };

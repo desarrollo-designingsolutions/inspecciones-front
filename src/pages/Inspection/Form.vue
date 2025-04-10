@@ -2,6 +2,7 @@
 import AppTextarea from '@/@core/components/app-form-elements/AppTextarea.vue';
 import { useToast } from '@/composables/useToast';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import ModalShowReportInfo from "@/pages/Inspection/Components/ModalShowReportInfo.vue";
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { VForm } from 'vuetify/components/VForm';
@@ -29,6 +30,7 @@ interface IForm {
   state_id: string | null,
   city_id: string | null,
   user_inspector_id: number | string | null,
+  user_inspector_full_name: number | string | null,
   user_operator_id: string | null,
   general_comment: string | null,
   type_documents: Array<object>,
@@ -67,6 +69,7 @@ const form = ref<IForm>({
   state_id: null,
   city_id: null,
   user_inspector_id: null,
+  user_inspector_full_name: null,
   user_operator_id: null,
   general_comment: null,
   type_documents: []
@@ -390,6 +393,42 @@ watch(
   { immediate: true, deep: true }
 );
 
+const pdfExport = async (id: any) => {
+
+  const { data, response } = await useAxios("/inspection/pdfExport").post({
+    id: id,
+    company_id: authenticationStore.company.id,
+    pdf_name: "Lista inspecciones",
+  })
+
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
+  }
+}
+
+//ModalShowReportInfo
+const isFirstInspection = ref(true);
+const inspectionData = ref();
+const refModalShowReportInfo = ref()
+
+const openModalShowReportInfo = () => {
+
+  if (isFirstInspection.value) {
+    inspectionData.value = {
+      id: form.value.id,
+      vehicle_license_plate: vehicleData.value.license_plate,
+      vehicle_model: vehicleData.value.model,
+      inspection_date: form.value.inspection_date,
+      user_inspector_full_name: form.value.user_inspector_full_name,
+      inspection_type_name: route.params.inspection_type_id == 1 ? 'Inspección Pre-Operacional' : 'Inspección HSEQ',
+      inspection_type_id: route.params.inspection_type_id,
+    }
+    isFirstInspection.value = false;
+  }
+
+  refModalShowReportInfo.value.openModal(inspectionData.value)
+}
+
 </script>
 
 <template>
@@ -402,6 +441,18 @@ watch(
         <span v-else>
           Inspección HSEQ
         </span>
+        <div>
+          <VRow v-if="form.id">
+            <VCol>
+              <VBtn @click="pdfExport(form.id)">Reporte
+              </VBtn>
+            </VCol>
+            <VCol>
+              <VBtn @click="openModalShowReportInfo()">Informe
+              </VBtn>
+            </VCol>
+          </VRow>
+        </div>
       </VCardTitle>
       <VCardText v-if="!loading.form">
         <VTabs v-model="currentTab">
@@ -560,6 +611,8 @@ watch(
     <ModalQuestion ref="refModalQuestion" @success="submitForm" />
 
     <ModalQuestion ref="refModalQuestionChangeVehicle" @success="confirmVehicleChange" @cancel="cancelVehicleChange" />
+
+    <ModalShowReportInfo ref="refModalShowReportInfo" />
 
   </div>
 </template>
