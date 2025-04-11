@@ -442,7 +442,7 @@ const openModalShowReportInfo = () => {
           Inspección HSEQ
         </span>
         <div>
-          <VRow v-if="form.id">
+          <VRow v-if="form.id && route.params.action == 'view'">
             <VCol>
               <VBtn @click="pdfExport(form.id)">Reporte
               </VBtn>
