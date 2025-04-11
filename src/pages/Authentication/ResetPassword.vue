@@ -6,6 +6,9 @@ import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw';
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer';
 import { themeConfig } from '@themeConfig';
 import type { VForm } from "vuetify/components";
+import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+
+const errorsBack = ref<IErrorsBack>({});
 
 definePage({
   name: "ResetPassword",
@@ -45,6 +48,8 @@ const resetPassword = async () => {
 
     if (response.value?.ok && data.value) {
     }
+
+    errorsBack.value = data.value.errors ?? {}
   }
 }
 
@@ -82,20 +87,22 @@ const resetPassword = async () => {
             <VRow>
               <!-- password -->
               <VCol cols="12">
-                <AppTextField v-model="form.password" autofocus label="Nueva contraseña" placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
+                <AppTextField :requiredField="true" v-model="form.password" autofocus label="Nueva contraseña"
+                  placeholder="············" :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                  :rules="[requiredValidator, passwordValidator]" />
+                  :rules="[requiredValidator, passwordValidator]" :error-messages="errorsBack.password"
+                  @input="errorsBack.password = ''" />
               </VCol>
 
               <!-- Confirm Password -->
               <VCol cols="12">
-                <AppTextField v-model="form.password_confirmation" label="Confirmar contraseña"
+                <AppTextField :requiredField="true" v-model="form.password_confirmation" label="Confirmar contraseña"
                   placeholder="············" :type="isConfirmPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
-                  :rules="rulesFieldConfirmedPassword" />
+                  :rules="rulesFieldConfirmedPassword" :error-messages="errorsBack.password_confirmation"
+                  @input="errorsBack.password_confirmation = ''" />
               </VCol>
 
               <VCol cols="12">
