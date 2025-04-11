@@ -393,7 +393,11 @@ watch(
   { immediate: true, deep: true }
 );
 
+const pdfExportIsLoading = ref(false);
+
 const pdfExport = async (id: any) => {
+
+  pdfExportIsLoading.value = true
 
   const { data, response } = await useAxios("/inspection/pdfExport").post({
     id: id,
@@ -404,6 +408,9 @@ const pdfExport = async (id: any) => {
   if (response.status == 200 && data) {
     openPdfBase64(data.pdf)
   }
+
+  pdfExportIsLoading.value = false
+
 }
 
 //ModalShowReportInfo
@@ -444,7 +451,7 @@ const openModalShowReportInfo = () => {
         <div>
           <VRow v-if="form.id && route.params.action == 'view'">
             <VCol>
-              <VBtn @click="pdfExport(form.id)">Reporte
+              <VBtn :loading="pdfExportIsLoading" :disabled="pdfExportIsLoading" @click="pdfExport(form.id)">Reporte
               </VBtn>
             </VCol>
             <VCol>
