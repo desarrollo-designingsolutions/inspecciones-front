@@ -128,7 +128,11 @@ const downloadExcel = async () => {
   }
 }
 
+const loadingItems = reactive({});
+
 const pdfExport = async (item: any) => {
+
+  loadingItems[item.id] = true;
 
   const { data, response } = await useAxios("/vehicle/pdfExport").post({
     id: item.id,
@@ -139,6 +143,8 @@ const pdfExport = async (item: any) => {
   if (response.status == 200 && data) {
     descargarArchivo(data.path, 'pdf.pdf')
   }
+
+  loadingItems[item.id] = false;
 }
 
 const goViewView = async (data: any) => {
@@ -191,17 +197,46 @@ const refreshTable = () => {
         </FilterDialogNew>
       </VCardText>
 
-      <VCardText class=" mt-2">
+      <VCardText class="mt-2">
         <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
           @update:loading="tableLoading = $event">
-          <template #item.actions2="{ item }">
-            <VListItem @click="pdfExport(item)">
-              <template #prepend>
-                <VIcon size="22" icon="tabler-file-type-pdf" />
+
+          <template #item.actions="{ item }">
+            <VMenu>
+              <template #activator="{ props }">
+                <VBtn color="primary" v-bind="props" :loading="loadingItems[item.id]" append-icon="tabler-chevron-down">
+                  Acciones
+                </VBtn>
               </template>
-              <span>CV vehículo</span>
-            </VListItem>
+              <VList>
+                <VListItem @click="goViewView(item)">
+                  <template #prepend>
+                    <VIcon icon="tabler-eye" />
+                  </template>
+                  <span>Ver</span>
+                </VListItem>
+                <VListItem @click="goViewEdit(item)">
+                  <template #prepend>
+                    <VIcon icon="tabler-pencil" />
+                  </template>
+                  <span>Editar</span>
+                </VListItem>
+                <VListItem @click="refTableFull.openDeleteModal(item.id)">
+                  <template #prepend>
+                    <VIcon icon="tabler-trash" />
+                  </template>
+                  <span>Eliminar</span>
+                </VListItem>
+                <VListItem @click="pdfExport(item)">
+                  <template #prepend>
+                    <VIcon size="22" icon="tabler-file-type-pdf" />
+                  </template>
+                  <span>CV vehículo</span>
+                </VListItem>
+              </VList>
+            </VMenu>
           </template>
+
         </TableFullNew>
       </VCardText>
     </VCard>
