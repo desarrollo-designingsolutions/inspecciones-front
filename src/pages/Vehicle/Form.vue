@@ -296,7 +296,16 @@ const submitForm = async (isCreateAndNew: boolean = false) => {
         }
       }
     }
-    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+
+    if (data.value.code === 422) {
+      const formattedErrors: any = {};
+      Object.keys(data.value.errors).forEach(key => {
+        // Transforma "type_documents.0.expiration_date" en "type_documents[0].expiration_date"
+        const newKey = key.replace(/\.(\d+)\./g, '[$1].');
+        formattedErrors[newKey] = data.value.errors[key];
+      });
+      errorsBack.value = formattedErrors;
+    }
 
   }
   else {
@@ -410,13 +419,13 @@ const updateEndDate = async (event: any, item: any) => {
     .format("YYYY-MM-DD");
 };
 
-const validationExpirationDate = (event: any, date: any) => {
+const validationExpirationDate = (event: any, date: any, index: any) => {
   if (event) {
     let d1 = moment(date);
     let d2 = moment(event);
-    errorsBack.value.expiration_date = "";
+    errorsBack.value[`type_document_${index}`] = "";
     if (!d2.isAfter(d1))
-      errorsBack.value.expiration_date = `La fecha debe ser posterior a ${d1.format('YYYY-MM-DD')}`;
+      errorsBack.value[`type_document_${index}`] = `La fecha debe ser posterior a ${d1.format('YYYY-MM-DD')}`;
   }
 }
 
@@ -545,6 +554,22 @@ const toggleTodos = (inspection, event) => {
     });
   }
 }
+
+const expirationDateValidator = (value: string, dateIssue: string): true | string => {
+  if (!value) {
+    return 'La fecha de vencimiento es obligatoria.'
+  }
+  if (!dateIssue) {
+    return true; // O podés marcar un error si fecha de expedición es obligatoria
+  }
+  const dIssue = moment(dateIssue, "YYYY-MM-DD");
+  const dExpiration = moment(value, "YYYY-MM-DD");
+  if (!dExpiration.isAfter(dIssue)) {
+    return `La fecha debe ser posterior a ${dIssue.format('YYYY-MM-DD')}`;
+  }
+  return true;
+};
+
 </script>
 
 <template>
@@ -737,13 +762,12 @@ const toggleTodos = (inspection, event) => {
                 </VCol>
                 <VCol cols="12" sm="6">
                   <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
-                    :rules="[requiredValidator]" v-model="item.expiration_date"
-                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" />
-                  <!-- <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
-                    :rules="[requiredValidator]" v-model="item.expiration_date"
-                    :errorMessages="errorsBack.expiration_date" @input="errorsBack.expiration_date = ''"
-                    @update:model-value="validationExpirationDate($event, item.date_issue)"
-                    :config="{ dateFormat: 'Y-m-d', disable: [{ from: `1800-01-01`, to: `${item.date_issue}` }] }" /> -->
+                    v-model="item.expiration_date"
+                    :error-messages="errorsBack[`type_documents[${index}].expiration_date`]"
+                    @input="errorsBack[`type_documents[${index}].expiration_date`] = ''" :rules="[
+                      requiredValidator,
+                      value => expirationDateValidator(value, item.date_issue)
+                    ]" />
                 </VCol>
 
                 <VCol cols="12">
