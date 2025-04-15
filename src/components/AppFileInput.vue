@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 
+const emit = defineEmits()
 
 const elementId = computed(() => {
   const attrs = useAttrs();
@@ -14,6 +15,7 @@ const elementId = computed(() => {
 
 const label = computed(() => useAttrs().label as string | undefined);
 const label2 = computed(() => useAttrs().label2 as string | undefined);
+const viewFile = computed(() => useAttrs().viewFile as boolean | undefined);
 const requiredField = computed(
   () => useAttrs().requiredField as boolean | undefined
 );
@@ -40,6 +42,12 @@ const tooltip = computed(
       label: label2,
       id: elementId,
     }">
+
+      <template #append v-if="viewFile">
+        <VBtn icon color="success" @click="emit('viewFile')">
+          <VIcon icon="tabler-eye" />
+        </VBtn>
+      </template>
 
     </VFileInput>
   </div>

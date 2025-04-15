@@ -525,7 +525,8 @@ const deleteDataArrayEmergencyElement = (index: number) => {
 }
 
 const changeFile = (e: any, item: any) => {
-  item.file = e[0]
+  const input = e.target as HTMLInputElement;
+  item.photo = input.files[0];
 }
 
 // Computed to check if all inputs in an inspection are selected
@@ -568,6 +569,13 @@ const expirationDateValidator = (value: string, dateIssue: string): true | strin
     return `La fecha debe ser posterior a ${dIssue.format('YYYY-MM-DD')}`;
   }
   return true;
+};
+
+const viewFile = (pathname: any) => {
+  window.open(
+    `${import.meta.env.VITE_API_BASE_BACK}/storage/${pathname}`,
+    "_blank"
+  );
 };
 
 </script>
@@ -770,10 +778,9 @@ const expirationDateValidator = (value: string, dateIssue: string): true | strin
                     ]" />
                 </VCol>
 
-                <VCol cols="12">
-                  <AppFileInput label="Seleccione un archivo" v-model="item.photo"
-                    :label2="item.photo ? '1 archivo agregado' : ''" clearable :key="index"
-                    @change="changeFile($event, item)">
+                <VCol cols="12" sm="6">
+                  <AppFileInput label="Seleccione un archivo" :label2="item.photo ? '1 archivo agregado' : ''" clearable
+                    :key="index" @change="changeFile($event, item)" :viewFile="true" @viewFile="viewFile(item.photo)">
                   </AppFileInput>
                 </VCol>
 
