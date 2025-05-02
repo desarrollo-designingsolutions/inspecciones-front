@@ -17,6 +17,7 @@ definePage({
 const loading = reactive({
   excel: false,
   btnCreate: false,
+  report: false,
 
 })
 
@@ -256,26 +257,24 @@ const openModalReportForMonth = () => {
             </VTooltip>
           </VBtn>
 
-          <VBtn :loading="loading.report" :disabled="loading.report" color="primary" @click="openModalReportForMonth()">
+          <VBtn color="primary" append-icon="tabler-file-download" :loading="loading.report" :disabled="loading.report"
+            @click="openModalReportForMonth()">
             Generar reporte
           </VBtn>
 
-          <VMenu location="bottom"
-            v-if="hasPermission('inspection.type1.form') && hasPermission('inspection.type2.form')">
-            <template #activator="{ props }">
-              <VBtn v-bind="props" :loading="loading.btnCreate" :disabled="loading.btnCreate">
-                Agregar Inspeccion
-                <VIcon icon="tabler-circle-chevrons-down"></VIcon>
-              </VBtn>
-            </template>
+          <VBtn color="primary" append-icon="tabler-chevron-down" :loading="loading.btnCreate"
+            :disabled="loading.btnCreate">
+            Agregar Inspeccion
+            <VMenu activator="parent">
+              <VList>
+                <VListItem v-for="(item, index) in inspectionTypeBtn" :key="index"
+                  @click="goViewCreate({ inspection_type_id: item.id })">
+                  {{ item.name }}
+                </VListItem>
+              </VList>
+            </VMenu>
+          </VBtn>
 
-            <VList>
-              <VListItem v-for="(item, index) in inspectionTypeBtn" :key="index"
-                @click="goViewCreate({ inspection_type_id: item.id })">
-                {{ item.name }}
-              </VListItem>
-            </VList>
-          </VMenu>
         </div>
       </VCardTitle>
 
@@ -307,6 +306,6 @@ const openModalReportForMonth = () => {
     </VCard>
 
     <ModalShowReportInfo ref="refModalShowReportInfo" />
-    <ModalReportForMonth ref="refModalReportForMonth" />
+    <ModalReportForMonth ref="refModalReportForMonth" @loading="loading.report = $event" />
   </div>
 </template>

@@ -5,6 +5,8 @@ import type { VForm } from 'vuetify/components/VForm';
 const authenticationStore = useAuthenticationStore();
 const { toast } = useToast()
 
+const emit = defineEmits()
+
 const isDialogVisible = ref(false)
 const loadingReport = ref(false)
 
@@ -40,6 +42,7 @@ const handleClearForm = (): void => {
   form.value.year = new Date().getFullYear();
   form.value.license_plate = null;
   form.value.inspectionType = null;
+  typeReport.value = '';
 };
 
 const handleIsDialogVisible = () => {
@@ -53,25 +56,42 @@ const openModal = async () => {
 
 const formValidation = ref<VForm>()
 
+const typeReport = ref<string>();
+
+const arrayReports = ref([
+  'pdf', 'excel'
+])
+
 const handleSubmit = async () => {
   const validation = await formValidation.value?.validate()
   if (validation?.valid) {
-    loadingReport.value = true;
+    if (typeReport.value) {
+      loadingReport.value = true;
+      emit('loading', true);
 
-    const { data, response } = await useAxios("/inspection/excelReportExport").post({
-      company_id: authenticationStore.company.id,
-      month: form.value.month,
-      year: form.value.year,
-      license_plate: form.value.license_plate?.title,
-      vehicle_id: form.value.license_plate?.value,
-      inspectionType: form.value.inspectionType?.title,
-      inspectionType_id: form.value.inspectionType?.value,
-    })
-    loadingReport.value = false;
+      const url = typeReport.value == 'pdf' ? "/inspection/pdfReportExport" : "/inspection/excelReportExport";
 
-    if (response.status == 200 && data) {
-      handleIsDialogVisible();
-      downloadExcelBase64(data.excel, "Reporte de vehículos")
+      const { data, response } = await useAxios(url).post({
+        company_id: authenticationStore.company.id,
+        month: form.value.month,
+        year: form.value.year,
+        license_plate: form.value.license_plate?.title,
+        vehicle_id: form.value.license_plate?.value,
+        inspectionType: form.value.inspectionType?.title,
+        inspectionType_id: form.value.inspectionType?.value,
+      })
+
+      if (response.status == 200 && data && data.code == 200) {
+        if (typeReport.value == 'pdf') {
+          descargarArchivo(data.path, 'pdf.pdf')
+        } else {
+          downloadExcelBase64(data.excel, "Reporte de vehículos")
+        }
+      }
+      loadingReport.value = false;
+      emit('loading', false);
+    } else {
+      toast('Faltan Seleccionar El Tipo De Descarga', '', 'danger')
     }
   }
   else {
@@ -124,6 +144,14 @@ defineExpose({
               <AppSelectRemote label="Tipo de inspecciones" v-model="form.inspectionType" url="/selectInspectionType"
                 arrayInfo="inspectionType" :requiredField="true" :rules="[requiredValidator]" clearable>
               </AppSelectRemote>
+            </VCol>
+
+            <VCol cols="3">
+              <VRadioGroup v-model="typeReport" inline label="Tipo de descarga">
+                <div>
+                  <VRadio v-for="type in arrayReports" :key="type" :label="type" :value="type.toLocaleLowerCase()" />
+                </div>
+              </VRadioGroup>
             </VCol>
           </VRow>
         </VForm>
