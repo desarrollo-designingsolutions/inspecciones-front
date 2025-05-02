@@ -36,19 +36,21 @@ const tooltip = computed(
         <span>{{ tooltip.text }}</span>
       </VTooltip>
     </VLabel>
-    <VFileInput v-bind="{
-      ...$attrs,
-      class: null,
-      label: label2,
-      id: elementId,
-    }">
-
-      <template #append v-if="viewFile">
-        <VBtn icon color="success" @click="emit('viewFile')">
-          <VIcon icon="tabler-eye" />
-        </VBtn>
-      </template>
-
-    </VFileInput>
+    <div class="d-flex justify-center gap-3 flex-wrap mt-5">
+      <VFileInput v-bind="{
+        ...$attrs,
+        class: null,
+        label: label2,
+        id: elementId,
+      }">
+<!--   
+        <template #append v-if="viewFile">
+        </template> -->
+        
+      </VFileInput>
+      <VBtn v-if="viewFile" icon color="success" @click="emit('viewFile')">
+        <VIcon icon="tabler-eye" />
+      </VBtn>
+    </div>
   </div>
 </template>
