@@ -739,7 +739,7 @@ const viewFile = (pathname: any) => {
         </div>
 
         <div v-show="currentTab == 1">
-          <VForm ref="refFormTypeDocument" @submit.prevent="() => { }" :disabled="disabledFiledsView">
+          <VForm ref="refFormTypeDocument" @submit.prevent="() => { }" >
             <VRow>
               <template v-for="(item, index) in form.type_documents" :key="index">
                 <VCol cols="12" class="w-100 d-flex justify-end">
@@ -749,17 +749,17 @@ const viewFile = (pathname: any) => {
                   </VBtn>
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <SelectTypeDocumentForm :key="'select_' + index" :rules="[requiredValidator]" :requiredField="true"
+                  <SelectTypeDocumentForm :disabled="disabledFiledsView" :key="'select_' + index" :rules="[requiredValidator]" :requiredField="true"
                     label="Tipo de documento" v-model="item.type_document_id"
                     @input="errorsBack.type_document_id = ''" />
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <AppTextField :requiredField="true" label="Número de documento" v-model="item.document_number"
+                  <AppTextField :disabled="disabledFiledsView" :requiredField="true" label="Número de documento" v-model="item.document_number"
                     :rules="[requiredValidator]">
                   </AppTextField>
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de expedición"
+                  <AppDateTimePicker :disabled="disabledFiledsView" clearable :requiredField="true" label="Fecha de expedición"
                     :rules="[requiredValidator]" v-model="item.date_issue" :errorMessages="errorsBack.date_issue"
                     @input="errorsBack.date_issue = ''" @update:model-value="updateEndDate($event, item)" :config="{
                       dateFormat: 'Y-m-d',
@@ -769,7 +769,7 @@ const viewFile = (pathname: any) => {
                     }" />
                 </VCol>
                 <VCol cols="12" sm="6">
-                  <AppDateTimePicker clearable :requiredField="true" label="Fecha de vencimiento"
+                  <AppDateTimePicker :disabled="disabledFiledsView" clearable :requiredField="true" label="Fecha de vencimiento"
                     v-model="item.expiration_date"
                     :error-messages="errorsBack[`type_documents[${index}].expiration_date`]"
                     @input="errorsBack[`type_documents[${index}].expiration_date`] = ''" :rules="[
@@ -779,7 +779,7 @@ const viewFile = (pathname: any) => {
                 </VCol>
 
                 <VCol cols="12" sm="6">
-                  <AppFileInput label="Seleccione un archivo" :label2="item.photo ? '1 archivo agregado' : ''" clearable
+                  <AppFileInput :disabled="disabledFiledsView" label="Seleccione un archivo" :label2="item.photo ? '1 archivo agregado' : ''" clearable
                     :key="index" @change="changeFile($event, item)" :viewFile="true" @viewFile="viewFile(item.photo)">
                   </AppFileInput>
                 </VCol>
