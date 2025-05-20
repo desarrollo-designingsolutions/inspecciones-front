@@ -38,6 +38,7 @@ declare module 'vue-router/auto-routes' {
     'inspection-components-modal-show-report-info': RouteRecordInfo<'inspection-components-modal-show-report-info', '/Inspection/Components/ModalShowReportInfo', Record<never, never>, Record<never, never>>,
     'Inspection-Form': RouteRecordInfo<'Inspection-Form', 'Inspection-form/:inspection_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'Inspection-List': RouteRecordInfo<'Inspection-List', '/Inspection/List', Record<never, never>, Record<never, never>>,
+    'maintenance-components-modal-report-for-month': RouteRecordInfo<'maintenance-components-modal-report-for-month', '/Maintenance/components/ModalReportForMonth', Record<never, never>, Record<never, never>>,
     'Maintenance-List': RouteRecordInfo<'Maintenance-List', '/Maintenance/List', Record<never, never>, Record<never, never>>,
     'Maintenance-Form': RouteRecordInfo<'Maintenance-Form', 'Maintenance-form/:maintenance_type_id/:action/:id?', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,

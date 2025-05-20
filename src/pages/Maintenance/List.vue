@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ModalReportForMonth from "@/pages/Maintenance/components/ModalReportForMonth.vue";
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -200,6 +201,21 @@ onMounted(() => {
   fetchDataBtn();
 })
 
+const loadingItems = reactive({});
+
+//ModalReportForMonth
+const refModalReportForMonth = ref()
+
+const openModalReportForMonth = (item: any) => {
+  console.log(item)
+  const license_plate = {
+    title: item.vehicle_license_plate,
+    value: item.vehicle_id
+  }
+  const id = item.id;
+  refModalReportForMonth.value.openModal(license_plate, id)
+}
+
 </script>
 
 <template>
@@ -233,11 +249,53 @@ onMounted(() => {
         </FilterDialogNew>
       </VCardText>
 
-      <VCardText class=" mt-2">
+      <VCardText class="mt-2">
         <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
           @update:loading="tableLoading = $event">
+
+          <template #item.actions="{ item }">
+            <VMenu>
+              <template #activator="{ props }">
+                <VBtn color="primary" v-bind="props" :loading="loadingItems[item.id]" append-icon="tabler-chevron-down">
+                  Acciones
+                </VBtn>
+              </template>
+              <VList>
+                <VListItem @click="goViewView(item)">
+                  <template #prepend>
+                    <VIcon icon="tabler-eye" />
+                  </template>
+                  <span>Ver</span>
+                </VListItem>
+                <VListItem @click="goViewEdit(item)">
+                  <template #prepend>
+                    <VIcon icon="tabler-pencil" />
+                  </template>
+                  <span>Editar</span>
+                </VListItem>
+                <VListItem @click="refTableFull.openDeleteModal(item.id)">
+                  <template #prepend>
+                    <VIcon icon="tabler-trash" />
+                  </template>
+                  <span>Eliminar</span>
+                </VListItem>
+                <VListItem @click="openModalReportForMonth(item)">
+                  <template #prepend>
+                    <VIcon size="22" icon="tabler-file-type-pdf" />
+                  </template>
+                  <span>Informe Mensual</span>
+                </VListItem>
+              </VList>
+            </VMenu>
+          </template>
+
         </TableFullNew>
       </VCardText>
     </VCard>
+
+
+
+    <ModalReportForMonth ref="refModalReportForMonth" @loading="loadingItems[$event.maintenance_id] = $event.loading" />
+
   </div>
 </template>
