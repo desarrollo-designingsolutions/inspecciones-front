@@ -473,7 +473,7 @@ const openModalQuestionSave = async (typeCreate: boolean) => {
                       <VRow>
                         <VCol cols="12" md="6">
                           <AppSelect clearable :items="responseMaintenanceInput" v-model="form[itemSelect.id].type"
-                            label="Seleccionar" :error-messages="errorsBack[itemSelect.id]"
+                            label="Inspección" :error-messages="errorsBack[itemSelect.id]"
                             @input="errorsBack[itemSelect.id] = ''">
                           </AppSelect>
                         </VCol>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ModalReportForMonth from "@/pages/Maintenance/components/ModalReportForMonth.vue";
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -203,18 +202,25 @@ onMounted(() => {
 
 const loadingItems = reactive({});
 
-//ModalReportForMonth
-const refModalReportForMonth = ref()
+const reportPDF = async (item: any) => {
+  // loadingReport.value = true;
+  loadingItems[item.id] = true;
 
-const openModalReportForMonth = (item: any) => {
-  console.log(item)
-  const license_plate = {
-    title: item.vehicle_license_plate,
-    value: item.vehicle_id
+  console.log(item);
+
+  const url = "/maintenance/pdfReportExport";
+
+  const { data, response } = await useAxios(url).post({
+    company_id: authenticationStore.company.id,
+    maintenance_id: item.id,
+  })
+
+  if (response.status == 200 && data && data.code == 200) {
+    descargarArchivo(data.path, 'pdf.pdf')
   }
-  const id = item.id;
-  refModalReportForMonth.value.openModal(license_plate, id)
-}
+  loadingItems[item.id] = false;
+
+};
 
 </script>
 
@@ -279,11 +285,11 @@ const openModalReportForMonth = (item: any) => {
                   </template>
                   <span>Eliminar</span>
                 </VListItem>
-                <VListItem @click="openModalReportForMonth(item)">
+                <VListItem @click="reportPDF(item)">
                   <template #prepend>
                     <VIcon size="22" icon="tabler-file-type-pdf" />
                   </template>
-                  <span>Informe Mensual</span>
+                  <span>Reporte de mantenimiento del vehículo</span>
                 </VListItem>
               </VList>
             </VMenu>
@@ -292,10 +298,5 @@ const openModalReportForMonth = (item: any) => {
         </TableFullNew>
       </VCardText>
     </VCard>
-
-
-
-    <ModalReportForMonth ref="refModalReportForMonth" @loading="loadingItems[$event.maintenance_id] = $event.loading" />
-
   </div>
 </template>
